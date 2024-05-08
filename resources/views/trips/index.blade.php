@@ -15,7 +15,7 @@
         <div class="ml-auto">
                 <form action="{{ route('trips.index') }}" method="GET">
                     <div class="input-group">
-                        <input type="text" name="search" class="form-control" placeholder="Search by name or phone">
+                        <input type="text" name="search" class="form-control" placeholder="Search By">
                         <div class="input-group-append">
                             <button type="submit" class="btn btn-primary">Search</button>
                         </div>
