@@ -13,12 +13,9 @@
     <div class="card-body">
     <div class="row mb-4">
         <div class="ml-auto">
-                <form action="{{ route('users.index') }}" method="GET">
+        <form action="{{ route('users.index') }}" method="GET">
                     <div class="input-group">
-                        <input type="text" name="search" class="form-control" placeholder="Search by name or phone">
-                        <div class="input-group-append">
-                            <button type="submit" class="btn btn-primary">Search</button>
-                        </div>
+                        <input type="text" name="search" class="form-control" placeholder="Search by....">
                     </div>
                 </form>
             </div>
@@ -27,17 +24,18 @@
             <table class="table table-bordered table-hover">
                 <thead class="thead-dark">
                     <tr>
-                        <th>ID</th>
-                        <th>Profile</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Mobile</th>
-                        <th>Age</th>
-                        <th>Gender</th>
-                        <th>Profession</th>
-                        <th>Refer Code</th>
-                        <th>Referred By</th>
-                        <th>Actions</th>
+                    <th>ID <i class="fas fa-sort"></i></th>
+                    <th>Profile</th>
+                    <th>Name <i class="fas fa-sort"></i></th>
+                    <th>Email <i class="fas fa-sort"></i></th>
+                    <th>Mobile <i class="fas fa-sort"></i></th>
+                    <th>Age <i class="fas fa-sort"></i></th>
+                    <th>Gender <i class="fas fa-sort"></i></th>
+                    <th>Profession <i class="fas fa-sort"></i></th>
+                    <th>Refer Code <i class="fas fa-sort"></i></th>
+                    <th>Referred By <i class="fas fa-sort"></i></th>
+                    <th>DateTime <i class="fas fa-sort"></i></th>
+                    <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -56,6 +54,7 @@
                         <td>{{$user->profession}}</td>
                         <td>{{$user->refer_code}}</td>
                         <td>{{$user->referred_by}}</td>
+                        <td>{{$user->datetime}}</td>
                         <td>
                             <a href="{{ route('users.edit', $user) }}" class="btn btn-primary"><i class="fas fa-edit"></i></a>
                             <button class="btn btn-danger btn-delete" data-url="{{route('users.destroy', $user)}}"><i class="fas fa-trash"></i></button>
@@ -70,7 +69,6 @@
 </div>
 
 @endsection
-
 @section('js')
     <script src="{{ asset('plugins/sweetalert2/sweetalert2.min.js') }}"></script>
     <script>
@@ -104,5 +102,42 @@
                 })
             })
         })
+    </script>
+
+<script>
+        $(document).ready(function() {
+            $('.table th').click(function() {
+                var table = $(this).parents('table').eq(0);
+                var index = $(this).index();
+                var rows = table.find('tr:gt(0)').toArray().sort(comparer(index));
+                this.asc = !this.asc;
+                if (!this.asc) {
+                    rows = rows.reverse();
+                }
+                for (var i = 0; i < rows.length; i++) {
+                    table.append(rows[i]);
+                }
+                // Update arrows
+                updateArrows(table, index, this.asc);
+            });
+
+            function comparer(index) {
+                return function(a, b) {
+                    var valA = getCellValue(a, index),
+                        valB = getCellValue(b, index);
+                    return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.localeCompare(valB);
+                };
+            }
+
+            function getCellValue(row, index) {
+                return $(row).children('td').eq(index).text();
+            }
+
+            function updateArrows(table, index, asc) {
+                table.find('.arrow').remove();
+                var arrow = asc ? '<i class="fas fa-arrow-up arrow"></i>' : '<i class="fas fa-arrow-down arrow"></i>';
+                table.find('th').eq(index).append(arrow);
+            }
+        });
     </script>
 @endsection

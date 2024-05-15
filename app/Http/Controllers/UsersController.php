@@ -101,6 +101,7 @@ class UsersController extends Controller
             'refer_code' => $refer_code,
             'referred_by' => $request->referred_by,
             'profile' => basename($imagePath),
+            'datetime' => now(), // Set the created_at field to the current datetime
         ]);
     
         if (!$users) {
@@ -155,6 +156,7 @@ class UsersController extends Controller
         $users->refer_code = $request->refer_code;
         $users->referred_by = $request->referred_by;
         $users->profession = $request->profession;
+        $users->datetime = now(); 
 
         if ($request->hasFile('profile')) {
             $newImagePath = $request->file('profile')->store('users', 'public');

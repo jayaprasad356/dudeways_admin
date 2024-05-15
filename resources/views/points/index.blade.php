@@ -1,9 +1,9 @@
 @extends('layouts.admin')
 
-@section('title', 'Trips Management')
-@section('content-header', 'Trips Management')
+@section('title', 'Points Management')
+@section('content-header', 'Points Management')
 @section('content-actions')
-    <a href="{{route('trips.create')}}" class="btn btn-success"><i class="fas fa-plus"></i> Add New trips</a>
+    <a href="{{route('points.create')}}" class="btn btn-success"><i class="fas fa-plus"></i> Add New Points</a>
 @endsection
 @section('css')
     <link rel="stylesheet" href="{{ asset('plugins/sweetalert2/sweetalert2.min.css') }}">
@@ -12,93 +12,54 @@
 <div class="card">
     <div class="card-body">
     <div class="row mb-4">
-    <div class="col-md-8">
-        <!-- User Filter Dropdown -->
-        <form id="user-filter-form" action="{{ route('trips.index') }}" method="GET" class="form-inline">
-            <div class="form-group">
-                <label for="user-filter" class="mr-2">Filter by Users:</label>
-                <select name="user_id" id="user-filter" class="form-control">
-                    <option value="">All Users</option>
-                    @foreach ($users as $user)
-                        <option value="{{ $user->id }}" @if($user->id == request()->input('user_id')) selected @endif>{{ $user->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-        </form>
-    </div>
-
-    <div class="col-md-4 text-right">
-        <!-- Search Form -->
-        <form action="{{ route('trips.index') }}" method="GET">
+        <div class="ml-auto">
+                <form action="{{ route('points.index') }}" method="GET">
                     <div class="input-group">
                         <input type="text" name="search" class="form-control" placeholder="Search by....">
                     </div>
                 </form>
-    </div>
-</div>
-
+            </div>
+        </div>
         <div class="table-responsive">
             <table class="table table-bordered table-hover">
                 <thead class="thead-dark">
                     <tr>
                         <th>ID <i class="fas fa-sort"></i></th>
-                        <th>User Name <i class="fas fa-sort"></i></th>
-                        <th>Planning <i class="fas fa-sort"></i></th>
-                        <th>From Location <i class="fas fa-sort"></i></th>
-                        <th>To Location <i class="fas fa-sort"></i></th>
-                        <th>Meetup Location <i class="fas fa-sort"></i></th>
-                        <th>From Date <i class="fas fa-sort"></i></th>
-                        <th>To Date <i class="fas fa-sort"></i></th>
-                        <th>Name Your Trip <i class="fas fa-sort"></i></th>
-                        <th>Description Of Your Trip <i class="fas fa-sort"></i></th>
-                        <th>DateTime<i class="fas fa-sort"></i></th>
+                        <th>Points <i class="fas fa-sort"></i></th>
+                        <th>Discount Points <i class="fas fa-sort"></i></th>
+                        <th>Offer Percent <i class="fas fa-sort"></i></th>
+                        <th>Price <i class="fas fa-sort"></i></th>
+                        <th>DateTime <i class="fas fa-sort"></i></th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($trips as $trip)
+                    @foreach ($points as $point)
                     <tr>
-                        <td>{{$trip->id}}</td>
-                        <td>{{ optional($trip->users)->name }}</td> <!-- Display user name safely -->
-                        <td>{{$trip->planning}}</td>
-                        <td>{{$trip->from_location}}</td>
-                        <td>{{$trip->to_location}}</td>
-                        <td>{{$trip->meetup_location}}</td>
-                        <td>{{$trip->from_date}}</td>
-                        <td>{{$trip->to_date}}</td>
-                        <td>{{$trip->name_of_your_trip}}</td>
-                        <td>{{$trip->description_of_your_trip}}</td>
-                        <td>{{$trip->datetime}}</td>
+                        <td>{{$point->id}}</td>
+                        <td>{{$point->points}}</td>
+                        <td>{{$point->discount_points}}</td>
+                        <td>{{$point->offer_percent}}</td>
+                        <td>{{$point->price}}</td>
+                        <td>{{$point->datetime}}</td>
                         <td>
-                            <a href="{{ route('trips.edit', $trip) }}" class="btn btn-primary"><i class="fas fa-edit"></i></a>
-                            <button class="btn btn-danger btn-delete" data-url="{{route('trips.destroy', $trip)}}"><i class="fas fa-trash"></i></button>
+                            <a href="{{ route('points.edit', $point) }}" class="btn btn-primary"><i class="fas fa-edit"></i></a>
+                            <button class="btn btn-danger btn-delete" data-url="{{route('points.destroy', $point)}}"><i class="fas fa-trash"></i></button>
                         </td>
                     </tr>
                     @endforeach
                 </tbody>
             </table>
         </div>
-        {{ $trips->render() }}
+        {{ $points->render() }}
     </div>
 </div>
 
 @endsection
+
 @section('js')
     <script src="{{ asset('plugins/sweetalert2/sweetalert2.min.js') }}"></script>
- <script>
-  $(document).ready(function () {
-            // Submit the form when user selection changes
-            $('#user-filter').change(function () {
-                if ($(this).val() !== '') {
-                    $('#user-filter-form').submit();
-                } else {
-                    window.location.href = "{{ route('trips.index') }}";
-                }
-            });
-        });
-            </script>
-            <script>
-
+    <script>
         $(document).ready(function () {
             $(document).on('click', '.btn-delete', function () {
                 $this = $(this);

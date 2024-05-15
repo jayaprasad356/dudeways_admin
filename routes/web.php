@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\CartController;
-use App\Http\Controllers\OffersController;
+use App\Http\Controllers\PointsController;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\TripsController;
 use App\Http\Controllers\CustomerController;
@@ -49,13 +49,23 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::put('/users/{users}', [UsersController::class, 'update'])->name('users.update');
     Route::post('/users', [UsersController::class, 'store'])->name('users.store');
 
-     //Slide
+   
+     //Trips  
      Route::get('/trips', [TripsController::class, 'index'])->name('trips.index');
      Route::get('/trips/create', [TripsController::class, 'create'])->name('trips.create');
      Route::get('/trips/{trips}/edit', [TripsController::class, 'edit'])->name('trips.edit');
      Route::delete('/trips/{trips}', [TripsController::class, 'destroy'])->name('trips.destroy');
      Route::put('/trips/{trips}', [TripsController::class, 'update'])->name('trips.update');
      Route::post('/trips', [TripsController::class, 'store'])->name('trips.store');
+
+
+      //Points  
+      Route::get('/points', [PointsController::class, 'index'])->name('points.index');
+      Route::get('/points/create', [PointsController::class, 'create'])->name('points.create');
+      Route::get('/points/{points}/edit', [PointsController::class, 'edit'])->name('points.edit');
+      Route::delete('/points/{points}', [PointsController::class, 'destroy'])->name('points.destroy');
+      Route::put('/points/{points}', [PointsController::class, 'update'])->name('points.update');
+      Route::post('/points', [PointsController::class, 'store'])->name('points.store');
 
 
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');

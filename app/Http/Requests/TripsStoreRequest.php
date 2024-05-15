@@ -25,11 +25,15 @@ class TripsStoreRequest extends FormRequest
     {
         return [
             'planning' => 'nullable|string',
-            'location' => 'nullable|string',
+            'from_location' => 'nullable|string',
+            'to_location' => 'nullable|string',
+            'meetup_location' => 'nullable|string',
             'from_date' => 'nullable|date',
             'to_date' => 'nullable|date',
             'name_of_your_trip' => 'nullable|string',
             'description_of_your_trip' => 'nullable|string',
+            'user_id' => 'required|exists:users,id',
+            'datetime' => 'nullable|datetime',
         ];
     }
 }

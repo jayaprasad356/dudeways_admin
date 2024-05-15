@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Points;
 use App\Models\Users;
 use App\Models\Trips;
 use Illuminate\Http\Request;
@@ -27,10 +28,12 @@ class HomeController extends Controller
     {
         $users_count = Users::count();
         $trips_count = Trips::count();
+        $points_count = Points::count();
 
         return view('home', [
             'users_count' => $users_count,
             'trips_count' => $trips_count,
+            'points_count' => $points_count,
         ]);
     }
 }
