@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Users; 
 use App\Models\Trips; 
+use Carbon\Carbon;
 
 class AuthController extends Controller
 {
@@ -59,9 +60,9 @@ class AuthController extends Controller
             'refer_code' => $user->refer_code,
             'referred_by' => $user->referred_by,
             'profile' => $imageUrl,
-            'datetime' => $user->datetime,
-            'updated_at' => $user->updated_at,
-            'created_at' => $user->created_at,
+            'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
+            'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
+            'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
         ],
     ], 200);
 }
@@ -167,9 +168,9 @@ public function register(Request $request)
             'refer_code' => $refer_code, // Return the generated refer_code
             'referred_by' => $user->referred_by,
             'profile' => $imageUrl,
-            'datetime' => $user->datetime,
-            'updated_at' => $user->updated_at,
-            'created_at' => $user->created_at,
+            'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
+                'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
+                'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
         ],
     ], 201);
 }
@@ -229,9 +230,9 @@ return response()->json([
         'refer_code' => $user->refer_code,
         'referred_by' => $user->referred_by,
         'profile' => $imageUrl,
-        'datetime' => $user->datetime,
-        'updated_at' => $user->updated_at,
-        'created_at' => $user->created_at,
+        'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
+        'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
+        'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
     ],
 ], 200);
 }
@@ -279,9 +280,9 @@ public function update_image(Request $request)
                 'refer_code' => $user->refer_code,
                 'referred_by' => $user->referred_by,
                 'profile' => $imageUrl,
-                'datetime' => $user->datetime,
-                'updated_at' => $user->updated_at,
-                'created_at' => $user->created_at,
+                'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
+                'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
+                'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
             ],
         ], 200);
     } else {
@@ -370,9 +371,9 @@ public function update_users(Request $request)
             'refer_code' => $user->refer_code,
             'referred_by' => $user->referred_by,
             'profile' => $imageUrl,
-            'datetime' => $user->datetime,
-            'updated_at' => $user->updated_at,
-            'created_at' => $user->created_at,
+            'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
+            'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
+            'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
         ],
     ], 200);
 }
@@ -449,7 +450,7 @@ public function plan_trip(Request $request)
         'message' => 'Trip Added successfully.',
         'data' => [
             'id' => $trip->id,
-            'user_name' => $user->user_name,
+            'user_name' => $user->name,
             'planning' => $trip->planning,
             'from_date' => $trip->from_date,
             'to_date' => $trip->to_date,
@@ -458,9 +459,9 @@ public function plan_trip(Request $request)
             'from_location' => $trip->from_location,
             'to_location' => $trip->to_location,
             'meetup_location' => $trip->meetup_location,
-            'datetime' => $trip->datetime,
-            'updated_at' => $trip->updated_at,
-            'created_at' => $trip->created_at,
+            'datetime' => Carbon::parse($trip->datetime)->format('Y-m-d H:i:s'),
+            'updated_at' => Carbon::parse($trip->updated_at)->format('Y-m-d H:i:s'),
+            'created_at' => Carbon::parse($trip->created_at)->format('Y-m-d H:i:s'),
         ],
     ], 201);
 }
@@ -550,9 +551,9 @@ public function update_trip(Request $request)
             'from_location' => $trip->from_location,
             'to_location' => $trip->to_location,
             'meetup_location' => $trip->meetup_location,
-            'datetime' => $trip->datetime,
-            'updated_at' => $trip->updated_at,
-            'created_at' => $trip->created_at,
+            'datetime' => Carbon::parse($trip->datetime)->format('Y-m-d H:i:s'),
+            'updated_at' => Carbon::parse($trip->updated_at)->format('Y-m-d H:i:s'),
+            'created_at' => Carbon::parse($trip->created_at)->format('Y-m-d H:i:s'),
         ],
     ], 200);
 }
@@ -584,9 +585,9 @@ public function Trip_list(Request $request)
             'from_location' => $trip->from_location,
             'to_location' => $trip->to_location,
             'meetup_location' => $trip->meetup_location,
-            'datetime' => $trip->datetime,
-            'updated_at' => $trip->updated_at,
-            'created_at' => $trip->created_at,
+            'datetime' => Carbon::parse($trip->datetime)->format('Y-m-d H:i:s'),
+            'updated_at' => Carbon::parse($trip->updated_at)->format('Y-m-d H:i:s'),
+            'created_at' => Carbon::parse($trip->created_at)->format('Y-m-d H:i:s'),
         ];
     }
 
