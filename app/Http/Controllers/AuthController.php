@@ -542,7 +542,7 @@ public function update_trip(Request $request)
         'message' => 'Trip updated successfully.',
         'data' => [
             'id' => $trip->id,
-            'user_name' => $user->user_name,
+            'user_name' => $user->name,
             'planning' => $trip->planning,
             'from_date' => $trip->from_date,
             'to_date' => $trip->to_date,
