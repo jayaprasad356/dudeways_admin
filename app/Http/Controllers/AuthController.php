@@ -263,7 +263,7 @@ public function update_image(Request $request)
         $user->save();
 
         // Image URL
-        $imageUrl = asset('storage/users/' . $user->profile);
+         $imageUrl = asset('storage/app/public/users/' . $user->profile);
 
         return response()->json([
             'success' => true,
