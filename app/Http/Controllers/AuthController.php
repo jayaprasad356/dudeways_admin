@@ -245,6 +245,7 @@ public function update_image(Request $request)
             'message' => 'user_id is empty.',
         ], 400);
     }
+
     $user = Users::find($user_id);
 
     if (!$user) {
@@ -254,41 +255,43 @@ public function update_image(Request $request)
         ], 404);
     }
 
-
     $profile = $request->file('profile');
-
-
-    // Update offer details
 
     if ($profile !== null) {
         $imagePath = $profile->store('users', 'public');
         $user->profile = basename($imagePath);
+        $user->save();
+
+        // Image URL
+        $imageUrl = asset('storage/users/' . $user->profile);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'User Profile updated successfully.',
+            'data' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'mobile' => $user->mobile,
+                'age' => $user->age,
+                'gender' => $user->gender,
+                'profession' => $user->profession,
+                'refer_code' => $user->refer_code,
+                'referred_by' => $user->referred_by,
+                'profile' => $imageUrl,
+                'datetime' => $user->datetime,
+                'updated_at' => $user->updated_at,
+                'created_at' => $user->created_at,
+            ],
+        ], 200);
+    } else {
+        return response()->json([
+            'success' => false,
+            'message' => 'profile image is empty.',
+        ], 400);
     }
-    $user->save();
-
-    // Image URL
-    $imageUrl = asset('storage/app/public/users/' . $user->profile);
-
-    return response()->json([
-        'success' => true,
-        'message' => 'User Profile updated successfully.',
-        'data' => [
-            'id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'mobile' => $user->mobile,
-            'age' => $user->age,
-            'gender' => $user->gender,
-            'profession' => $user->profession,
-            'refer_code' => $user->refer_code,
-            'referred_by' => $user->referred_by,
-            'profile' => $imageUrl,
-            'datetime' => $user->datetime,
-            'updated_at' => $user->updated_at,
-            'created_at' => $user->created_at,
-        ],
-    ], 200);
 }
+
 
 public function update_users(Request $request)
 {
