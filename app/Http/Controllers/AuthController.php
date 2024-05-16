@@ -558,7 +558,7 @@ public function update_trip(Request $request)
     ], 200);
 }
 
-public function Trip_list(Request $request)
+public function trip_list(Request $request)
 {
     // Fetch all trip details from the database
     $trips = Trips::all();
