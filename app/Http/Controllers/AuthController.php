@@ -59,6 +59,7 @@ class AuthController extends Controller
             'refer_code' => $user->refer_code,
             'referred_by' => $user->referred_by,
             'profile' => $imageUrl,
+            'datetime' => $user->datetime,
             'updated_at' => $user->updated_at,
             'created_at' => $user->created_at,
         ],
@@ -146,6 +147,7 @@ public function register(Request $request)
     $user->refer_code = $refer_code; // Insert the generated refer_code
     $user->email = $email;
     $user->referred_by = $referred_by; // Insert referred_by if provided
+    $user->datetime = now(); 
     $user->save();
 
     // Image URL
@@ -165,6 +167,7 @@ public function register(Request $request)
             'refer_code' => $refer_code, // Return the generated refer_code
             'referred_by' => $user->referred_by,
             'profile' => $imageUrl,
+            'datetime' => $user->datetime,
             'updated_at' => $user->updated_at,
             'created_at' => $user->created_at,
         ],
@@ -226,6 +229,7 @@ return response()->json([
         'refer_code' => $user->refer_code,
         'referred_by' => $user->referred_by,
         'profile' => $imageUrl,
+        'datetime' => $user->datetime,
         'updated_at' => $user->updated_at,
         'created_at' => $user->created_at,
     ],
@@ -279,6 +283,7 @@ public function update_image(Request $request)
             'refer_code' => $user->refer_code,
             'referred_by' => $user->referred_by,
             'profile' => $imageUrl,
+            'datetime' => $user->datetime,
             'updated_at' => $user->updated_at,
             'created_at' => $user->created_at,
         ],
@@ -341,6 +346,8 @@ public function update_users(Request $request)
         $user->profession = $profession;
     }
 
+    $user->datetime = now(); 
+
     $user->save();
 
     // Image URL
@@ -360,6 +367,7 @@ public function update_users(Request $request)
             'refer_code' => $user->refer_code,
             'referred_by' => $user->referred_by,
             'profile' => $imageUrl,
+            'datetime' => $user->datetime,
             'updated_at' => $user->updated_at,
             'created_at' => $user->created_at,
         ],
