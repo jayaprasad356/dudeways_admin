@@ -44,9 +44,14 @@
                     <tr>
                         <td>{{$user->id}}</td>
                         <td>
-                       <img class="customer-img img-thumbnail img-fluid rounded-circle" src="{{ asset('storage/app/public/users/' . $user->profile) }}"   alt=""
-                        style="max-width: 100px; max-height: 100px;">
-                       </td>
+    @if(Str::startsWith($user->profile, ['http://', 'https://']))
+        <img class="customer-img img-thumbnail img-fluid rounded-circle" src="{{ $user->profile }}" alt=""
+            style="max-width: 100px; max-height: 100px;">
+    @else
+        <img class="customer-img img-thumbnail img-fluid rounded-circle" src="{{ asset('storage/app/public/users/' . $user->profile) }}" alt=""
+            style="max-width: 100px; max-height: 100px;">
+    @endif
+</td>
                         <td>{{$user->name}}</td>
                         <td>{{$user->email}}</td>
                         <td>{{$user->mobile}}</td>
