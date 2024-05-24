@@ -70,6 +70,28 @@
                 </div>
 
                 <div class="form-group">
+                    <label for="state">State</label>
+                    <input type="text" name="state" class="form-control @error('state') is-invalid @enderror" id="state"
+                           placeholder="state" value="{{ old('state') }}">
+                    @error('state')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                    @enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="city">City</label>
+                    <input type="text" name="city" class="form-control @error('city') is-invalid @enderror" id="city"
+                           placeholder="city" value="{{ old('city') }}">
+                    @error('city')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                    @enderror
+                </div>
+
+                <div class="form-group">
                     <label for="profession">Profession</label>
                     <select name="profession" class="form-control @error('profession') is-invalid @enderror" id="profession">
                         <option value=''>--select--</option>

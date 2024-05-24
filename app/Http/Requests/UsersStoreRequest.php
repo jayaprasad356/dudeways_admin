@@ -29,6 +29,8 @@ class UsersStoreRequest extends FormRequest
             'email' => 'nullable|email',
             'mobile' => 'nullable|string|max:10',
             'gender' => 'nullable|string',
+            'state' => 'nullable|string',
+            'city' => 'nullable|string',
             'avatar' => 'nullable|profile',
             'refer_code' => 'nullable|string',
             'referred_by' => 'nullable|string',

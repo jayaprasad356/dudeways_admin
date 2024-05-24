@@ -31,6 +31,8 @@
                     <th>Mobile <i class="fas fa-sort"></i></th>
                     <th>Age <i class="fas fa-sort"></i></th>
                     <th>Gender <i class="fas fa-sort"></i></th>
+                    <th>State <i class="fas fa-sort"></i></th>
+                    <th>City <i class="fas fa-sort"></i></th>
                     <th>Profession <i class="fas fa-sort"></i></th>
                     <th>Refer Code <i class="fas fa-sort"></i></th>
                     <th>Referred By <i class="fas fa-sort"></i></th>
@@ -57,6 +59,8 @@
                         <td>{{$user->mobile}}</td>
                         <td>{{$user->age}}</td>
                         <td>{{$user->gender}}</td>
+                        <td>{{$user->state}}</td>
+                        <td>{{$user->city}}</td>
                         <td>{{$user->profession}}</td>
                         <td>{{$user->refer_code}}</td>
                         <td>{{$user->referred_by}}</td>

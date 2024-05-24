@@ -92,6 +92,8 @@ class UsersController extends Controller
             'address' => $request->address,
             'mobile' => $request->mobile,
             'gender' => $request->gender,
+            'state' => $request->state,
+            'city' => $request->city,
             'profession' => $request->profession,
             'refer_code' => $refer_code,
             'referred_by' => $request->referred_by,
@@ -131,6 +133,8 @@ class UsersController extends Controller
         $users->email = $request->email;
         $users->mobile = $request->mobile;
         $users->gender = $request->gender;
+        $users->state = $request->state;
+        $users->city = $request->city;
         $users->profession = $request->profession;
         $users->refer_code = $request->refer_code;
         $users->referred_by = $request->referred_by;

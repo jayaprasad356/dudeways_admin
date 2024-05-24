@@ -61,6 +61,8 @@ class AuthController extends Controller
             'mobile' => $user->mobile,
             'age' => $user->age,
             'gender' => $user->gender,
+            'state' => $user->state,
+            'city' => $user->city,
             'profession' => $user->profession,
             'refer_code' => $user->refer_code,
             'referred_by' => $user->referred_by,
@@ -80,6 +82,8 @@ public function register(Request $request)
     $name = $request->input('name');
     $email = $request->input('email');
     $gender = $request->input('gender');
+    $state = $request->input('state');
+    $city = $request->input('city');
     $profession = $request->input('profession');
     $referred_by = $request->input('referred_by');
     $points = $request->input('points', 10);
@@ -92,6 +96,18 @@ public function register(Request $request)
         ], 400);
     }
 
+    if (empty($state)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'state is empty.',
+        ], 400);
+    }
+    if (empty($city)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'city is empty.',
+        ], 400);
+    }
     if (empty($age)) {
         return response()->json([
             'success' => false,
@@ -199,6 +215,8 @@ public function register(Request $request)
     $user->refer_code = $refer_code; // Insert the generated refer_code
     $user->email = $email;
     $user->points = $points;
+    $user->state = $state;
+    $user->city = $city;
     $user->referred_by = $referred_by; // Insert referred_by if provided
     $user->datetime = now(); 
     $user->save();
@@ -216,6 +234,8 @@ public function register(Request $request)
             'mobile' => $user->mobile,
             'age' => $user->age,
             'gender' => $user->gender,
+            'state' => $user->state,
+            'city' => $user->city,
             'profession' => $user->profession,
             'refer_code' => $refer_code, // Return the generated refer_code
             'referred_by' => $user->referred_by,
@@ -279,6 +299,8 @@ return response()->json([
         'mobile' => $user->mobile,
         'age' => $user->age,
         'gender' => $user->gender,
+        'state' => $user->state,
+        'city' => $user->city,
         'profession' => $user->profession,
         'refer_code' => $user->refer_code,
         'referred_by' => $user->referred_by,
@@ -330,6 +352,8 @@ public function update_image(Request $request)
                 'mobile' => $user->mobile,
                 'age' => $user->age,
                 'gender' => $user->gender,
+                'state' => $user->state,
+                'city' => $user->city,
                 'profession' => $user->profession,
                 'refer_code' => $user->refer_code,
                 'referred_by' => $user->referred_by,
@@ -374,6 +398,8 @@ public function update_users(Request $request)
     $age = $request->input('age');
     $gender = $request->input('gender');
     $profession = $request->input('profession');
+    $state = $request->input('state');
+    $city = $request->input('city');
 
    // Validation for each field
    if ($mobile !== null) {
@@ -443,6 +469,12 @@ if ($email !== null) {
     if ($profession !== null) {
         $user->profession = $profession;
     }
+    if ($state !== null) {
+        $user->state = $state;
+    }
+    if ($city !== null) {
+        $user->city = $city;
+    }
 
     $user->datetime = now(); 
 
@@ -461,6 +493,8 @@ if ($email !== null) {
             'mobile' => $user->mobile,
             'age' => $user->age,
             'gender' => $user->gender,
+            'state' => $user->state,
+            'city' => $user->city,
             'profession' => $user->profession,
             'refer_code' => $user->refer_code,
             'referred_by' => $user->referred_by,
