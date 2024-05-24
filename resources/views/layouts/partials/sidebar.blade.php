@@ -36,6 +36,12 @@
                     </a>
                 </li>
                 <li class="nav-item has-treeview">
+                    <a href="{{ route('bulk-users.upload') }}" class="nav-link {{ activeSegment('bulk-users') }}">
+                        <i class="nav-icon fas fa-user-plus"></i>
+                        <p>Add Bulk User</p>
+                    </a>
+                </li>
+                <li class="nav-item has-treeview">
                     <a href="{{ route('trips.index') }}" class="nav-link {{ activeSegment('trips') }}">
                         <i class="nav-icon fas fa-suitcase"></i>
                         <p>Trips</p>
@@ -45,6 +51,24 @@
                     <a href="{{ route('points.index') }}" class="nav-link {{ activeSegment('points') }}">
                         <i class="nav-icon fas fa-star"></i>
                         <p>Points</p>
+                    </a>
+                </li>
+                <li class="nav-item has-treeview">
+                    <a href="{{ route('chats.index') }}" class="nav-link {{ activeSegment('chats') }}">
+                        <i class="nav-icon fas fa-comment"></i>
+                        <p>Chats</p>
+                    </a>
+                </li>
+                <li class="nav-item has-treeview">
+                    <a href="{{ route('interests.index') }}" class="nav-link {{ activeSegment('interests') }}">
+                        <i class="nav-icon fas fa-heart"></i>
+                        <p>Interests</p>
+                    </a>
+                </li>
+                <li class="nav-item has-treeview">
+                    <a href="{{ route('notifications.index') }}" class="nav-link {{ activeSegment('notifications') }}">
+                        <i class="nav-icon fas fa-bell"></i>
+                        <p>Notifications</p>
                     </a>
                 </li>
                 <li class="nav-item">

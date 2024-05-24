@@ -33,6 +33,7 @@ class UsersStoreRequest extends FormRequest
             'refer_code' => 'nullable|string',
             'referred_by' => 'nullable|string',
             'profession' => 'nullable|string',
+            'points' => 'required|integer',
             'datetime' => 'nullable|datetime',
         ];
     }

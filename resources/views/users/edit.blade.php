@@ -3,8 +3,9 @@
 @section('title', 'Update users')
 @section('content-header', 'Update users')
 @section('content-actions')
-    <a href="{{route('users.index')}}" class="btn btn-success"><i class="fas fa-back"></i>Back To Users</a>
+    <a href="{{ route('users.index') }}" class="btn btn-success"><i class="fas fa-back"></i> Back To Users</a>
 @endsection
+
 @section('content')
 
     <div class="card">
@@ -13,8 +14,9 @@
             <form action="{{ route('users.update', $users) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
-
+                <a href="{{ route('users.add_points', $users->id) }}" class="btn btn-primary"><i class="fas fa-plus"></i> Add Points</a>
                 <div class="form-group">
+                    <br>
                     <label for="name">Name</label>
                     <input type="text" name="name" class="form-control @error('name') is-invalid @enderror"
                            id="name"

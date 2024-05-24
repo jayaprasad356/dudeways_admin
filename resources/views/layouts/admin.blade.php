@@ -9,6 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Ionicons -->
     <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+
     <!-- overlayScrollbars -->
     <link rel="stylesheet" href="{{ asset('public/css/app.css') }}">
     <!-- Font Awesome -->

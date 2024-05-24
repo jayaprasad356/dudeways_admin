@@ -4,12 +4,16 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\PointsController;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\TripsController;
+use App\Http\Controllers\ChatsController;
 use App\Http\Controllers\CustomerController;
-use App\Http\Controllers\HomeController;
+use App\Http\Controllers\HomeController;    
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\InterestsController;
+use App\Http\Controllers\NotificationsController;
+use App\Http\Controllers\BulkUserController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -48,6 +52,9 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::delete('/users/{users}', [UsersController::class, 'destroy'])->name('users.destroy');
     Route::put('/users/{users}', [UsersController::class, 'update'])->name('users.update');
     Route::post('/users', [UsersController::class, 'store'])->name('users.store');
+    Route::get('/users/{id}/add-points', [UsersController::class, 'addPointsForm'])->name('users.add_points');
+    Route::post('/users/{id}/add-points', [UsersController::class, 'addPoints'])->name('users.store_points');
+
 
    
      //Trips  
@@ -59,6 +66,14 @@ Route::prefix('admin')->middleware('auth')->group(function () {
      Route::post('/trips', [TripsController::class, 'store'])->name('trips.store');
 
 
+     //Chats  
+     Route::get('/chats', [ChatsController::class, 'index'])->name('chats.index');
+     Route::get('/chats/create', [ChatsController::class, 'create'])->name('chats.create');
+     Route::get('/chats/{chats}/edit', [ChatsController::class, 'edit'])->name('chats.edit');
+     Route::delete('/chats/{chats}', [ChatsController::class, 'destroy'])->name('chats.destroy');
+     Route::put('/chats/{chats}', [ChatsController::class, 'update'])->name('chats.update');
+     Route::post('/chats', [ChatsController::class, 'store'])->name('chats.store');
+
       //Points  
       Route::get('/points', [PointsController::class, 'index'])->name('points.index');
       Route::get('/points/create', [PointsController::class, 'create'])->name('points.create');
@@ -67,6 +82,20 @@ Route::prefix('admin')->middleware('auth')->group(function () {
       Route::put('/points/{points}', [PointsController::class, 'update'])->name('points.update');
       Route::post('/points', [PointsController::class, 'store'])->name('points.store');
 
+       //Interests  
+       Route::get('/interests', [InterestsController::class, 'index'])->name('interests.index');
+       Route::delete('/interests/{interests}', [InterestsController::class, 'destroy'])->name('interests.destroy');
+
+
+        //Notifications  
+        Route::get('/notifications', [NotificationsController::class, 'index'])->name('notifications.index');
+        Route::delete('/notifications/{notifications}', [NotificationsController::class, 'destroy'])->name('notifications.destroy');
+ 
+        //Bulk Users
+       // web.php
+// Define the route for the "Upload Bulk Users" page
+Route::get('bulk-users/upload', [BulkUserController::class, 'create'])->name('bulk-users.upload');
+Route::post('bulk-users/upload', [BulkUserController::class, 'store'])->name('bulk-users.store');
 
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
     Route::post('/cart', [CartController::class, 'store'])->name('cart.store');

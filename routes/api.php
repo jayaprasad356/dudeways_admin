@@ -9,16 +9,18 @@ Route::post('register', [AuthController::class, 'register']);
 Route::post('userdetails', [AuthController::class, 'userdetails']);
 Route::post('update_image', [AuthController::class, 'update_image']);
 Route::post('update_users', [AuthController::class, 'update_users']);
-Route::post('plan_trip', [AuthController::class, 'plan_trip']);
+Route::post('add_trip', [AuthController::class, 'add_trip']);
 Route::post('update_trip', [AuthController::class, 'update_trip']);
 Route::post('trip_list', [AuthController::class, 'trip_list']);
-Route::post('/all-shop-details', [AuthController::class, 'allshopdetails']);
-Route::post('/add-offer', [AuthController::class, 'addoffers']);
-Route::post('/edit-offer', [AuthController::class, 'editoffers']);
-Route::post('/delete-offer', [AuthController::class, 'deleteoffers']);
-Route::post('/offer-details', [AuthController::class, 'offerdetails']);
-Route::post('/offer-locked', [AuthController::class, 'offerlocked']);
-Route::post('/slide-list', [AuthController::class, 'slide']);
+Route::post('my_trip_list', [AuthController::class, 'my_trip_list']);
+Route::post('trip_date', [AuthController::class, 'trip_date']);
+Route::post('latest_trip', [AuthController::class, 'latest_trip']);
+Route::post('delete_trip', [AuthController::class, 'delete_trip']);
+Route::post('chat_list', [AuthController::class, 'chat_list']);
+Route::post('add_interests', [AuthController::class, 'add_interests']);
+Route::post('interest_list', [AuthController::class, 'interest_list']);
+Route::post('add_notifications', [AuthController::class, 'add_notifications']);
+Route::post('notification_list', [AuthController::class, 'notification_list']);
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
