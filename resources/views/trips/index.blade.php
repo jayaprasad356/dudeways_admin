@@ -43,6 +43,7 @@
                     <tr>
                         <th>ID <i class="fas fa-sort"></i></th>
                         <th>User Name <i class="fas fa-sort"></i></th>
+                        <th>Unique Name <i class="fas fa-sort"></i></th>
                         <th>Planning <i class="fas fa-sort"></i></th>
                         <th>From Location <i class="fas fa-sort"></i></th>
                         <th>To Location <i class="fas fa-sort"></i></th>
@@ -60,6 +61,7 @@
                     <tr>
                         <td>{{$trip->id}}</td>
                         <td>{{ optional($trip->users)->name }}</td> <!-- Display user name safely -->
+                        <td>{{$trip->unique_name}}</td>
                         <td>{{$trip->planning}}</td>
                         <td>{{$trip->from_location}}</td>
                         <td>{{$trip->to_location}}</td>

@@ -495,6 +495,7 @@ if ($email !== null) {
 public function add_trip(Request $request)
 {
     $user_id = $request->input('user_id'); 
+    $unique_name = $request->input('unique_name'); 
     $planning = $request->input('planning');
     $from_date = $request->input('from_date');
     $to_date = $request->input('to_date');
@@ -506,36 +507,77 @@ public function add_trip(Request $request)
 
     $errors = [];
 
-    if (empty($planning)) {
-        $errors[] = 'planning is empty.';
+       // Validate each input and return specific error messages
+       if (empty($planning)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Planning is empty.',
+        ], 400);
     }
     if (empty($from_date)) {
-        $errors[] = 'From Date is empty.';
+        return response()->json([
+            'success' => false,
+            'message' => 'From Date is empty.',
+        ], 400);
     }
     if (empty($to_date)) {
-        $errors[] = 'To Date is empty.';
+        return response()->json([
+            'success' => false,
+            'message' => 'To Date is empty.',
+        ], 400);
     }
     if (empty($name_of_your_trip)) {
-        $errors[] = 'Name Of Your Trip is empty.';
+        return response()->json([
+            'success' => false,
+            'message' => 'Name Of Your Trip is empty.',
+        ], 400);
     }
     if (empty($description_of_your_trip)) {
-        $errors[] = 'Description Of Your Trip is empty.';
+        return response()->json([
+            'success' => false,
+            'message' => 'Description Of Your Trip is empty.',
+        ], 400);
     }
     if (empty($from_location)) {
-        $errors[] = 'From Location is empty.';
+        return response()->json([
+            'success' => false,
+            'message' => 'From Location is empty.',
+        ], 400);
     }
     if (empty($to_location)) {
-        $errors[] = 'To Location is empty.';
+        return response()->json([
+            'success' => false,
+            'message' => 'To Location is empty.',
+        ], 400);
     }
     if (empty($meetup_location)) {
-        $errors[] = 'Meetup Location is empty.';
+        return response()->json([
+            'success' => false,
+            'message' => 'Meetup Location is empty.',
+        ], 400);
     }
- 
+    if (empty($unique_name)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Unique Name is empty.',
+        ], 400);
+    }
 
-      $user = Users::find($user_id);
-      if (!$user) {
-          $errors[] = 'user not found.';
-      }
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User ID is empty.',
+        ], 400);
+    }
+
+    // Check if the user exists
+    $user = Users::find($user_id);
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User not found.',
+        ], 404);
+    }
 
     // Check if any validation errors occurred
     if (!empty($errors)) {
@@ -547,6 +589,7 @@ public function add_trip(Request $request)
     // Create a new user instance
     $trip = new trips();
     $trip->user_id = $user_id; 
+    $trip->unique_name = $unique_name; 
     $trip->planning = $planning;
     $trip->from_date = $from_date;
     $trip->to_date = $to_date;
@@ -565,6 +608,7 @@ public function add_trip(Request $request)
         'data' => [
             'id' => $trip->id,
             'user_name' => $user->name,
+            'unique_name' => $trip->unique_name,
             'planning' => $trip->planning,
             'from_date' => $trip->from_date,
             'to_date' => $trip->to_date,
@@ -601,6 +645,7 @@ public function update_trip(Request $request)
     }
 
     $user_id = $request->input('user_id'); 
+    $unique_name = $request->input('unique_name'); 
     $planning = $request->input('planning');
     $from_date = $request->input('from_date');
     $to_date = $request->input('to_date');
@@ -610,7 +655,7 @@ public function update_trip(Request $request)
     $to_location = $request->input('to_location');
     $meetup_location = $request->input('meetup_location');
 
-    // Update trip details
+    // Update trip details if provided
     if ($user_id !== null) {
         // Check if user_id is valid
         $user = Users::find($user_id);
@@ -623,28 +668,85 @@ public function update_trip(Request $request)
         $trip->user_id = $user_id;
     }
     if ($planning !== null) {
+        if (empty($planning)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Planning is empty.',
+            ], 400);
+        }
         $trip->planning = $planning;
     }
     if ($from_date !== null) {
+        if (empty($from_date)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'From Date is empty.',
+            ], 400);
+        }
         $trip->from_date = $from_date;
     }
     if ($to_date !== null) {
+        if (empty($to_date)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'To Date is empty.',
+            ], 400);
+        }
         $trip->to_date = $to_date;
     }
     if ($name_of_your_trip !== null) {
+        if (empty($name_of_your_trip)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Name Of Your Trip is empty.',
+            ], 400);
+        }
         $trip->name_of_your_trip = $name_of_your_trip;
     }
     if ($description_of_your_trip !== null) {
+        if (empty($description_of_your_trip)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Description Of Your Trip is empty.',
+            ], 400);
+        }
         $trip->description_of_your_trip = $description_of_your_trip;
     }
     if ($from_location !== null) {
+        if (empty($from_location)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'From Location is empty.',
+            ], 400);
+        }
         $trip->from_location = $from_location;
     }
     if ($to_location !== null) {
+        if (empty($to_location)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'To Location is empty.',
+            ], 400);
+        }
         $trip->to_location = $to_location;
     }
     if ($meetup_location !== null) {
+        if (empty($meetup_location)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Meetup Location is empty.',
+            ], 400);
+        }
         $trip->meetup_location = $meetup_location;
+    }
+    if ($unique_name !== null) {
+        if (empty($unique_name)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unique Name is empty.',
+            ], 400);
+        }
+        $trip->unique_name = $unique_name;
     }
     $trip->datetime = now(); 
 
@@ -657,6 +759,7 @@ public function update_trip(Request $request)
         'data' => [
             'id' => $trip->id,
             'user_name' => $user->name,
+            'unique_name' => $trip->unique_name,
             'planning' => $trip->planning,
             'from_date' => $trip->from_date,
             'to_date' => $trip->to_date,
@@ -694,11 +797,12 @@ public function trip_list(Request $request)
         $tripDetails[] = [
             'id' => $trip->id,
             'user_name' => $user->name,
+            'unique_name' => $trip->unique_name,
             'planning' => $trip->planning,
-            'From Date' => $trip->from_date,
-            'To Date' => $trip->to_date,
-            'Name Of Your Trip' => $trip->name_of_your_trip,
-            'Description Of Your Trip' => $trip->description_of_your_trip,
+            'from_date' => $trip->from_date,
+            'to_date' => $trip->to_date,
+            'name_of_your_trip' => $trip->name_of_your_trip,
+            'description_of_your_trip' => $trip->description_of_your_trip,
             'from_location' => $trip->from_location,
             'to_location' => $trip->to_location,
             'meetup_location' => $trip->meetup_location,
@@ -739,11 +843,12 @@ public function my_trip_list(Request $request)
             'id' => $trip->id,
             'user_id' => $trip->user_id,
             'user_name' => $user->name,
+            'unique_name' => $trip->unique_name,
             'planning' => $trip->planning,
-            'From Date' => $trip->from_date,
-            'To Date' => $trip->to_date,
-            'Name Of Your Trip' => $trip->name_of_your_trip,
-            'Description Of Your Trip' => $trip->description_of_your_trip,
+            'from_date' => $trip->from_date,
+            'to_date' => $trip->to_date,
+            'name_of_your_trip' => $trip->name_of_your_trip,
+            'description_of_your_trip' => $trip->description_of_your_trip,
             'from_location' => $trip->from_location,
             'to_location' => $trip->to_location,
             'meetup_location' => $trip->meetup_location,
@@ -799,11 +904,12 @@ public function trip_date(Request $request)
             'id' => $trip->id,
             'user_id' => $trip->user_id,
             'user_name' => $user->name,
+            'unique_name' => $trip->unique_name,
             'planning' => $trip->planning,
-            'From Date' => $trip->from_date,
-            'To Date' => $trip->to_date,
-            'Name Of Your Trip' => $trip->name_of_your_trip,
-            'Description Of Your Trip' => $trip->description_of_your_trip,
+            'from_date' => $trip->from_date,
+            'to_date' => $trip->to_date,
+            'name_of_your_trip' => $trip->name_of_your_trip,
+            'description_of_your_trip' => $trip->description_of_your_trip,
             'from_location' => $trip->from_location,
             'to_location' => $trip->to_location,
             'meetup_location' => $trip->meetup_location,
@@ -854,11 +960,12 @@ public function latest_trip(Request $request)
         'id' => $trip->id,
         'user_id' => $trip->user_id,
         'user_name' => $user ? $user->name : 'Unknown',
+        'unique_name' => $trip->unique_name,
         'planning' => $trip->planning,
-        'From Date' => $trip->from_date,
-        'To Date' => $trip->to_date,
-        'Name Of Your Trip' => $trip->name_of_your_trip,
-        'Description Of Your Trip' => $trip->description_of_your_trip,
+        'from_date' => $trip->from_date,
+        'to_date' => $trip->to_date,
+        'name_of_your_trip' => $trip->name_of_your_trip,
+        'description_of_your_trip' => $trip->description_of_your_trip,
         'from_location' => $trip->from_location,
         'to_location' => $trip->to_location,
         'meetup_location' => $trip->meetup_location,
