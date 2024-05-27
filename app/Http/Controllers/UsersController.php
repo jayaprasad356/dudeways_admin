@@ -69,22 +69,50 @@ class UsersController extends Controller
         return $refer_code;
     }
 
-    public function store(UsersStoreRequest $request)
+    public function store(Request $request)
     {
+        $validatedData = $request->validate([
+            'unique_name' => 'required|unique:users|max:255',
+            'email' => 'required|email|unique:users',
+            'mobile' => 'required|numeric|digits:10|unique:users',
+            'profession' => 'required|string|max:255',
+            'city' => 'required|string|max:255',
+            'state' => 'required|string|max:255',
+            'age' => 'required|integer|between:18,60',
+            'gender' => 'required|in:male,female,other',
+            'profile' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ], [
+            'unique_name.unique' => 'The unique name has already been taken.',
+            'email.unique' => 'The email has already been taken.',
+            'mobile.unique' => 'The mobile number has already been taken.',
+            'mobile.digits' => 'The mobile number must be exactly 10 digits.',
+            'age.between' => 'The age must be between 18 and 60.',
+            'gender.in' => 'Invalid gender selected.',
+            'profile.image' => 'The profile must be an image file.',
+            'profile.mimes' => 'The profile must be a file of type: jpeg, png, jpg, gif.',
+            'profile.max' => 'The profile may not be greater than 2 MB.',
+        ]);
         // Generate a refer_code regardless of whether referred_by is provided or not
         $refer_code = $this->generateReferCode();
-
+    
         // Validate the referred_by field if provided
         if ($request->filled('referred_by')) {
             $existingUser = Users::where('refer_code', $request->referred_by)->first();
-
+    
             if (!$existingUser) {
                 return redirect()->back()->with('error', 'Invalid referred_by. Please provide a valid refer code.');
             }
         }
-
-        $imagePath = $request->file('profile')->store('users', 'public');
-
+    
+   // Check if a file has been uploaded
+   if ($request->hasFile('profile')) {
+    $imageName = $request->file('profile')->getClientOriginalName(); // Get the original file name
+    $imagePath = $request->file('profile')->storeAs('users', $imageName);
+} else {
+    // Handle the case where no file has been uploaded
+    $imagePath = null; // or provide a default image path
+}
+    
         $users = Users::create([
             'name' => $request->name,
             'age' => $request->age,
@@ -97,16 +125,18 @@ class UsersController extends Controller
             'profession' => $request->profession,
             'refer_code' => $refer_code,
             'referred_by' => $request->referred_by,
-            'profile' => basename($imagePath),
+            'profile' => $imageName, // Save only the image name in the database
+            'unique_name' => $request->unique_name,
             'datetime' => now(),
         ]);
-
+    
         if (!$users) {
             return redirect()->back()->with('error', 'Sorry, Something went wrong while creating user.');
         }
-
+    
         return redirect()->route('users.index')->with('success', 'Success, New user has been added successfully!');
     }
+    
 
     /**
      * Show the form for editing the specified resource.
@@ -128,7 +158,37 @@ class UsersController extends Controller
      */
     public function update(Request $request, Users $users)
     {
+
+        $validatedData = $request->validate([
+            'unique_name' => 'required|string|max:255|unique:users,unique_name,' . $users->id,
+            'name' => 'required|string|max:255',
+            'age' => 'required|integer|between:18,60',
+            'email' => 'required|email|unique:users,email,' . $users->id,
+            'mobile' => 'required|numeric|digits:10|unique:users,mobile,' . $users->id,
+            'gender' => 'required|in:male,female,other',
+            'state' => 'required|string|max:255',
+            'city' => 'required|string|max:255',
+            'profession' => 'required|string|max:255',
+            'refer_code' => 'nullable|string|max:255',
+            'referred_by' => 'nullable|string|max:255',
+            'profile' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            // other validation rules...
+        ], [
+            'unique_name.unique' => 'The unique name has already been taken.',
+            'email.unique' => 'The email has already been taken.',
+            'mobile.unique' => 'The mobile number has already been taken.',
+            'mobile.digits' => 'The mobile number must be exactly 10 digits.',
+            'age.between' => 'The age must be between 18 and 60.',
+            'gender.in' => 'Invalid gender selected.',
+            'profile.image' => 'The profile must be an image file.',
+            'profile.mimes' => 'The profile must be a file of type: jpeg, png, jpg, gif.',
+            'profile.max' => 'The profile may not be greater than 2 MB.',
+            // custom error messages for other validation rules...
+        ]);
+
+
         $users->name = $request->name;
+        $users->unique_name = $request->unique_name;
         $users->age = $request->age;
         $users->email = $request->email;
         $users->mobile = $request->mobile;

@@ -27,6 +27,7 @@
                     <th>ID <i class="fas fa-sort"></i></th>
                     <th>Profile</th>
                     <th>Name <i class="fas fa-sort"></i></th>
+                    <th>Unique Name <i class="fas fa-sort"></i></th>
                     <th>Email <i class="fas fa-sort"></i></th>
                     <th>Mobile <i class="fas fa-sort"></i></th>
                     <th>Age <i class="fas fa-sort"></i></th>
@@ -55,6 +56,7 @@
     @endif
 </td>
                         <td>{{$user->name}}</td>
+                        <td>{{$user->unique_name}}</td>
                         <td>{{$user->email}}</td>
                         <td>{{$user->mobile}}</td>
                         <td>{{$user->age}}</td>

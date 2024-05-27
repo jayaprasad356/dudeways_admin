@@ -44,17 +44,6 @@
                     @enderror
                 </div>
 
-                <div class="form-group">
-                    <label for="unique_name">Unique Name</label>
-                    <input type="text" name="unique_name" class="form-control @error('unique_name') is-invalid @enderror"
-                           id="unique_name"
-                           placeholder="Unique Name" value="{{ old('unique_name') }}">
-                    @error('unique_name')
-                    <span class="invalid-feedback" role="alert">
-                        <strong>{{ $message }}</strong>
-                    </span>
-                    @enderror
-                </div>
 
                 <div class="form-group">
                     <label for="from_location">From Location</label>

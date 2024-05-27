@@ -33,7 +33,6 @@ class TripsStoreRequest extends FormRequest
             'name_of_your_trip' => 'nullable|string',
             'description_of_your_trip' => 'nullable|string',
             'user_id' => 'required|exists:users,id',
-            'unique_name' => 'nullable|string',
             'datetime' => 'nullable|datetime',
         ];
     }

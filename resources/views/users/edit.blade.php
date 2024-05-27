@@ -29,6 +29,19 @@
                 </div>
 
                 <div class="form-group">
+                    <label for="unique_name">Unique Name</label>
+                    <input type="text" name="unique_name" class="form-control @error('unique_name') is-invalid @enderror"
+                           id="unique_name"
+                           placeholder="Unique Name" value="{{ old('unique_name', $users->unique_name) }}">
+                    @error('unique_name')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                    @enderror
+                </div>
+
+
+                <div class="form-group">
                     <label for="mobile">Mobile Number</label>
                     <input type="number" name="mobile" class="form-control @error('mobile') is-invalid @enderror" id="mobile"
                            placeholder="mobile" value="{{ old('mobile', $users->mobile) }}">

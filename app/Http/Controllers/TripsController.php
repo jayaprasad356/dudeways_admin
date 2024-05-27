@@ -64,7 +64,6 @@ class TripsController extends Controller
     {
     
         $trips = Trips::create([
-            'unique_name' => $request->unique_name,
             'planning' => $request->planning,
             'from_location' => $request->from_location,
             'to_location' => $request->to_location,
@@ -123,7 +122,6 @@ class TripsController extends Controller
     public function update(Request $request, Trips $trips)
 
     {
-        $trips->unique_name = $request->unique_name;
         $trips->planning = $request->planning;
         $trips->from_location = $request->from_location;
         $trips->to_location = $request->to_location;

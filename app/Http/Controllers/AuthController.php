@@ -57,6 +57,7 @@ class AuthController extends Controller
         'data' => [
             'id' => $user->id,
             'name' => $user->name,
+            'unique_name' => $user->unique_name,
             'email' => $user->email,
             'mobile' => $user->mobile,
             'age' => $user->age,
@@ -80,6 +81,7 @@ public function register(Request $request)
     $mobile = $request->input('mobile');
     $age = $request->input('age');
     $name = $request->input('name');
+    $unique_name = $request->input('unique_name');
     $email = $request->input('email');
     $gender = $request->input('gender');
     $state = $request->input('state');
@@ -96,6 +98,12 @@ public function register(Request $request)
         ], 400);
     }
 
+    if (empty($unique_name)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Unique Name is empty.',
+        ], 400);
+    }
     if (empty($state)) {
         return response()->json([
             'success' => false,
@@ -177,6 +185,14 @@ public function register(Request $request)
         ], 409);
     }
 
+    $existingUser = Users::where('unique_name', $unique_name)->first();
+    if ($existingUser) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User already exists with this Unique Name.',
+        ], 409);
+    }
+
     // Check if the user with the given email already exists
     $existingEmail = Users::where('email', $email)->first();
     if ($existingEmail) {
@@ -204,6 +220,7 @@ public function register(Request $request)
     $user->mobile = $mobile;
     $user->age = $age;
     $user->name = $name;
+    $user->unique_name = $unique_name;
     $user->gender = $gender;
     $user->profession = $profession;
     $user->refer_code = $refer_code; // Insert the generated refer_code
@@ -224,6 +241,7 @@ public function register(Request $request)
         'data' => [
             'id' => $user->id,
             'name' => $user->name,
+            'unique_name' => $user->unique_name,
             'email' => $user->email,
             'mobile' => $user->mobile,
             'age' => $user->age,
@@ -289,6 +307,7 @@ return response()->json([
     'data' => [
         'id' => $user->id,
         'name' => $user->name,
+        'unique_name' => $user->unique_name,
         'email' => $user->email,
         'mobile' => $user->mobile,
         'age' => $user->age,
@@ -342,6 +361,7 @@ public function update_image(Request $request)
             'data' => [
                 'id' => $user->id,
                 'name' => $user->name,
+                'unique_name' => $user->unique_name,
                 'email' => $user->email,
                 'mobile' => $user->mobile,
                 'age' => $user->age,
@@ -388,6 +408,7 @@ public function update_users(Request $request)
 
     $name = $request->input('name');
     $email = $request->input('email');
+    $unique_name = $request->input('unique_name');
     $mobile = $request->input('mobile');
     $age = $request->input('age');
     $gender = $request->input('gender');
@@ -460,6 +481,9 @@ if ($email !== null) {
     if ($city !== null) {
         $user->city = $city;
     }
+    if ($unique_name !== null) {
+        $user->unique_name = $unique_name;
+    }
 
     $user->datetime = now(); 
 
@@ -474,6 +498,7 @@ if ($email !== null) {
         'data' => [
             'id' => $user->id,
             'name' => $user->name,
+            'unique_name' => $user->unique_name,
             'email' => $user->email,
             'mobile' => $user->mobile,
             'age' => $user->age,
@@ -495,7 +520,6 @@ if ($email !== null) {
 public function add_trip(Request $request)
 {
     $user_id = $request->input('user_id'); 
-    $unique_name = $request->input('unique_name'); 
     $planning = $request->input('planning');
     $from_date = $request->input('from_date');
     $to_date = $request->input('to_date');
@@ -556,12 +580,6 @@ public function add_trip(Request $request)
             'message' => 'Meetup Location is empty.',
         ], 400);
     }
-    if (empty($unique_name)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Unique Name is empty.',
-        ], 400);
-    }
 
     if (empty($user_id)) {
         return response()->json([
@@ -589,7 +607,6 @@ public function add_trip(Request $request)
     // Create a new user instance
     $trip = new trips();
     $trip->user_id = $user_id; 
-    $trip->unique_name = $unique_name; 
     $trip->planning = $planning;
     $trip->from_date = $from_date;
     $trip->to_date = $to_date;
@@ -608,10 +625,9 @@ public function add_trip(Request $request)
         'data' => [
             'id' => $trip->id,
             'user_name' => $user->name,
-            'unique_name' => $trip->unique_name,
             'planning' => $trip->planning,
-            'from_date' => $trip->from_date,
-            'to_date' => $trip->to_date,
+            'from_date' => date('F j, Y', strtotime($trip->from_date)),
+            'to_date' => date('F j, Y', strtotime($trip->to_date)),
             'name_of_your_trip' => $trip->name_of_your_trip,
             'description_of_your_trip' => $trip->description_of_your_trip,
             'from_location' => $trip->from_location,
@@ -645,7 +661,6 @@ public function update_trip(Request $request)
     }
 
     $user_id = $request->input('user_id'); 
-    $unique_name = $request->input('unique_name'); 
     $planning = $request->input('planning');
     $from_date = $request->input('from_date');
     $to_date = $request->input('to_date');
@@ -739,15 +754,6 @@ public function update_trip(Request $request)
         }
         $trip->meetup_location = $meetup_location;
     }
-    if ($unique_name !== null) {
-        if (empty($unique_name)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Unique Name is empty.',
-            ], 400);
-        }
-        $trip->unique_name = $unique_name;
-    }
     $trip->datetime = now(); 
 
     // Save the updated trip
@@ -759,10 +765,9 @@ public function update_trip(Request $request)
         'data' => [
             'id' => $trip->id,
             'user_name' => $user->name,
-            'unique_name' => $trip->unique_name,
             'planning' => $trip->planning,
-            'from_date' => $trip->from_date,
-            'to_date' => $trip->to_date,
+            'from_date' => date('F j, Y', strtotime($trip->from_date)),
+            'to_date' => date('F j, Y', strtotime($trip->to_date)),
             'name_of_your_trip' => $trip->name_of_your_trip,
             'description_of_your_trip' => $trip->description_of_your_trip,
             'from_location' => $trip->from_location,
@@ -792,15 +797,23 @@ public function trip_list(Request $request)
 
     $tripDetails = [];
 
-    foreach ($trips as $trip) {
+
+     foreach ($trips as $trip) {
         $user = Users::find($trip->user_id);
+        if ($user) {
+            // Image URL
+            $imageUrl = asset('storage/app/public/users/' . $user->profile);
+        } else {
+            $imageUrl = null; // Set default image URL if user not found
+        }
+
         $tripDetails[] = [
             'id' => $trip->id,
             'user_name' => $user->name,
-            'unique_name' => $trip->unique_name,
+            'user_profile' => $imageUrl,
             'planning' => $trip->planning,
-            'from_date' => $trip->from_date,
-            'to_date' => $trip->to_date,
+            'from_date' => date('F j, Y', strtotime($trip->from_date)),
+            'to_date' => date('F j, Y', strtotime($trip->to_date)),
             'name_of_your_trip' => $trip->name_of_your_trip,
             'description_of_your_trip' => $trip->description_of_your_trip,
             'from_location' => $trip->from_location,
@@ -837,16 +850,23 @@ public function my_trip_list(Request $request)
 
     $tripDetails = [];
 
+ 
     foreach ($trips as $trip) {
         $user = Users::find($trip->user_id);
+        if ($user) {
+            // Image URL
+            $imageUrl = asset('storage/app/public/users/' . $user->profile);
+        } else {
+            $imageUrl = null; // Set default image URL if user not found
+        }
         $tripDetails[] = [
             'id' => $trip->id,
-            'user_id' => $trip->user_id,
+            'user_id' => $user->user_id,
             'user_name' => $user->name,
-            'unique_name' => $trip->unique_name,
+            'user_profile' => $imageUrl,
             'planning' => $trip->planning,
-            'from_date' => $trip->from_date,
-            'to_date' => $trip->to_date,
+            'from_date' => date('F j, Y', strtotime($trip->from_date)),
+            'to_date' => date('F j, Y', strtotime($trip->to_date)),
             'name_of_your_trip' => $trip->name_of_your_trip,
             'description_of_your_trip' => $trip->description_of_your_trip,
             'from_location' => $trip->from_location,
@@ -898,16 +918,23 @@ public function trip_date(Request $request)
 
     $tripDetails = [];
 
+   
     foreach ($trips as $trip) {
         $user = Users::find($trip->user_id);
+        if ($user) {
+            // Image URL
+            $imageUrl = asset('storage/app/public/users/' . $user->profile);
+        } else {
+            $imageUrl = null; // Set default image URL if user not found
+        }
         $tripDetails[] = [
             'id' => $trip->id,
             'user_id' => $trip->user_id,
             'user_name' => $user->name,
-            'unique_name' => $trip->unique_name,
+            'user_profile' => $imageUrl,
             'planning' => $trip->planning,
-            'from_date' => $trip->from_date,
-            'to_date' => $trip->to_date,
+            'from_date' => date('F j, Y', strtotime($trip->from_date)),
+            'to_date' => date('F j, Y', strtotime($trip->to_date)),
             'name_of_your_trip' => $trip->name_of_your_trip,
             'description_of_your_trip' => $trip->description_of_your_trip,
             'from_location' => $trip->from_location,
@@ -956,14 +983,17 @@ public function latest_trip(Request $request)
 
     $user = Users::find($trip->user_id);
 
+        // Image URL
+        $userProfileUrl = asset('storage/app/public/users/' . $user->profile);
+
     $tripDetails = [
         'id' => $trip->id,
         'user_id' => $trip->user_id,
         'user_name' => $user ? $user->name : 'Unknown',
-        'unique_name' => $trip->unique_name,
+        'user_profile' => $userProfileUrl,
         'planning' => $trip->planning,
-        'from_date' => $trip->from_date,
-        'to_date' => $trip->to_date,
+        'from_date' => date('F j, Y', strtotime($trip->from_date)),
+        'to_date' => date('F j, Y', strtotime($trip->to_date)),
         'name_of_your_trip' => $trip->name_of_your_trip,
         'description_of_your_trip' => $trip->description_of_your_trip,
         'from_location' => $trip->from_location,
