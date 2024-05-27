@@ -117,17 +117,37 @@
                     @enderror
                 </div>
 
+                <div class="form-group">
+    <label for="trip_description">Trip Description</label>
+    <textarea name="trip_description" class="form-control @error('trip_description') is-invalid @enderror"
+              id="trip_description" rows="3" placeholder="Trip Description">{{ old('trip_description', $trips->trip_description) }}</textarea>
+    @error('trip_description')
+    <span class="invalid-feedback" role="alert">
+        <strong>{{ $message }}</strong>
+    </span>
+    @enderror
+</div>
+
 
                 <div class="form-group">
-                    <label for="trip_description">Trip Description</label>
-                    <textarea name="trip_description" class="form-control @error('trip_description') is-invalid @enderror"
-                            id="trip_description" rows="3" placeholder="Trip Description" value = "{{ old('trip_description', $trips->trip_description) }}"></textarea>
-                    @error('trip_description')
-                    <span class="invalid-feedback" role="alert">
-                        <strong>{{ $message }}</strong>
-                    </span>
-                    @enderror
-                </div>
+    <label for="trip_status">Trip Status</label>
+    <div class="btn-group btn-group-toggle d-block" data-toggle="buttons">
+        <label class="btn btn-outline-success {{ old('trip_status', $trips->trip_status) === 1 ? 'active' : '' }}">
+            <input type="radio" name="trip_status" id="status_activated" value="1" {{ old('trip_status', $trips->trip_status) === 1 ? 'checked' : '' }}> Approved
+        </label>
+        <label class="btn btn-outline-primary {{ old('trip_status', $trips->trip_status) === 0 ? 'active' : '' }}">
+            <input type="radio" name="trip_status" id="status_pending" value="0" {{ old('trip_status', $trips->trip_status) === 0 ? 'checked' : '' }}> Pending
+        </label>
+        <label class="btn btn-outline-danger {{ old('trip_status', $trips->trip_status) === 2 ? 'active' : '' }}">
+            <input type="radio" name="trip_status" id="status_cancelled" value="2" {{ old('trip_status', $trips->trip_status) === 2 ? 'checked' : '' }}> Cancelled
+        </label>
+    </div>
+    @error('trip_status')
+    <span class="invalid-feedback" role="alert">
+        <strong>{{ $message }}</strong>
+    </span>
+    @enderror
+</div>
 
 
                 <button class="btn btn-success btn-block btn-lg" type="submit">Save Changes</button>
@@ -260,5 +280,19 @@
 
         // Show the first page initially
         showPage(currentPage);
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+    var btns = document.querySelectorAll('.btn-group-toggle .btn');
+    btns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            btns.forEach(function (btn) {
+                btn.classList.remove('active');
+            });
+            this.classList.add('active');
+        });
+    });
+});
+
     </script>
     @endsection

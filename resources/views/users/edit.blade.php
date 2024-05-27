@@ -154,24 +154,23 @@
                 </div>
 
                 <div class="form-group">
-            <span>Current Profile:</span>
-            <img src="{{ asset('storage/app/public/users/' . $users->profile) }}" alt="{{ $users->name }}" style="max-width: 100px; max-height: 100px;">
-            <br>
-            <label for="image">New Profile</label>
-                <div class="custom-file">
-                    <input type="file" class="custom-file-input" name="profile" id="profile">
-                    <label class="custom-file-label" for="profile">Choose file</label>
-                    @if($users->profile)
-                        <input type="hidden" name="existing_profile" value="{{ $users->profile }}">
-                    @endif
-                </div>
-                @error('profile')
-                <span class="invalid-feedback" role="alert">
-                    <strong>{{ $message }}</strong>
-                </span>
-                @enderror
-            </div>
-
+    <span>Current Profile:</span>
+    <img src="{{ asset('storage/app/public/users/' . $users->profile) }}" alt="{{ $users->name }}" style="max-width: 100px; max-height: 100px;">
+    <br>
+    <label for="profile">New Profile</label>
+    <div class="custom-file">
+        <input type="file" class="custom-file-input" name="profile" id="profile">
+        <label class="custom-file-label" for="profile">Choose file</label>
+        @if($users->profile)
+            <input type="hidden" name="existing_profile" value="{{ $users->profile }}">
+        @endif
+    </div>
+    @error('profile')
+    <span class="invalid-feedback" role="alert">
+        <strong>{{ $message }}</strong>
+    </span>
+    @enderror
+</div>
 
 
                 <button class="btn btn-success btn-block btn-lg" type="submit">Save Changes</button>
@@ -187,4 +186,15 @@
             bsCustomFileInput.init();
         });
     </script>
+    <script>
+document.addEventListener('DOMContentLoaded', function () {
+    const fileInput = document.getElementById('profile');
+    const fileInputLabel = fileInput.nextElementSibling;
+
+    fileInput.addEventListener('change', function () {
+        const fileName = this.files[0].name;
+        fileInputLabel.textContent = fileName;
+    });
+});
+</script>
 @endsection

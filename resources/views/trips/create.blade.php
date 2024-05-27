@@ -115,14 +115,15 @@
                  </div>
 
                  <div class="form-group">
-                    <label for="trip_description">Trip Description</label>
-                    <textarea name="trip_description" class="form-control @error('trip_description') is-invalid @enderror" id="trip_description" rows="3" placeholder="Trip Description" value="{{ old('trip_description') }}"></textarea>
-                    @error('trip_description')
-                    <span class="invalid-feedback" role="alert">
-                        <strong>{{ $message }}</strong>
-                    </span>
-                    @enderror
-                </div>
+    <label for="trip_description">Trip Description</label>
+    <textarea name="trip_description" class="form-control @error('trip_description') is-invalid @enderror" 
+              id="trip_description" rows="3" placeholder="Trip Description">{{ old('trip_description', $trips->trip_description) }}</textarea>
+    @error('trip_description')
+    <span class="invalid-feedback" role="alert">
+        <strong>{{ $message }}</strong>
+    </span>
+    @enderror
+</div>
 
 
                 <button class="btn btn-success btn-block btn-lg" type="submit">Submit</button>

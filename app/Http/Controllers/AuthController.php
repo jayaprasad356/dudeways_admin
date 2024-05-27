@@ -636,7 +636,7 @@ public function add_trip(Request $request)
     $trip->from_location = $from_location;
     $trip->to_location = $to_location;
     $trip->meetup_location = $meetup_location;
-    $trip->datetime = now(); 
+    $trip->trip_datetime = now(); 
     $trip->save();
 
 
@@ -656,7 +656,8 @@ public function add_trip(Request $request)
             'from_location' => $trip->from_location,
             'to_location' => $trip->to_location,
             'meetup_location' => $trip->meetup_location,
-            'datetime' => Carbon::parse($trip->datetime)->format('Y-m-d H:i:s'),
+            'trip_status' => $trip->trip_status,
+            'trip_datetime' => Carbon::parse($trip->trip_datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($trip->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($trip->created_at)->format('Y-m-d H:i:s'),
         ],
@@ -777,7 +778,7 @@ public function update_trip(Request $request)
         }
         $trip->meetup_location = $meetup_location;
     }
-    $trip->datetime = now(); 
+    $trip->trip_datetime = now(); 
 
     // Save the updated trip
     $trip->save();
@@ -798,7 +799,8 @@ public function update_trip(Request $request)
             'from_location' => $trip->from_location,
             'to_location' => $trip->to_location,
             'meetup_location' => $trip->meetup_location,
-            'datetime' => Carbon::parse($trip->datetime)->format('Y-m-d H:i:s'),
+            'trip_status' => $trip->trip_status,
+            'trip_datetime' => Carbon::parse($trip->trip_datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($trip->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($trip->created_at)->format('Y-m-d H:i:s'),
         ],
@@ -846,7 +848,8 @@ public function trip_list(Request $request)
             'from_location' => $trip->from_location,
             'to_location' => $trip->to_location,
             'meetup_location' => $trip->meetup_location,
-            'datetime' => Carbon::parse($trip->datetime)->format('Y-m-d H:i:s'),
+            'trip_status' => $trip->trip_status,
+            'trip_datetime' => Carbon::parse($trip->trip_datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($trip->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($trip->created_at)->format('Y-m-d H:i:s'),
         ];
@@ -901,7 +904,8 @@ public function my_trip_list(Request $request)
             'from_location' => $trip->from_location,
             'to_location' => $trip->to_location,
             'meetup_location' => $trip->meetup_location,
-            'datetime' => Carbon::parse($trip->datetime)->format('Y-m-d H:i:s'),
+            'trip_status' => $trip->trip_status,
+            'trip_datetime' => Carbon::parse($trip->trip_datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($trip->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($trip->created_at)->format('Y-m-d H:i:s'),
         ];
@@ -936,7 +940,7 @@ public function trip_date(Request $request)
     }
 
     // Fetch trips for the specific date from the database, comparing only the date part of the datetime field
-    $trips = Trips::whereDate('datetime', $date)->get();
+    $trips = Trips::whereDate('trip_datetime', $date)->get();
 
     if ($trips->isEmpty()) {
         return response()->json([
@@ -971,7 +975,8 @@ public function trip_date(Request $request)
             'from_location' => $trip->from_location,
             'to_location' => $trip->to_location,
             'meetup_location' => $trip->meetup_location,
-            'datetime' => Carbon::parse($trip->datetime)->format('Y-m-d H:i:s'),
+            'trip_status' => $trip->trip_status,
+            'trip_datetime' => Carbon::parse($trip->trip_datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($trip->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($trip->created_at)->format('Y-m-d H:i:s'),
         ];
@@ -1032,7 +1037,8 @@ public function latest_trip(Request $request)
         'from_location' => $trip->from_location,
         'to_location' => $trip->to_location,
         'meetup_location' => $trip->meetup_location,
-        'datetime' => Carbon::parse($trip->datetime)->format('Y-m-d H:i:s'),
+        'trip_status' => $trip->trip_status,
+        'trip_datetime' => Carbon::parse($trip->trip_datetime)->format('Y-m-d H:i:s'),
         'updated_at' => Carbon::parse($trip->updated_at)->format('Y-m-d H:i:s'),
         'created_at' => Carbon::parse($trip->created_at)->format('Y-m-d H:i:s'),
     ];

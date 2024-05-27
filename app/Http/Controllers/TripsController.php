@@ -73,7 +73,7 @@ class TripsController extends Controller
             'trip_title' => $request->trip_title,
             'trip_description' => $request->trip_description,
             'user_id' => $request->user_id,
-            'datetime' => now(),
+            'trip_datetime' => now(),
             
         ]);
     
@@ -131,7 +131,8 @@ class TripsController extends Controller
         $trips->trip_title = $request->trip_title;
         $trips->trip_description = $request->trip_description;
         $trips->user_id = $request->user_id;
-        $trips->datetime = now(); 
+        $trips->trip_status = $request->trip_status;
+        $trips->trip_datetime = now(); 
 
 
         if (!$trips->save()) {

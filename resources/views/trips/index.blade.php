@@ -51,7 +51,8 @@
                         <th>To Date <i class="fas fa-sort"></i></th>
                         <th>Trip Title<i class="fas fa-sort"></i></th>
                         <th>Trip Description<i class="fas fa-sort"></i></th>
-                        <th>DateTime<i class="fas fa-sort"></i></th>
+                        <th>Trip Status</th>
+                        <th>Trip DateTime<i class="fas fa-sort"></i></th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -68,7 +69,16 @@
                         <td>{{$trip->to_date}}</td>
                         <td>{{$trip->trip_title}}</td>
                         <td>{{$trip->trip_description}}</td>
-                        <td>{{$trip->datetime}}</td>
+                        <td>
+                    @if ($trip->trip_status === 1)
+                        <span class="badge badge-success">Approved</span>
+                    @elseif ($trip->trip_status === 0)
+                        <span class="badge badge-primary">Pending</span>
+                    @elseif ($trip->trip_status === 2)
+                        <span class="badge badge-danger">Cancelled</span>
+                    @endif
+                </td>
+                        <td>{{$trip->trip_datetime}}</td>
                         <td>
                             <a href="{{ route('trips.edit', $trip) }}" class="btn btn-primary"><i class="fas fa-edit"></i></a>
                             <button class="btn btn-danger btn-delete" data-url="{{route('trips.destroy', $trip)}}"><i class="fas fa-trash"></i></button>
