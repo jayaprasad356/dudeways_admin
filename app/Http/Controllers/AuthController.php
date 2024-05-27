@@ -137,13 +137,7 @@ public function register(Request $request)
             'success' => false,
             'message' => 'Gender is empty.',
         ], 400);
-    } elseif (!in_array(strtolower($gender), ['male', 'female'])) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Gender should be male or female.',
-        ], 400);
-    }
-
+    } 
     if (empty($profession)) {
         return response()->json([
             'success' => false,
@@ -429,15 +423,6 @@ if ($name !== null) {
         return response()->json([
             'success' => false,
             'message' => 'Name should be between 4 and 18 characters.',
-        ], 400);
-    }
-}
-
-if ($gender !== null) {
-    if (!in_array(strtolower($gender), ['male', 'female'])) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Gender should be male or female.',
         ], 400);
     }
 }
