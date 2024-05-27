@@ -104,10 +104,10 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="name_of_your_trip">Name Of Your Trip</label>
-                    <input type="text" name="name_of_your_trip" class="form-control @error('name_of_your_trip') is-invalid @enderror" id="age"
-                           placeholder="Name Of Your Trip" value="{{ old('name_of_your_trip') }}">
-                    @error('name_of_your_trip')
+                    <label for="trip_title">Trip Title</label>
+                    <input type="text" name="trip_title" class="form-control @error('trip_title') is-invalid @enderror" id="trip_title"
+                           placeholder="Trip Title" value="{{ old('trip_title') }}">
+                    @error('trip_title')
                     <span class="invalid-feedback" role="alert">
                         <strong>{{ $message }}</strong>
                     </span>
@@ -115,9 +115,9 @@
                  </div>
 
                  <div class="form-group">
-                    <label for="description_of_your_trip">Description Of Your Trip</label>
-                    <textarea name="description_of_your_trip" class="form-control @error('description_of_your_trip') is-invalid @enderror" id="description_of_your_trip" rows="3" placeholder="Description Of Your Trip">{{ old('description_of_your_trip') }}</textarea>
-                    @error('description_of_your_trip')
+                    <label for="trip_description">Trip Description</label>
+                    <textarea name="trip_description" class="form-control @error('trip_description') is-invalid @enderror" id="trip_description" rows="3" placeholder="Trip Description" value="{{ old('trip_description') }}"></textarea>
+                    @error('trip_description')
                     <span class="invalid-feedback" role="alert">
                         <strong>{{ $message }}</strong>
                     </span>

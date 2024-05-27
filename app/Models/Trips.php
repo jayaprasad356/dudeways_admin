@@ -15,7 +15,7 @@ class Trips extends Authenticatable
 
 
     protected $fillable = [
-        'planning', 'from_location', 'to_location', 'meetup_location', 'from_date', 'to_date', 'name_of_your_trip','description_of_your_trip','user_id','datetime', // Add 'mobile' to the fillable fields
+        'planning', 'from_location', 'to_location', 'meetup_location', 'from_date', 'to_date', 'trip_title','trip_description','user_id','datetime', // Add 'mobile' to the fillable fields
     ];
 
     public function users()

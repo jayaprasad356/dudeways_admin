@@ -30,8 +30,8 @@ class TripsStoreRequest extends FormRequest
             'meetup_location' => 'nullable|string',
             'from_date' => 'nullable|date',
             'to_date' => 'nullable|date',
-            'name_of_your_trip' => 'nullable|string',
-            'description_of_your_trip' => 'nullable|string',
+            'trip_title' => 'nullable|string',
+            'trip_description' => 'nullable|string',
             'user_id' => 'required|exists:users,id',
             'datetime' => 'nullable|datetime',
         ];

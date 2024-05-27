@@ -72,7 +72,6 @@ class UsersController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'unique_name' => 'required|unique:users|max:255',
             'email' => 'required|email|unique:users',
             'mobile' => 'required|numeric|digits:10|unique:users',
             'profession' => 'required|string|max:255',
@@ -82,7 +81,6 @@ class UsersController extends Controller
             'gender' => 'required|in:male,female,other',
             'profile' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ], [
-            'unique_name.unique' => 'The unique name has already been taken.',
             'email.unique' => 'The email has already been taken.',
             'mobile.unique' => 'The mobile number has already been taken.',
             'mobile.digits' => 'The mobile number must be exactly 10 digits.',
@@ -126,7 +124,6 @@ class UsersController extends Controller
             'refer_code' => $refer_code,
             'referred_by' => $request->referred_by,
             'profile' => $imageName, // Save only the image name in the database
-            'unique_name' => $request->unique_name,
             'datetime' => now(),
         ]);
     
@@ -134,9 +131,33 @@ class UsersController extends Controller
             return redirect()->back()->with('error', 'Sorry, Something went wrong while creating user.');
         }
     
+        // Generate the unique_name after the user has been saved and has an ID
+        $unique_name = $this->generateUniqueName($request->name, $users->id);
+        $users->unique_name = $unique_name;
+        $users->save();
+    
         return redirect()->route('users.index')->with('success', 'Success, New user has been added successfully!');
     }
-    
+    // Method to generate a unique name based on the user's name and user_id
+private function generateUniqueName($name, $user_id)
+{
+    // Extract the first part of the user's name
+    $parts = explode(' ', $name);
+    $firstPart = $parts[0];
+
+    // Generate the unique name by concatenating the first part with the user_id
+    $unique_name = $firstPart . $user_id;
+
+    // Check if the generated unique_name is already in use
+    $counter = 1;
+    while (Users::where('unique_name', $unique_name)->exists()) {
+        // If it is, append a counter to make it unique
+        $unique_name = $firstPart . $user_id . $counter;
+        $counter++;
+    }
+
+    return $unique_name;
+}
 
     /**
      * Show the form for editing the specified resource.

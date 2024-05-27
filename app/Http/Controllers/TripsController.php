@@ -70,8 +70,8 @@ class TripsController extends Controller
             'meetup_location' => $request->meetup_location,
             'from_date' => $request->from_date,
             'to_date' => $request->to_date,
-            'name_of_your_trip' => $request->name_of_your_trip,
-            'description_of_your_trip' => $request->description_of_your_trip,
+            'trip_title' => $request->trip_title,
+            'trip_description' => $request->trip_description,
             'user_id' => $request->user_id,
             'datetime' => now(),
             
@@ -128,8 +128,8 @@ class TripsController extends Controller
         $trips->meetup_location = $request->meetup_location;
         $trips->from_date = $request->from_date;
         $trips->to_date = $request->to_date;
-        $trips->name_of_your_trip = $request->name_of_your_trip;
-        $trips->description_of_your_trip = $request->description_of_your_trip;
+        $trips->trip_title = $request->trip_title;
+        $trips->trip_description = $request->trip_description;
         $trips->user_id = $request->user_id;
         $trips->datetime = now(); 
 

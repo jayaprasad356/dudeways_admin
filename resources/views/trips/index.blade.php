@@ -49,8 +49,8 @@
                         <th>Meetup Location <i class="fas fa-sort"></i></th>
                         <th>From Date <i class="fas fa-sort"></i></th>
                         <th>To Date <i class="fas fa-sort"></i></th>
-                        <th>Name Your Trip <i class="fas fa-sort"></i></th>
-                        <th>Description Of Your Trip <i class="fas fa-sort"></i></th>
+                        <th>Trip Title<i class="fas fa-sort"></i></th>
+                        <th>Trip Description<i class="fas fa-sort"></i></th>
                         <th>DateTime<i class="fas fa-sort"></i></th>
                         <th>Actions</th>
                     </tr>
@@ -66,8 +66,8 @@
                         <td>{{$trip->meetup_location}}</td>
                         <td>{{$trip->from_date}}</td>
                         <td>{{$trip->to_date}}</td>
-                        <td>{{$trip->name_of_your_trip}}</td>
-                        <td>{{$trip->description_of_your_trip}}</td>
+                        <td>{{$trip->trip_title}}</td>
+                        <td>{{$trip->trip_description}}</td>
                         <td>{{$trip->datetime}}</td>
                         <td>
                             <a href="{{ route('trips.edit', $trip) }}" class="btn btn-primary"><i class="fas fa-edit"></i></a>

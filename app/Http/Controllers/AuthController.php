@@ -98,12 +98,6 @@ public function register(Request $request)
         ], 400);
     }
 
-    if (empty($unique_name)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Unique Name is empty.',
-        ], 400);
-    }
     if (empty($state)) {
         return response()->json([
             'success' => false,
@@ -215,21 +209,29 @@ public function register(Request $request)
         }
     }
 
-    // Create a new user instance
     $user = new Users();
     $user->mobile = $mobile;
     $user->age = $age;
     $user->name = $name;
-    $user->unique_name = $unique_name;
     $user->gender = $gender;
     $user->profession = $profession;
-    $user->refer_code = $refer_code; // Insert the generated refer_code
+    $user->refer_code = $this->generateReferCode();
     $user->email = $email;
     $user->points = $points;
     $user->state = $state;
     $user->city = $city;
-    $user->referred_by = $referred_by; // Insert referred_by if provided
+    $user->referred_by = $referred_by;
     $user->datetime = now(); 
+
+    // Save the user
+    $user->save();
+
+    // Retrieve the user's id
+    $user_id = $user->id;
+
+    // Generate unique_name based on name and user's id
+    $unique_name = $this->generateUniqueName($name, $user_id);
+    $user->unique_name = $unique_name;
     $user->save();
 
     // Image URL
@@ -260,6 +262,25 @@ public function register(Request $request)
     ], 201);
 }
 
+private function generateUniqueName($name, $user_id)
+{
+    // Extract the first part of the user's name
+    $parts = explode(' ', $name);
+    $firstPart = $parts[0];
+
+    // Generate the unique name by concatenating the first part with the user's id
+    $unique_name = $firstPart . $user_id;
+
+    // Check if the generated unique_name is already in use
+    $counter = 1;
+    while (Users::where('unique_name', $unique_name)->exists()) {
+        // If it is, append a counter to make it unique
+        $unique_name = $firstPart . $user_id . $counter;
+        $counter++;
+    }
+
+    return $unique_name;
+}
 private function generateReferCode()
 {
     // Generate a random string
@@ -523,8 +544,8 @@ public function add_trip(Request $request)
     $planning = $request->input('planning');
     $from_date = $request->input('from_date');
     $to_date = $request->input('to_date');
-    $name_of_your_trip = $request->input('name_of_your_trip');
-    $description_of_your_trip = $request->input('description_of_your_trip');
+    $trip_title = $request->input('trip_title');
+    $trip_description = $request->input('trip_description');
     $from_location = $request->input('from_location');
     $to_location = $request->input('to_location');
     $meetup_location = $request->input('meetup_location');
@@ -550,16 +571,16 @@ public function add_trip(Request $request)
             'message' => 'To Date is empty.',
         ], 400);
     }
-    if (empty($name_of_your_trip)) {
+    if (empty($trip_title)) {
         return response()->json([
             'success' => false,
-            'message' => 'Name Of Your Trip is empty.',
+            'message' => 'Trip Title is empty.',
         ], 400);
     }
-    if (empty($description_of_your_trip)) {
+    if (empty($trip_description)) {
         return response()->json([
             'success' => false,
-            'message' => 'Description Of Your Trip is empty.',
+            'message' => 'Trip Description is empty.',
         ], 400);
     }
     if (empty($from_location)) {
@@ -610,8 +631,8 @@ public function add_trip(Request $request)
     $trip->planning = $planning;
     $trip->from_date = $from_date;
     $trip->to_date = $to_date;
-    $trip->name_of_your_trip = $name_of_your_trip;
-    $trip->description_of_your_trip = $description_of_your_trip;
+    $trip->trip_title = $trip_title;
+    $trip->trip_description = $trip_description;
     $trip->from_location = $from_location;
     $trip->to_location = $to_location;
     $trip->meetup_location = $meetup_location;
@@ -625,11 +646,12 @@ public function add_trip(Request $request)
         'data' => [
             'id' => $trip->id,
             'user_name' => $user->name,
+            'unique_name' => $user->unique_name,
             'planning' => $trip->planning,
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
             'to_date' => date('F j, Y', strtotime($trip->to_date)),
-            'name_of_your_trip' => $trip->name_of_your_trip,
-            'description_of_your_trip' => $trip->description_of_your_trip,
+            'trip_title' => $trip->trip_title,
+            'trip_description' => $trip->trip_description,
             'from_location' => $trip->from_location,
             'to_location' => $trip->to_location,
             'meetup_location' => $trip->meetup_location,
@@ -664,8 +686,8 @@ public function update_trip(Request $request)
     $planning = $request->input('planning');
     $from_date = $request->input('from_date');
     $to_date = $request->input('to_date');
-    $name_of_your_trip = $request->input('name_of_your_trip');
-    $description_of_your_trip = $request->input('description_of_your_trip');
+    $trip_title = $request->input('trip_title');
+    $trip_description = $request->input('trip_description');
     $from_location = $request->input('from_location');
     $to_location = $request->input('to_location');
     $meetup_location = $request->input('meetup_location');
@@ -709,23 +731,23 @@ public function update_trip(Request $request)
         }
         $trip->to_date = $to_date;
     }
-    if ($name_of_your_trip !== null) {
-        if (empty($name_of_your_trip)) {
+    if ($trip_title !== null) {
+        if (empty($trip_title)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Name Of Your Trip is empty.',
+                'message' => 'Trip Title is empty.',
             ], 400);
         }
-        $trip->name_of_your_trip = $name_of_your_trip;
+        $trip->trip_title = $trip_title;
     }
-    if ($description_of_your_trip !== null) {
-        if (empty($description_of_your_trip)) {
+    if ($trip_description !== null) {
+        if (empty($trip_description)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Description Of Your Trip is empty.',
+                'message' => 'Trip Description is empty.',
             ], 400);
         }
-        $trip->description_of_your_trip = $description_of_your_trip;
+        $trip->trip_description = $trip_description;
     }
     if ($from_location !== null) {
         if (empty($from_location)) {
@@ -765,11 +787,12 @@ public function update_trip(Request $request)
         'data' => [
             'id' => $trip->id,
             'user_name' => $user->name,
+            'unique_name' => $user->unique_name,
             'planning' => $trip->planning,
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
             'to_date' => date('F j, Y', strtotime($trip->to_date)),
-            'name_of_your_trip' => $trip->name_of_your_trip,
-            'description_of_your_trip' => $trip->description_of_your_trip,
+            'trip_title' => $trip->trip_title,
+            'trip_description' => $trip->trip_description,
             'from_location' => $trip->from_location,
             'to_location' => $trip->to_location,
             'meetup_location' => $trip->meetup_location,
@@ -815,8 +838,8 @@ public function trip_list(Request $request)
             'planning' => $trip->planning,
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
             'to_date' => date('F j, Y', strtotime($trip->to_date)),
-            'name_of_your_trip' => $trip->name_of_your_trip,
-            'description_of_your_trip' => $trip->description_of_your_trip,
+            'trip_title' => $trip->trip_title,
+            'trip_description' => $trip->trip_description,
             'from_location' => $trip->from_location,
             'to_location' => $trip->to_location,
             'meetup_location' => $trip->meetup_location,
@@ -869,8 +892,8 @@ public function my_trip_list(Request $request)
             'planning' => $trip->planning,
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
             'to_date' => date('F j, Y', strtotime($trip->to_date)),
-            'name_of_your_trip' => $trip->name_of_your_trip,
-            'description_of_your_trip' => $trip->description_of_your_trip,
+            'trip_title' => $trip->trip_title,
+            'trip_description' => $trip->trip_description,
             'from_location' => $trip->from_location,
             'to_location' => $trip->to_location,
             'meetup_location' => $trip->meetup_location,
@@ -938,8 +961,8 @@ public function trip_date(Request $request)
             'planning' => $trip->planning,
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
             'to_date' => date('F j, Y', strtotime($trip->to_date)),
-            'name_of_your_trip' => $trip->name_of_your_trip,
-            'description_of_your_trip' => $trip->description_of_your_trip,
+            'trip_title' => $trip->trip_title,
+            'trip_description' => $trip->trip_description,
             'from_location' => $trip->from_location,
             'to_location' => $trip->to_location,
             'meetup_location' => $trip->meetup_location,
@@ -998,8 +1021,8 @@ public function latest_trip(Request $request)
         'planning' => $trip->planning,
         'from_date' => date('F j, Y', strtotime($trip->from_date)),
         'to_date' => date('F j, Y', strtotime($trip->to_date)),
-        'name_of_your_trip' => $trip->name_of_your_trip,
-        'description_of_your_trip' => $trip->description_of_your_trip,
+        'trip_title' => $trip->trip_title,
+        'trip_description' => $trip->trip_description,
         'from_location' => $trip->from_location,
         'to_location' => $trip->to_location,
         'meetup_location' => $trip->meetup_location,
