@@ -810,6 +810,7 @@ public function trip_list(Request $request)
         $tripDetails[] = [
             'id' => $trip->id,
             'user_name' => $user->name,
+            'unique_name' => $user->unique_name,
             'user_profile' => $imageUrl,
             'planning' => $trip->planning,
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
@@ -861,8 +862,9 @@ public function my_trip_list(Request $request)
         }
         $tripDetails[] = [
             'id' => $trip->id,
-            'user_id' => $user->user_id,
+            'user_id' => $trip->user_id,
             'user_name' => $user->name,
+            'unique_name' => $user->unique_name,
             'user_profile' => $imageUrl,
             'planning' => $trip->planning,
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
@@ -931,6 +933,7 @@ public function trip_date(Request $request)
             'id' => $trip->id,
             'user_id' => $trip->user_id,
             'user_name' => $user->name,
+            'unique_name' => $user->unique_name,
             'user_profile' => $imageUrl,
             'planning' => $trip->planning,
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
@@ -991,6 +994,7 @@ public function latest_trip(Request $request)
         'user_id' => $trip->user_id,
         'user_name' => $user ? $user->name : 'Unknown',
         'user_profile' => $userProfileUrl,
+        'unique_name' => $user->unique_name,
         'planning' => $trip->planning,
         'from_date' => date('F j, Y', strtotime($trip->from_date)),
         'to_date' => date('F j, Y', strtotime($trip->to_date)),
