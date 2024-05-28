@@ -651,7 +651,6 @@ public function add_trip(Request $request)
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
             'to_date' => date('F j, Y', strtotime($trip->to_date)),
             'time' => '4h',
-            'friend' => '0',
             'trip_title' => $trip->trip_title,
             'trip_description' => $trip->trip_description,
             'from_location' => $trip->from_location,
@@ -795,7 +794,6 @@ public function update_trip(Request $request)
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
             'to_date' => date('F j, Y', strtotime($trip->to_date)),
             'time' => '4h',
-            'friend' => '0',
             'trip_title' => $trip->trip_title,
             'trip_description' => $trip->trip_description,
             'from_location' => $trip->from_location,
@@ -826,14 +824,22 @@ public function trip_list(Request $request)
 
     $tripDetails = [];
 
-
-     foreach ($trips as $trip) {
+    foreach ($trips as $trip) {
         $user = Users::find($trip->user_id);
         if ($user) {
             // Image URL
             $imageUrl = asset('storage/app/public/users/' . $user->profile);
+            
+            // Check if the user is a friend or has friends
+            $isFriend = Friends::where(function($query) use ($user) {
+                $query->where('user_id', $user->id)
+                      ->orWhere('friend_user_id', $user->id);
+            })->exists();
+            
+            $friendStatus = $isFriend ? '1' : '0';
         } else {
             $imageUrl = null; // Set default image URL if user not found
+            $friendStatus = '0';
         }
 
         $tripDetails[] = [
@@ -845,7 +851,7 @@ public function trip_list(Request $request)
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
             'to_date' => date('F j, Y', strtotime($trip->to_date)),
             'time' => '4h',
-            'friend' => '0',
+            'friend' => $friendStatus,
             'trip_title' => $trip->trip_title,
             'trip_description' => $trip->trip_description,
             'from_location' => $trip->from_location,
@@ -864,6 +870,7 @@ public function trip_list(Request $request)
         'data' => $tripDetails,
     ], 200);
 }
+
 
 
 public function my_trip_list(Request $request)
@@ -889,8 +896,17 @@ public function my_trip_list(Request $request)
         if ($user) {
             // Image URL
             $imageUrl = asset('storage/app/public/users/' . $user->profile);
+            
+            // Check if the user is a friend or has friends
+            $isFriend = Friends::where(function($query) use ($user) {
+                $query->where('user_id', $user->id)
+                      ->orWhere('friend_user_id', $user->id);
+            })->exists();
+            
+            $friendStatus = $isFriend ? '1' : '0';
         } else {
             $imageUrl = null; // Set default image URL if user not found
+            $friendStatus = '0';
         }
         $tripDetails[] = [
             'id' => $trip->id,
@@ -902,7 +918,7 @@ public function my_trip_list(Request $request)
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
             'to_date' => date('F j, Y', strtotime($trip->to_date)),
             'time' => '4h',
-            'friend' => '0',
+            'friend' => $friendStatus,
             'trip_title' => $trip->trip_title,
             'trip_description' => $trip->trip_description,
             'from_location' => $trip->from_location,
@@ -961,8 +977,17 @@ public function trip_date(Request $request)
         if ($user) {
             // Image URL
             $imageUrl = asset('storage/app/public/users/' . $user->profile);
+            
+            // Check if the user is a friend or has friends
+            $isFriend = Friends::where(function($query) use ($user) {
+                $query->where('user_id', $user->id)
+                      ->orWhere('friend_user_id', $user->id);
+            })->exists();
+            
+            $friendStatus = $isFriend ? '1' : '0';
         } else {
             $imageUrl = null; // Set default image URL if user not found
+            $friendStatus = '0';
         }
         $tripDetails[] = [
             'id' => $trip->id,
@@ -974,7 +999,7 @@ public function trip_date(Request $request)
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
             'to_date' => date('F j, Y', strtotime($trip->to_date)),
             'time' => '4h',
-            'friend' => '0',
+            'friend' => $friendStatus,
             'trip_title' => $trip->trip_title,
             'trip_description' => $trip->trip_description,
             'from_location' => $trip->from_location,
@@ -1023,21 +1048,30 @@ public function latest_trip(Request $request)
     }
 
     $user = Users::find($trip->user_id);
+    
+    // Check if the user is a friend or has friends
+    $isFriend = false;
+    if ($user) {
+        $isFriend = Friends::where(function($query) use ($user) {
+            $query->where('user_id', $user->id)
+                  ->orWhere('friend_user_id', $user->id);
+        })->exists();
+    }
 
-        // Image URL
-        $userProfileUrl = asset('storage/app/public/users/' . $user->profile);
+    // Image URL
+    $userProfileUrl = $user ? asset('storage/app/public/users/' . $user->profile) : null;
 
     $tripDetails = [
         'id' => $trip->id,
         'user_id' => $trip->user_id,
         'user_name' => $user ? $user->name : 'Unknown',
+        'unique_name' => $user ? $user->unique_name : 'Unknown',
         'user_profile' => $userProfileUrl,
-        'unique_name' => $user->unique_name,
         'planning' => $trip->planning,
         'from_date' => date('F j, Y', strtotime($trip->from_date)),
         'to_date' => date('F j, Y', strtotime($trip->to_date)),
         'time' => '4h',
-        'friend' => '0',
+        'friend' => $isFriend ? '1' : '0',
         'trip_title' => $trip->trip_title,
         'trip_description' => $trip->trip_description,
         'from_location' => $trip->from_location,
