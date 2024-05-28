@@ -15,7 +15,7 @@ class Users extends Authenticatable
 
 
     protected $fillable = [
-        'name', 'email', 'mobile', 'age', 'profile','gender','refer_code','referred_by','profession','datetime','points','state','city','unique_name', // Add 'mobile' to the fillable fields
+        'name', 'email', 'mobile', 'age', 'profile','gender','refer_code','referred_by','profession','datetime','points','state','city','unique_name','verified','last_seen', // Add 'mobile' to the fillable fields
     ];
     public $timestamps = true;
 

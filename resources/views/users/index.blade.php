@@ -38,6 +38,7 @@
                     <th>Refer Code <i class="fas fa-sort"></i></th>
                     <th>Referred By <i class="fas fa-sort"></i></th>
                     <th>Points <i class="fas fa-sort"></i></th>
+                    <th>Verified <i class="fas fa-sort"></i></th>
                     <th>DateTime <i class="fas fa-sort"></i></th>
                     <th>Actions</th>
                     </tr>
@@ -67,6 +68,11 @@
                         <td>{{$user->refer_code}}</td>
                         <td>{{$user->referred_by}}</td>
                         <td>{{$user->points}}</td>
+                        <td>
+                        <span class="{{ $user->verified == 1 ? 'text-enable' : 'text-disable' }}">
+                                {{ $user->verified == 1 ? 'Enable' : 'Disable' }}
+                            </span>
+                        </td>
                         <td>{{$user->datetime}}</td>
                         <td>
                             <a href="{{ route('users.edit', $user) }}" class="btn btn-primary"><i class="fas fa-edit"></i></a>

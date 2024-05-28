@@ -172,6 +172,21 @@
     @enderror
 </div>
 
+<div class="form-group">
+    <label for="verified">Verified</label>
+    <div class="custom-control custom-switch">
+        <input type="hidden" name="verified" value="0"> <!-- Hidden input to ensure a value is always submitted -->
+        <input type="checkbox" name="verified" class="custom-control-input @error('verified') is-invalid @enderror" id="verified" value="1" {{ old('verified', $users->verified) == '1' ? 'checked' : '' }}>
+        <label class="custom-control-label" for="verified"></label>
+    </div>
+    @error('verified')
+    <span class="invalid-feedback" role="alert">
+        <strong>{{ $message }}</strong>
+    </span>
+    @enderror
+</div>
+
+
 
                 <button class="btn btn-success btn-block btn-lg" type="submit">Save Changes</button>
             </form>

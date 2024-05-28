@@ -47,6 +47,13 @@
         margin: 10% auto; /* Adjust the margin for smaller screens */
     }
 }
+        .text-enable {
+            color: green;
+        }
+        .text-disable {
+            color: red;
+        }
+  
     </style>
  
    

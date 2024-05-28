@@ -69,6 +69,8 @@ class AuthController extends Controller
             'referred_by' => $user->referred_by,
             'profile' => $imageUrl,
             'points' => $user->points,
+            'verified' => $user->verified,
+            'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
@@ -222,7 +224,7 @@ public function register(Request $request)
     $user->city = $city;
     $user->referred_by = $referred_by;
     $user->datetime = now(); 
-
+    $user->last_seen = now(); 
     // Save the user
     $user->save();
 
@@ -255,6 +257,8 @@ public function register(Request $request)
             'referred_by' => $user->referred_by,
             'profile' => $imageUrl,
             'points' => $user->points,
+            'verified' => $user->verified,
+            'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
                 'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
                 'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
@@ -340,6 +344,8 @@ return response()->json([
         'referred_by' => $user->referred_by,
         'profile' => $imageUrl,
         'points' => $user->points,
+        'verified' => $user->verified,
+        'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
         'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
         'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
         'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
@@ -394,6 +400,8 @@ public function update_image(Request $request)
                 'referred_by' => $user->referred_by,
                 'profile' => $imageUrl,
                 'points' => $user->points,
+                'verified' => $user->verified,
+                'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
                 'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
                 'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
                 'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
@@ -531,6 +539,8 @@ if ($email !== null) {
             'referred_by' => $user->referred_by,
             'profile' => $imageUrl,
             'points' => $user->points,
+            'verified' => $user->verified,
+            'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
@@ -647,6 +657,7 @@ public function add_trip(Request $request)
             'id' => $trip->id,
             'user_name' => $user->name,
             'unique_name' => $user->unique_name,
+            'verified' => $user->verified,
             'planning' => $trip->planning,
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
             'to_date' => date('F j, Y', strtotime($trip->to_date)),
@@ -790,6 +801,7 @@ public function update_trip(Request $request)
             'id' => $trip->id,
             'user_name' => $user->name,
             'unique_name' => $user->unique_name,
+            'verified' => $user->verified,
             'planning' => $trip->planning,
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
             'to_date' => date('F j, Y', strtotime($trip->to_date)),
@@ -846,6 +858,7 @@ public function trip_list(Request $request)
             'id' => $trip->id,
             'user_name' => $user->name,
             'unique_name' => $user->unique_name,
+            'verified' => $user->verified,
             'user_profile' => $imageUrl,
             'planning' => $trip->planning,
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
@@ -912,6 +925,7 @@ public function my_trip_list(Request $request)
             'id' => $trip->id,
             'user_id' => $trip->user_id,
             'user_name' => $user->name,
+            'verified' => $user->verified,
             'unique_name' => $user->unique_name,
             'user_profile' => $imageUrl,
             'planning' => $trip->planning,
@@ -993,6 +1007,7 @@ public function trip_date(Request $request)
             'id' => $trip->id,
             'user_id' => $trip->user_id,
             'user_name' => $user->name,
+            'verified' => $user->verified,
             'unique_name' => $user->unique_name,
             'user_profile' => $imageUrl,
             'planning' => $trip->planning,
@@ -1065,6 +1080,7 @@ public function latest_trip(Request $request)
         'id' => $trip->id,
         'user_id' => $trip->user_id,
         'user_name' => $user ? $user->name : 'Unknown',
+        'verified' => $user->verified,
         'unique_name' => $user ? $user->unique_name : 'Unknown',
         'user_profile' => $userProfileUrl,
         'planning' => $trip->planning,
@@ -1247,8 +1263,9 @@ public function add_friends(Request $request)
             'data' => [
                 'id' => $friend->id,
                 'user_id' => $friend->user_id,
-                'user_name' => $user->name,
-                'user_profile' => $userImageUrl,
+                'name' => $user->name,
+                'profile' => $userImageUrl,
+                'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
                 'friend_user_id' => $friend->friend_user_id,
                 'friend_user_name' => $friend_user->name,
                 'status' => $friend->status == 1 ? 'Interested' : 'Not Interested',
@@ -1268,7 +1285,7 @@ public function add_friends(Request $request)
 
 public function friends_list(Request $request)
 {
-    // Fetching all chats from the Chats model
+    // Fetching all friends from the Friends model
     $friends = Friends::all();
 
     if ($friends->isEmpty()) {
@@ -1280,16 +1297,22 @@ public function friends_list(Request $request)
 
     $friendDetails = $friends->map(function ($friend) {
         $user = $friend->user;
-        $friendUser = $friend->user; // Assuming you have defined a relationship called friendUser
+        $friendUser = $friend->friendUser;
 
         $userImageUrl = asset('storage/app/public/users/' . $user->profile);
+
+        // Determine the format of last_seen
+        $lastSeen = Carbon::parse($user->last_seen);
+        $lastSeenFormatted = $lastSeen->isToday() ? $lastSeen->format('H:i') : $lastSeen->format('Y-m-d H:i:s');
+
         return [
             'id' => $friend->id,
             'user_id' => $friend->user_id,
-            'user_name' => $user->name,
-            'user_profile' => $userImageUrl,
+            'name' => $user->name,
+            'profile' => $userImageUrl,
+            'last_seen' => $lastSeenFormatted,
             'friend_user_id' => $friend->friend_user_id,
-            'friend_user_name' => $friendUser->name,
+            'friend_user_name' => $friendUser ? $friendUser->name : 'Unknown', // Ensure friend user name is fetched
             'status' => $friend->status == 1 ? 'Interested' : 'Not Interested',
             'datetime' => Carbon::parse($friend->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($friend->updated_at)->format('Y-m-d H:i:s'),

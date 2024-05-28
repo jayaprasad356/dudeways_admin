@@ -38,6 +38,8 @@ class UsersStoreRequest extends FormRequest
             'profession' => 'nullable|string',
             'points' => 'required|integer',
             'datetime' => 'nullable|datetime',
+            'verified' => 'nullable|boolean',
+            'last_Seen' => 'nullable|datetime',
         ];
     }
 }

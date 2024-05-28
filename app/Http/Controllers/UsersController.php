@@ -125,6 +125,7 @@ class UsersController extends Controller
             'referred_by' => $request->referred_by,
             'profile' => $imageName, // Save only the image name in the database
             'datetime' => now(),
+            'last_seen' => now(),
         ]);
     
         if (!$users) {
@@ -193,6 +194,7 @@ private function generateUniqueName($name, $user_id)
             'refer_code' => 'nullable|string|max:255',
             'referred_by' => 'nullable|string|max:255',
             'profile' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'verified' => 'required|boolean',
             // other validation rules...
         ], [
             'unique_name.unique' => 'The unique name has already been taken.',
@@ -219,7 +221,9 @@ private function generateUniqueName($name, $user_id)
         $users->profession = $request->profession;
         $users->refer_code = $request->refer_code;
         $users->referred_by = $request->referred_by;
+        $users->verified = $request->verified;
         $users->datetime = now();
+        $users->last_seen = now();
 
         if ($request->hasFile('profile')) {
             $newImagePath = $request->file('profile')->store('users', 'public');
