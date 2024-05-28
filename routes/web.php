@@ -11,7 +11,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\InterestsController;
+use App\Http\Controllers\FriendsController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\BulkUserController;
 use Illuminate\Support\Facades\Route;
@@ -82,9 +82,9 @@ Route::prefix('admin')->middleware('auth')->group(function () {
       Route::put('/points/{points}', [PointsController::class, 'update'])->name('points.update');
       Route::post('/points', [PointsController::class, 'store'])->name('points.store');
 
-       //Interests  
-       Route::get('/interests', [InterestsController::class, 'index'])->name('interests.index');
-       Route::delete('/interests/{interests}', [InterestsController::class, 'destroy'])->name('interests.destroy');
+       //friends  
+       Route::get('/friends', [FriendsController::class, 'index'])->name('friends.index');
+       Route::delete('/friends/{friends}', [FriendsController::class, 'destroy'])->name('friends.destroy');
 
 
         //Notifications  

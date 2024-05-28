@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Users; 
 use App\Models\Chats; 
 use App\Models\Trips;
-use App\Models\Interests; 
+use App\Models\Friends; 
 use App\Models\Notifications; 
 use Carbon\Carbon;
 
@@ -1114,10 +1114,11 @@ public function chat_list(Request $request)
     ], 200);
 }
 
-public function add_interests(Request $request)
+public function add_friends(Request $request)
 {
     $user_id = $request->input('user_id'); 
-    $interest_user_id = $request->input('interest_user_id');
+    $friend_user_id = $request->input('friend_user_id');
+    $friend = $request->input('friend');
 
     // Validate user_id
     if (empty($user_id)) {
@@ -1127,11 +1128,19 @@ public function add_interests(Request $request)
         ], 400);
     }
 
-    // Validate interest_user_id
-    if (empty($interest_user_id)) {
+    // Validate friend_user_id
+    if (empty($friend_user_id)) {
         return response()->json([
             'success' => false,
-            'message' => 'interest_user_id is empty.',
+            'message' => 'friend_user_id is empty.',
+        ], 400);
+    }
+
+    // Validate friend action
+    if (!isset($friend)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'friend is empty.',
         ], 400);
     }
 
@@ -1144,85 +1153,114 @@ public function add_interests(Request $request)
         ], 404);
     }
 
-    // Check if interest_user exists
-    $interest_user = Users::find($interest_user_id);
-    if (!$interest_user) {
+    // Check if friend_user exists
+    $friend_user = Users::find($friend_user_id);
+    if (!$friend_user) {
         return response()->json([
             'success' => false,
-            'message' => 'interest_user not found.',
+            'message' => 'friend_user not found.',
         ], 404);
     }
 
-    // Create a new Interests instance
-    $interest = new Interests();
-    $interest->user_id = $user_id; 
-    $interest->interest_user_id = $interest_user_id;
-    $interest->status = 1;
-    $interest->datetime = now(); 
+    if ($friend == 2) {
+        // Delete the friend relationship
+        $friend = Friends::where('user_id', $user_id)
+                        ->where('friend_user_id', $friend_user_id)
+                        ->first();
 
-    // Save the interest
-    if (!$interest->save()) {
+        if ($friend) {
+            $friend->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Friend deleted successfully.',
+            ], 200);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Friend relationship not found.',
+            ], 404);
+        }
+    } else if ($friend == 1) {
+        // Create a new friends instance
+        $friend = new Friends();
+        $friend->user_id = $user_id; 
+        $friend->friend_user_id = $friend_user_id;
+        $friend->status = 1;
+        $friend->datetime = now(); 
+
+        // Save the friend
+        if (!$friend->save()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to save friend.',
+            ], 500);
+        }
+
+        // Generate image URLs
+        $userImageUrl = asset('storage/app/public/users/' . $user->profile);
+
+        // Return success response
+        return response()->json([
+            'success' => true,
+            'message' => 'Friend added successfully.',
+            'data' => [
+                'id' => $friend->id,
+                'user_id' => $friend->user_id,
+                'user_name' => $user->name,
+                'user_profile' => $userImageUrl,
+                'friend_user_id' => $friend->friend_user_id,
+                'friend_user_name' => $friend_user->name,
+                'status' => $friend->status == 1 ? 'Interested' : 'Not Interested',
+                'datetime' => Carbon::parse($friend->datetime)->format('Y-m-d H:i:s'),
+                'updated_at' => Carbon::parse($friend->updated_at)->format('Y-m-d H:i:s'),
+                'created_at' => Carbon::parse($friend->created_at)->format('Y-m-d H:i:s'),
+            ],
+        ], 201);
+    } else {
         return response()->json([
             'success' => false,
-            'message' => 'Failed to save interest.',
-        ], 500);
+            'message' => 'Invalid friend action.',
+        ], 400);
     }
-
-    // Generate image URLs
-    $userImageUrl = asset('storage/app/public/users/' . $user->profile);
-
-    // Return success response
-    return response()->json([
-        'success' => true,
-        'message' => 'Interests added successfully.',
-        'data' => [
-            'id' => $interest->id,
-            'user_id' => $interest->user_id,
-            'user_name' => $user->name,
-            'user_profile' => $userImageUrl,
-            'interest_user_id' => $interest->interest_user_id,
-            'interest_user_name' => $interest_user->name,
-            'status' => $interest->status == 1 ? 'Interested' : 'Not Interested',
-            'datetime' => Carbon::parse($interest->datetime)->format('Y-m-d H:i:s'),
-            'updated_at' => Carbon::parse($interest->updated_at)->format('Y-m-d H:i:s'),
-            'created_at' => Carbon::parse($interest->created_at)->format('Y-m-d H:i:s'),
-        ],
-    ], 201);
 }
 
-public function interest_list(Request $request)
+
+public function friends_list(Request $request)
 {
     // Fetching all chats from the Chats model
-    $interests = Interests::all();
+    $friends = Friends::all();
 
-    if ($interests->isEmpty()) {
+    if ($friends->isEmpty()) {
         return response()->json([
             'success' => false,
-            'message' => 'No interests found.',
+            'message' => 'No friends found.',
         ], 404);
     }
 
-    $interestDetails = $interests->map(function ($interest) {
-        $user = $interest->user;
-        $imageUrl = asset('storage/app/public/users/' . $user->profile);
+    $friendDetails = $friends->map(function ($friend) {
+        $user = $friend->user;
+        $friendUser = $friend->user; // Assuming you have defined a relationship called friendUser
 
+        $userImageUrl = asset('storage/app/public/users/' . $user->profile);
         return [
-            'id' => $interest->id,
-            'user_id' => $interest->user_id,
+            'id' => $friend->id,
+            'user_id' => $friend->user_id,
             'user_name' => $user->name,
-            'user_profile' => $imageUrl,
-            'interest_user_id' => $interest->interest_user_id,
-            'status' => $interest->status == 1 ? 'Interested' : 'Not Interested',
-            'datetime' => Carbon::parse($interest->datetime)->format('Y-m-d H:i:s'),
-            'updated_at' => Carbon::parse($interest->updated_at)->format('Y-m-d H:i:s'),
-            'created_at' => Carbon::parse($interest->created_at)->format('Y-m-d H:i:s'),
+            'user_profile' => $userImageUrl,
+            'friend_user_id' => $friend->friend_user_id,
+            'friend_user_name' => $friendUser->name,
+            'status' => $friend->status == 1 ? 'Interested' : 'Not Interested',
+            'datetime' => Carbon::parse($friend->datetime)->format('Y-m-d H:i:s'),
+            'updated_at' => Carbon::parse($friend->updated_at)->format('Y-m-d H:i:s'),
+            'created_at' => Carbon::parse($friend->created_at)->format('Y-m-d H:i:s'),
         ];
     });
 
     return response()->json([
         'success' => true,
-        'message' => 'Chat details listed successfully.',
-        'data' => $interestDetails,
+        'message' => 'Friends details listed successfully.',
+        'data' => $friendDetails,
     ], 200);
 }
 
@@ -1241,7 +1279,7 @@ public function add_notifications(Request $request)
         ], 400);
     }
 
-    // Validate interest_user_id
+    // Validate friend_user_id
     if (empty($notify_user_id)) {
         return response()->json([
             'success' => false,
@@ -1266,7 +1304,7 @@ public function add_notifications(Request $request)
         ], 404);
     }
 
-    // Check if interest_user exists
+    // Check if friend_user exists
     $notify_user = Users::find($notify_user_id);
     if (!$notify_user) {
         return response()->json([
@@ -1275,14 +1313,14 @@ public function add_notifications(Request $request)
         ], 404);
     }
 
-    // Create a new Interests instance
+    // Create a new friends instance
     $notification = new Notifications();
     $notification->user_id = $user_id; 
     $notification->notify_user_id = $notify_user_id;
     $notification->message = $message; 
     $notification->datetime = now(); 
 
-    // Save the interest
+    // Save the friend
     if (!$notification->save()) {
         return response()->json([
             'success' => false,

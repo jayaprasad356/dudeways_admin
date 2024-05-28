@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Interests;
+use App\Models\Friends;
 use App\Models\Users;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-class InterestsController extends Controller
+class FriendsController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Interests::query()->with('user'); // Eager load the user relationship
+        $query = Friends::query()->with('user'); // Eager load the user relationship
 
         // Filter by user if user_id is provided
         if ($request->has('user_id')) {
@@ -20,16 +20,16 @@ class InterestsController extends Controller
             $query->where('user_id', $user_id);
         }
 
-        $interests = $query->latest()->paginate(10); // Paginate the results
+        $friends = $query->latest()->paginate(10); // Paginate the results
 
         $users = Users::all(); // Fetch all users for the filter dropdown
 
-        return view('interests.index', compact('interests', 'users')); // Pass interests and users to the view
+        return view('friends.index', compact('friends', 'users')); // Pass friends and users to the view
     }
 
-    public function destroy(Interests $interests)
+    public function destroy(Friends $friends)
     {
-        $interests->delete();
+        $friends->delete();
 
         return response()->json([
             'success' => true,

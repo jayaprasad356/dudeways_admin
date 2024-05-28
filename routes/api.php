@@ -17,8 +17,8 @@ Route::post('trip_date', [AuthController::class, 'trip_date']);
 Route::post('latest_trip', [AuthController::class, 'latest_trip']);
 Route::post('delete_trip', [AuthController::class, 'delete_trip']);
 Route::post('chat_list', [AuthController::class, 'chat_list']);
-Route::post('add_interests', [AuthController::class, 'add_interests']);
-Route::post('interest_list', [AuthController::class, 'interest_list']);
+Route::post('add_friends', [AuthController::class, 'add_friends']);
+Route::post('friends_list', [AuthController::class, 'friends_list']);
 Route::post('add_notifications', [AuthController::class, 'add_notifications']);
 Route::post('notification_list', [AuthController::class, 'notification_list']);
 

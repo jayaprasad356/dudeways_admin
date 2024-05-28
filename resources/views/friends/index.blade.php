@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
-@section('title', 'Interest Management')
-@section('content-header', 'Interest Management')
+@section('title', 'Friends Management')
+@section('content-header', 'Friends Management')
 @section('content-actions')
 @endsection
 @section('css')
@@ -14,7 +14,7 @@
     <div class="col-md-8"></div> <!-- Create a placeholder column to push the search box to the right -->
     <div class="col-md-4">
         <!-- Search Form -->
-        <form action="{{ route('interests.index') }}" method="GET">
+        <form action="{{ route('friends.index') }}" method="GET">
             <div class="input-group">
                 <input type="text" name="search" class="form-control" placeholder="Search by....">
             </div>
@@ -30,33 +30,33 @@
                         <th>ID <i class="fas fa-sort"></i></th>
                         <th>Profile <i class="fas fa-sort"></i></th>
                         <th>User Name <i class="fas fa-sort"></i></th>
-                        <th>Interest User Id <i class="fas fa-sort"></i></th>
+                        <th>Friend User Id <i class="fas fa-sort"></i></th>
                         <th>Status<i class="fas fa-sort"></i></th>
                         <th>DateTime<i class="fas fa-sort"></i></th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($interests as $interest)
+                    @foreach ($friends as $friend)
                     <tr>
-                        <td>{{$interest->id}}</td>
+                        <td>{{$friend->id}}</td>
                         <td>
-                        <img class="customer-img img-thumbnail img-fluid rounded-circle" src="{{ asset('storage/app/public/users/' . $interest->user->profile) }}" alt=""
+                        <img class="customer-img img-thumbnail img-fluid rounded-circle" src="{{ asset('storage/app/public/users/' . $friend->user->profile) }}" alt=""
                         style="max-width: 100px; max-height: 100px;">
                         </td>
-                        <td>{{ optional($interest->user)->name }}</td> <!-- Display user name safely -->
-                        <td>{{$interest->interest_user_id}}</td>
-                        <td>{{ $interest->status == 1 ? 'Interested' : 'Not Interested' }}</td>
-                        <td>{{$interest->datetime}}</td>
+                        <td>{{ optional($friend->user)->name }}</td> <!-- Display user name safely -->
+                        <td>{{$friend->friend_user_id}}</td>
+                        <td>{{ $friend->status == 1 ? 'Interested' : 'Not Interested' }}</td>
+                        <td>{{$friend->datetime}}</td>
                         <td>
-                            <button class="btn btn-danger btn-delete" data-url="{{route('interests.destroy', $interest)}}"><i class="fas fa-trash"></i></button>
+                            <button class="btn btn-danger btn-delete" data-url="{{route('friends.destroy', $friend)}}"><i class="fas fa-trash"></i></button>
                         </td>
                     </tr>
                     @endforeach
                 </tbody>
             </table>
         </div>
-        {{ $interests->render() }}
+        {{ $friends->render() }}
     </div>
 </div>
 
@@ -70,7 +70,7 @@
                 if ($(this).val() !== '') {
                     $('#user-filter-form').submit();
                 } else {
-                    window.location.href = "{{ route('interests.index') }}";
+                    window.location.href = "{{ route('friends.index') }}";
                 }
             });
         });
