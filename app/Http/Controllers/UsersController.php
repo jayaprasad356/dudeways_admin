@@ -222,6 +222,7 @@ private function generateUniqueName($name, $user_id)
         $users->refer_code = $request->refer_code;
         $users->referred_by = $request->referred_by;
         $users->verified = $request->verified;
+        $users->online_status = $request->online_status;
         $users->datetime = now();
         $users->last_seen = now();
 

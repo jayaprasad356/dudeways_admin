@@ -186,6 +186,20 @@
     @enderror
 </div>
 
+<div class="form-group">
+    <label for="online_status">Online Status</label>
+    <div class="custom-control custom-switch">
+        <input type="hidden" name="online_status" value="0"> <!-- Hidden input to ensure a value is always submitted -->
+        <input type="checkbox" name="online_status" class="custom-control-input @error('online_status') is-invalid @enderror" id="online_status" value="1" {{ old('online_status', $users->online_status) == '1' ? 'checked' : '' }}>
+        <label class="custom-control-label" for="online_status"></label>
+    </div>
+    @error('online_status')
+    <span class="invalid-feedback" role="alert">
+        <strong>{{ $message }}</strong>
+    </span>
+    @enderror
+</div>
+
 
 
                 <button class="btn btn-success btn-block btn-lg" type="submit">Save Changes</button>

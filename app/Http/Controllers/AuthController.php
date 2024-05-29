@@ -9,6 +9,7 @@ use App\Models\Chats;
 use App\Models\Trips;
 use App\Models\Friends; 
 use App\Models\Notifications; 
+use App\Models\Verifications; 
 use Carbon\Carbon;
 
 class AuthController extends Controller
@@ -70,6 +71,7 @@ class AuthController extends Controller
             'profile' => $imageUrl,
             'points' => $user->points,
             'verified' => $user->verified,
+            'online_status' => $user->online_status,
             'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
@@ -258,6 +260,7 @@ public function register(Request $request)
             'profile' => $imageUrl,
             'points' => $user->points,
             'verified' => $user->verified,
+            'online_status' => $user->online_status,
             'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
                 'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
@@ -345,6 +348,7 @@ return response()->json([
         'profile' => $imageUrl,
         'points' => $user->points,
         'verified' => $user->verified,
+        'online_status' => $user->online_status,
         'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
         'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
         'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
@@ -401,6 +405,7 @@ public function update_image(Request $request)
                 'profile' => $imageUrl,
                 'points' => $user->points,
                 'verified' => $user->verified,
+                'online_status' => $user->online_status,
                 'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
                 'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
                 'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
@@ -540,6 +545,7 @@ if ($email !== null) {
             'profile' => $imageUrl,
             'points' => $user->points,
             'verified' => $user->verified,
+            'online_status' => $user->online_status,
             'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
@@ -822,7 +828,7 @@ public function update_trip(Request $request)
 public function trip_list(Request $request)
 {
     // Set default limit
-    $limit = $request->has('limit') ? $request->input('limit') : 1;
+    $limit = $request->has('limit') ? $request->input('limit') : 20;
 
     // Fetch trip details from the database with the specified limit in random order
     $trips = Trips::inRandomOrder()->limit($limit)->get();
@@ -1151,12 +1157,36 @@ public function chat_list(Request $request)
         $user = $chat->user;
         $imageUrl = asset('storage/app/public/users/' . $user->profile);
 
+          // Determine the format of last_seen
+          $lastSeen = Carbon::parse($chat->latest_msg_time);
+          $now = Carbon::now();
+          $differenceDays = $now->diffInDays($lastSeen);
+  
+          if ($differenceDays == 0) {
+              $lastSeenFormatted = $lastSeen->format('H:i'); // Today, show time
+          } elseif ($differenceDays == 1) {
+              $lastSeenFormatted = 'Yesterday'; // Yesterday
+          } elseif ($differenceDays <= 7) {
+              $lastSeenFormatted = $lastSeen->format('l'); // Last week, show day name
+          } elseif ($differenceDays <= 14 && $lastSeen->isSameMonth($now)) {
+              $lastSeenFormatted = 'Last week'; // Within 14 days and same month, show "Last week"
+          } elseif ($lastSeen->month == $now->subMonths(1)->month) {
+              $lastSeenFormatted = 'Last month'; // Last month
+          } elseif ($lastSeen->isSameYear($now)) {
+              $lastSeenFormatted = $lastSeen->format('M jS'); // This year, show month and day with ordinal indicator
+          } else {
+              $lastSeenFormatted = $lastSeen->format('M jS, Y'); // Older than current year, show month, day, and year
+          }
+
         return [
             'id' => $chat->id,
             'user_id' => $chat->user_id,
-            'user_name' => $user->name, 
-            'user_profile' => $imageUrl,
+            'name' => $user->name, 
+            'profile' => $imageUrl,
+            'chat_user_id' => $chat->chat_user_id,
             'latest_message' => $chat->latest_message,
+            'latest_msg_time' => $lastSeenFormatted,
+            'msg_seen' => $chat->msg_seen,
             'datetime' => Carbon::parse($chat->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($chat->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($chat->created_at)->format('Y-m-d H:i:s'),
@@ -1265,7 +1295,6 @@ public function add_friends(Request $request)
                 'user_id' => $friend->user_id,
                 'name' => $user->name,
                 'profile' => $userImageUrl,
-                'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
                 'friend_user_id' => $friend->friend_user_id,
                 'friend_user_name' => $friend_user->name,
                 'status' => $friend->status == 1 ? 'Interested' : 'Not Interested',
@@ -1303,7 +1332,24 @@ public function friends_list(Request $request)
 
         // Determine the format of last_seen
         $lastSeen = Carbon::parse($user->last_seen);
-        $lastSeenFormatted = $lastSeen->isToday() ? $lastSeen->format('H:i') : $lastSeen->format('Y-m-d H:i:s');
+        $now = Carbon::now();
+        $differenceDays = $now->diffInDays($lastSeen);
+
+        if ($differenceDays == 0) {
+            $lastSeenFormatted = $lastSeen->format('H:i'); // Today, show time
+        } elseif ($differenceDays == 1) {
+            $lastSeenFormatted = 'Yesterday'; // Yesterday
+        } elseif ($differenceDays <= 7) {
+            $lastSeenFormatted = $lastSeen->format('l'); // Last week, show day name
+        } elseif ($differenceDays <= 14 && $lastSeen->isSameMonth($now)) {
+            $lastSeenFormatted = 'Last week'; // Within 14 days and same month, show "Last week"
+        } elseif ($lastSeen->month == $now->subMonths(1)->month) {
+            $lastSeenFormatted = 'Last month'; // Last month
+        } elseif ($lastSeen->isSameYear($now)) {
+            $lastSeenFormatted = $lastSeen->format('M jS'); // This year, show month and day with ordinal indicator
+        } else {
+            $lastSeenFormatted = $lastSeen->format('M jS, Y'); // Older than current year, show month, day, and year
+        }
 
         return [
             'id' => $friend->id,
@@ -1462,7 +1508,80 @@ public function notification_list(Request $request)
     ], 200);
 }
 
+public function verifications(Request $request)
+{
+    $user_id = $request->input('user_id');
+    $selfie_image = $request->file('selfie_image');
+    $front_image = $request->file('front_image');
+    $back_image = $request->file('back_image');
 
+    // Validation for required fields
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 400);
+    }
+    if (empty($selfie_image)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Selfie Image is empty.',
+        ], 400);
+    }
+    if (empty($front_image)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Front Image is empty.',
+        ], 400);
+    }
+    if (empty($back_image)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Back Image is empty.',
+        ], 400);
+    }
+
+    // Check if user exists
+    $user = Users::find($user_id);
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User not found.',
+        ], 404);
+    }
+
+    // Store the images and get their paths
+    $selfieImagePath = $selfie_image->store('verifications', 'public');
+    $frontImagePath = $front_image->store('verifications', 'public');
+    $backImagePath = $back_image->store('verifications', 'public');
+
+    // Create a new verification record
+    $verification = new Verifications();
+    $verification->selfie_image = basename($selfieImagePath);
+    $verification->front_image = basename($frontImagePath);
+    $verification->back_image = basename($backImagePath);
+    $verification->user_id = $user_id;
+    $verification->save();
+
+    // Image URLs
+    $selfieImageUrl = asset('storage/app/public/verifications/' . $verification->selfie_image);
+    $frontImageUrl = asset('storage/app/public/verifications/' . $verification->front_image);
+    $backImageUrl = asset('storage/app/public/verifications/' . $verification->back_image);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Verification added successfully.',
+        'data' => [
+            'id' => $verification->id,
+            'user_name' => $user->user_name,
+            'updated_at' => $verification->updated_at,
+            'created_at' => $verification->created_at,
+            'selfie_image_url' => $selfieImageUrl,
+            'front_image_url' => $frontImageUrl,
+            'back_image_url' => $backImageUrl,
+        ],
+    ], 201);
+}
 }
 
 

@@ -13,6 +13,7 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\FriendsController;
 use App\Http\Controllers\NotificationsController;
+use App\Http\Controllers\VerificationsController;
 use App\Http\Controllers\BulkUserController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -90,6 +91,12 @@ Route::prefix('admin')->middleware('auth')->group(function () {
         //Notifications  
         Route::get('/notifications', [NotificationsController::class, 'index'])->name('notifications.index');
         Route::delete('/notifications/{notifications}', [NotificationsController::class, 'destroy'])->name('notifications.destroy');
+ 
+
+        
+        //Verifications  
+        Route::get('/verifications', [VerificationsController::class, 'index'])->name('verifications.index');
+        Route::delete('/verifications/{verifications}', [VerificationsController::class, 'destroy'])->name('verifications.destroy');
  
         //Bulk Users
        // web.php

@@ -39,6 +39,7 @@ class UsersStoreRequest extends FormRequest
             'points' => 'required|integer',
             'datetime' => 'nullable|datetime',
             'verified' => 'nullable|boolean',
+            'online_status' => 'nullable|boolean',
             'last_Seen' => 'nullable|datetime',
         ];
     }
