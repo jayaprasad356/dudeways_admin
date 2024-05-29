@@ -1401,13 +1401,23 @@ public function add_friends(Request $request)
 
 public function friends_list(Request $request)
 {
-    // Fetching all friends from the Friends model
-    $friends = Friends::all();
+    // Get the user_id from the request
+    $user_id = $request->input('user_id');
+
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 400);
+    }
+
+    // Fetching all friends from the Friends model where user_id matches
+    $friends = Friends::where('user_id', $user_id)->get();
 
     if ($friends->isEmpty()) {
         return response()->json([
             'success' => false,
-            'message' => 'No friends found.',
+            'message' => 'No friends found for the specified user.',
         ], 404);
     }
 
@@ -1445,7 +1455,6 @@ public function friends_list(Request $request)
             'profile' => $userImageUrl,
             'last_seen' => $lastSeenFormatted,
             'friend_user_id' => $friend->friend_user_id,
-            'friend_user_name' => $friendUser ? $friendUser->name : 'Unknown', // Ensure friend user name is fetched
             'status' => $friend->status == 1 ? 'Interested' : 'Not Interested',
             'datetime' => Carbon::parse($friend->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($friend->updated_at)->format('Y-m-d H:i:s'),
@@ -1455,11 +1464,10 @@ public function friends_list(Request $request)
 
     return response()->json([
         'success' => true,
-        'message' => 'Friends details listed successfully.',
+        'message' => 'Friends details listed successfully for the specified user.',
         'data' => $friendDetails,
     ], 200);
 }
-
 
 public function add_notifications(Request $request)
 {
