@@ -902,6 +902,7 @@ public function update_trip(Request $request)
     ], 200);
 }
 
+
 public function trip_list(Request $request)
 {
     // Set default limit
@@ -925,11 +926,8 @@ public function trip_list(Request $request)
             // Image URL
             $imageUrl = asset('storage/app/public/users/' . $user->profile);
             
-            // Check if the user is a friend or has friends
-            $isFriend = Friends::where(function($query) use ($user) {
-                $query->where('user_id', $user->id)
-                      ->orWhere('friend_user_id', $user->id);
-            })->exists();
+            // Check if the user has friends
+            $isFriend = Friends::where('user_id', $user->id)->exists();
             
             $friendStatus = $isFriend ? '1' : '0';
         } else {
@@ -968,7 +966,6 @@ public function trip_list(Request $request)
 }
 
 
-
 public function my_trip_list(Request $request)
 {
     // Get the user_id from the request
@@ -993,17 +990,15 @@ public function my_trip_list(Request $request)
             // Image URL
             $imageUrl = asset('storage/app/public/users/' . $user->profile);
             
-            // Check if the user is a friend or has friends
-            $isFriend = Friends::where(function($query) use ($user) {
-                $query->where('user_id', $user->id)
-                      ->orWhere('friend_user_id', $user->id);
-            })->exists();
+            // Check if the user has friends
+            $isFriend = Friends::where('user_id', $user->id)->exists();
             
             $friendStatus = $isFriend ? '1' : '0';
         } else {
             $imageUrl = null; // Set default image URL if user not found
             $friendStatus = '0';
         }
+
         $tripDetails[] = [
             'id' => $trip->id,
             'user_id' => $trip->user_id,
@@ -1075,17 +1070,15 @@ public function trip_date(Request $request)
             // Image URL
             $imageUrl = asset('storage/app/public/users/' . $user->profile);
             
-            // Check if the user is a friend or has friends
-            $isFriend = Friends::where(function($query) use ($user) {
-                $query->where('user_id', $user->id)
-                      ->orWhere('friend_user_id', $user->id);
-            })->exists();
+            // Check if the user has friends
+            $isFriend = Friends::where('user_id', $user->id)->exists();
             
             $friendStatus = $isFriend ? '1' : '0';
         } else {
             $imageUrl = null; // Set default image URL if user not found
             $friendStatus = '0';
         }
+
         $tripDetails[] = [
             'id' => $trip->id,
             'user_id' => $trip->user_id,
@@ -1147,14 +1140,8 @@ public function latest_trip(Request $request)
 
     $user = Users::find($trip->user_id);
     
-    // Check if the user is a friend or has friends
-    $isFriend = false;
-    if ($user) {
-        $isFriend = Friends::where(function($query) use ($user) {
-            $query->where('user_id', $user->id)
-                  ->orWhere('friend_user_id', $user->id);
-        })->exists();
-    }
+    // Check if the user has friends
+    $isFriend = Friends::where('user_id', $trip->user_id)->exists();
 
     // Image URL
     $userProfileUrl = $user ? asset('storage/app/public/users/' . $user->profile) : null;
@@ -1188,6 +1175,7 @@ public function latest_trip(Request $request)
         'data' => $tripDetails,
     ], 200);
 }
+
 
 public function delete_trip(Request $request)
 {
