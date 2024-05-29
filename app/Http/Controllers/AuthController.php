@@ -1660,7 +1660,7 @@ public function verifications(Request $request)
         'message' => 'Verification added successfully.',
         'data' => [
             'id' => $verification->id,
-            'user_name' => $user->user_name,
+            'user_name' => $user->name,
             'updated_at' => $verification->updated_at,
             'created_at' => $verification->created_at,
             'selfie_image_url' => $selfieImageUrl,
