@@ -50,6 +50,7 @@ class AuthController extends Controller
 
     // Image URL
     $imageUrl = asset('storage/app/public/users/' . $user->profile);
+    $coverimageUrl = asset('storage/app/public/users/' . $user->cover_img);
 
     return response()->json([
         'success' => true,
@@ -69,6 +70,7 @@ class AuthController extends Controller
             'refer_code' => $user->refer_code,
             'referred_by' => $user->referred_by,
             'profile' => $imageUrl,
+            'cover_img' => $coverimageUrl,
             'points' => $user->points,
             'verified' => $user->verified,
             'online_status' => $user->online_status,
@@ -240,6 +242,7 @@ public function register(Request $request)
 
     // Image URL
     $imageUrl = asset('storage/app/public/users/' . $user->profile);
+    $coverimageUrl = asset('storage/app/public/users/' . $user->cover_img);
 
     return response()->json([
         'success' => true,
@@ -258,6 +261,7 @@ public function register(Request $request)
             'refer_code' => $refer_code, // Return the generated refer_code
             'referred_by' => $user->referred_by,
             'profile' => $imageUrl,
+            'cover_img' => $coverimageUrl,
             'points' => $user->points,
             'verified' => $user->verified,
             'online_status' => $user->online_status,
@@ -328,6 +332,7 @@ if (!$user) {
 
 // Image URL
 $imageUrl = asset('storage/app/public/users/' . $user->profile);
+$coverimageUrl = asset('storage/app/public/users/' . $user->cover_img);
 
 return response()->json([
     'success' => true,
@@ -346,6 +351,7 @@ return response()->json([
         'refer_code' => $user->refer_code,
         'referred_by' => $user->referred_by,
         'profile' => $imageUrl,
+        'cover_img' => $coverimageUrl,
         'points' => $user->points,
         'verified' => $user->verified,
         'online_status' => $user->online_status,
@@ -385,6 +391,7 @@ public function update_image(Request $request)
         $user->save();
         // Image URL
          $imageUrl = asset('storage/app/public/users/' . $user->profile);
+         $coverimageUrl = asset('storage/app/public/users/' . $user->cover_img);
 
         return response()->json([
             'success' => true,
@@ -403,6 +410,7 @@ public function update_image(Request $request)
                 'refer_code' => $user->refer_code,
                 'referred_by' => $user->referred_by,
                 'profile' => $imageUrl,
+                'cover_img' => $coverimageUrl,
                 'points' => $user->points,
                 'verified' => $user->verified,
                 'online_status' => $user->online_status,
@@ -416,6 +424,73 @@ public function update_image(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'profile image is empty.',
+        ], 400);
+    }
+}
+
+
+public function update_cover_img(Request $request)
+{
+    $user_id = $request->input('user_id');
+
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 400);
+    }
+
+    $user = Users::find($user_id);
+
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user not found.',
+        ], 404);
+    }
+
+    $cover_img = $request->file('cover_img');
+
+    if ($cover_img !== null) {
+        $imagePath = $cover_img->store('users', 'public');
+        $user->cover_img = basename($imagePath);
+        $user->datetime = now(); 
+        $user->save();
+        // Image URL
+         $imageUrl = asset('storage/app/public/users/' . $user->profile);
+         $coverimageUrl = asset('storage/app/public/users/' . $user->cover_img);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Cover Image updated successfully For this User.',
+            'data' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'unique_name' => $user->unique_name,
+                'email' => $user->email,
+                'mobile' => $user->mobile,
+                'age' => $user->age,
+                'gender' => $user->gender,
+                'state' => $user->state,
+                'city' => $user->city,
+                'profession' => $user->profession,
+                'refer_code' => $user->refer_code,
+                'referred_by' => $user->referred_by,
+                'profile' => $imageUrl,
+                'cover_img' => $coverimageUrl,
+                'points' => $user->points,
+                'verified' => $user->verified,
+                'online_status' => $user->online_status,
+                'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
+                'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
+                'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
+                'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
+            ],
+        ], 200);
+    } else {
+        return response()->json([
+            'success' => false,
+            'message' => 'Cover image is empty.',
         ], 400);
     }
 }
@@ -525,6 +600,7 @@ if ($email !== null) {
 
     // Image URL
     $imageUrl = asset('storage/app/public/users/' . $user->profile);
+    $coverimageUrl = asset('storage/app/public/users/' . $user->cover_img);
 
     return response()->json([
         'success' => true,
@@ -543,6 +619,7 @@ if ($email !== null) {
             'refer_code' => $user->refer_code,
             'referred_by' => $user->referred_by,
             'profile' => $imageUrl,
+            'cover_img' => $coverimageUrl,
             'points' => $user->points,
             'verified' => $user->verified,
             'online_status' => $user->online_status,
@@ -1250,12 +1327,12 @@ public function add_friends(Request $request)
 
     if ($friend == 2) {
         // Delete the friend relationship
-        $friend = Friends::where('user_id', $user_id)
+        $existingFriend = Friends::where('user_id', $user_id)
                         ->where('friend_user_id', $friend_user_id)
                         ->first();
 
-        if ($friend) {
-            $friend->delete();
+        if ($existingFriend) {
+            $existingFriend->delete();
 
             return response()->json([
                 'success' => true,
@@ -1268,7 +1345,17 @@ public function add_friends(Request $request)
             ], 404);
         }
     } else if ($friend == 1) {
-        // Create a new friends instance
+        // Check if the friend relationship already exists
+        $existingFriend = Friends::where('user_id', $user_id)
+                                ->where('friend_user_id', $friend_user_id)
+                                ->first();
+        
+        if ($existingFriend) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You have already added this friend.',
+            ], 400);
+        }
         $friend = new Friends();
         $friend->user_id = $user_id; 
         $friend->friend_user_id = $friend_user_id;

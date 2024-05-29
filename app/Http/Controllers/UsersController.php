@@ -80,6 +80,7 @@ class UsersController extends Controller
             'age' => 'required|integer|between:18,60',
             'gender' => 'required|in:male,female,other',
             'profile' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'cover_img' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ], [
             'email.unique' => 'The email has already been taken.',
             'mobile.unique' => 'The mobile number has already been taken.',
@@ -88,7 +89,8 @@ class UsersController extends Controller
             'gender.in' => 'Invalid gender selected.',
             'profile.image' => 'The profile must be an image file.',
             'profile.mimes' => 'The profile must be a file of type: jpeg, png, jpg, gif.',
-            'profile.max' => 'The profile may not be greater than 2 MB.',
+            'cover_image.image' => 'The Cover Image must be an image file.',
+            'cover_image.mimes' => 'The Cover Image must be a file of type: jpeg, png, jpg, gif.',
         ]);
         // Generate a refer_code regardless of whether referred_by is provided or not
         $refer_code = $this->generateReferCode();
@@ -110,6 +112,15 @@ class UsersController extends Controller
     // Handle the case where no file has been uploaded
     $imagePath = null; // or provide a default image path
 }
+
+// Check if a file has been uploaded for cover image
+if ($request->hasFile('cover_img')) {
+    $coverImageName = $request->file('cover_img')->getClientOriginalName(); // Get the original cover image name
+    $coverImagePath = $request->file('cover_img')->storeAs('users', $coverImageName); // Store cover image
+} else {
+    // Handle the case where no file has been uploaded for cover image
+    $coverImagePath = null; // or provide a default cover image path
+}
     
         $users = Users::create([
             'name' => $request->name,
@@ -124,6 +135,7 @@ class UsersController extends Controller
             'refer_code' => $refer_code,
             'referred_by' => $request->referred_by,
             'profile' => $imageName, // Save only the image name in the database
+            'cover_img' => $coverImageName, // Save cover image name in the database
             'datetime' => now(),
             'last_seen' => now(),
         ]);
@@ -180,7 +192,7 @@ private function generateUniqueName($name, $user_id)
      */
     public function update(Request $request, Users $users)
     {
-
+    
         $validatedData = $request->validate([
             'unique_name' => 'required|string|max:255|unique:users,unique_name,' . $users->id,
             'name' => 'required|string|max:255',
@@ -194,6 +206,7 @@ private function generateUniqueName($name, $user_id)
             'refer_code' => 'nullable|string|max:255',
             'referred_by' => 'nullable|string|max:255',
             'profile' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'cover_img' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Corrected field name from 'cover_image' to 'cover_img'
             'verified' => 'required|boolean',
             // other validation rules...
         ], [
@@ -206,10 +219,12 @@ private function generateUniqueName($name, $user_id)
             'profile.image' => 'The profile must be an image file.',
             'profile.mimes' => 'The profile must be a file of type: jpeg, png, jpg, gif.',
             'profile.max' => 'The profile may not be greater than 2 MB.',
+            'cover_img.image' => 'The Cover Image must be an image file.', // Corrected field name from 'cover_image' to 'cover_img'
+            'cover_img.mimes' => 'The Cover Image must be a file of type: jpeg, png, jpg, gif.', // Corrected field name from 'cover_image' to 'cover_img'
             // custom error messages for other validation rules...
         ]);
-
-
+    
+    
         $users->name = $request->name;
         $users->unique_name = $request->unique_name;
         $users->age = $request->age;
@@ -225,19 +240,25 @@ private function generateUniqueName($name, $user_id)
         $users->online_status = $request->online_status;
         $users->datetime = now();
         $users->last_seen = now();
-
+    
         if ($request->hasFile('profile')) {
             $newImagePath = $request->file('profile')->store('users', 'public');
             Storage::disk('public')->delete('users/' . $users->profile);
             $users->profile = basename($newImagePath);
         }
-
+    
+        if ($request->hasFile('cover_img')) {
+            $newImagePath = $request->file('cover_img')->store('users', 'public');
+            Storage::disk('public')->delete('users/' . $users->cover_img);
+            $users->cover_img = basename($newImagePath);
+        }
+    
         if (!$users->save()) {
             return redirect()->back()->with('error', 'Sorry, Something went wrong while updating the customer.');
         }
         return redirect()->route('users.index')->with('success', 'Success, User has been updated.');
     }
-
+    
     public function addPointsForm($id)
     {
         $user = Users::find($id);
@@ -283,11 +304,20 @@ private function generateUniqueName($name, $user_id)
      */
     public function destroy(Users $users)
     {
+        // Check if the profile image exists and delete it
         if (Storage::disk('public')->exists('users/' . $users->profile)) {
             Storage::disk('public')->delete('users/' . $users->profile);
         }
+    
+        // Check if the cover image exists and delete it
+        if (Storage::disk('public')->exists('users/' . $users->cover_img)) {
+            Storage::disk('public')->delete('users/' . $users->cover_img);
+        }
+    
+        // Delete the user record
         $users->delete();
-
+    
+        // Return a JSON response indicating success
         return response()->json([
             'success' => true
         ]);

@@ -173,6 +173,25 @@
 </div>
 
 <div class="form-group">
+    <span>Current Cover Image:</span>
+    <img src="{{ asset('storage/app/public/users/' . $users->cover_img) }}" alt="{{ $users->name }}" style="max-width: 100px; max-height: 100px;">
+    <br>
+    <label for="profile">New Cover Image</label>
+    <div class="custom-file">
+        <input type="file" class="custom-file-input" name="cover_img" id="cover_img">
+        <label class="custom-file-label" for="cover_img">Choose file</label>
+        @if($users->cover_img)
+            <input type="hidden" name="existing_cover_img" value="{{ $users->cover_img }}">
+        @endif
+    </div>
+    @error('cover_img')
+    <span class="invalid-feedback" role="alert">
+        <strong>{{ $message }}</strong>
+    </span>
+    @enderror
+</div>
+
+<div class="form-group">
     <label for="verified">Verified</label>
     <div class="custom-control custom-switch">
         <input type="hidden" name="verified" value="0"> <!-- Hidden input to ensure a value is always submitted -->
@@ -218,6 +237,18 @@
     <script>
 document.addEventListener('DOMContentLoaded', function () {
     const fileInput = document.getElementById('profile');
+    const fileInputLabel = fileInput.nextElementSibling;
+
+    fileInput.addEventListener('change', function () {
+        const fileName = this.files[0].name;
+        fileInputLabel.textContent = fileName;
+    });
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const fileInput = document.getElementById('cover_img');
     const fileInputLabel = fileInput.nextElementSibling;
 
     fileInput.addEventListener('change', function () {

@@ -133,6 +133,20 @@
                     @enderror
                 </div>
 
+                <div class="form-group">
+                    <label for="cover_img">Cover Img</label>
+                    <div class="custom-file">
+                        <input type="file" class="custom-file-input" name="cover_img" id="cover_img" onchange="updateProfileLabel(this)">
+                        <label class="custom-file-label" for="cover_img" id="cover_img-label">Choose File</label>
+                    </div>
+                    @error('cover_img')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                    @enderror
+                </div>
+
+
               
 
                 <button class="btn btn-success btn-block btn-lg" type="submit">Submit</button>
@@ -144,6 +158,17 @@
 @section('js')
     <script src="{{ asset('plugins/bs-custom-file-input/bs-custom-file-input.min.js') }}"></script>
     <script>
+        $(document).ready(function () {
+            bsCustomFileInput.init();
+        });
+
+        function updateProfileLabel(input) {
+            var fileName = input.files[0].name;
+            var label = $(input).siblings('.custom-file-label');
+            label.text(fileName);
+        }
+    </script>
+     <script>
         $(document).ready(function () {
             bsCustomFileInput.init();
         });

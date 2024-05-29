@@ -26,6 +26,7 @@
                     <tr>
                     <th>ID <i class="fas fa-sort"></i></th>
                     <th>Profile</th>
+                    <th>Cover Image</th>
                     <th>Name <i class="fas fa-sort"></i></th>
                     <th>Unique Name <i class="fas fa-sort"></i></th>
                     <th>Email <i class="fas fa-sort"></i></th>
@@ -54,6 +55,15 @@
             style="max-width: 100px; max-height: 100px;">
     @else
         <img class="customer-img img-thumbnail img-fluid rounded-circle" src="{{ asset('storage/app/public/users/' . $user->profile) }}" alt=""
+            style="max-width: 100px; max-height: 100px;">
+    @endif
+</td>
+<td>
+    @if(Str::startsWith($user->cover_img, ['http://', 'https://']))
+        <img class="customer-img img-thumbnail img-fluid " src="{{ $user->cover_img }}" alt=""
+            style="max-width: 100px; max-height: 100px;">
+    @else
+        <img class="customer-img img-thumbnail img-fluid" src="{{ asset('storage/app/public/users/' . $user->cover_img) }}" alt=""
             style="max-width: 100px; max-height: 100px;">
     @endif
 </td>
