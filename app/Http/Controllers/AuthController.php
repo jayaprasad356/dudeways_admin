@@ -905,6 +905,16 @@ public function update_trip(Request $request)
 
 public function trip_list(Request $request)
 {
+    // Check if user_id is provided
+    if (!$request->has('user_id')) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User ID is required.',
+        ], 400);
+    }
+
+    $userId = $request->input('user_id');
+
     // Set default limit
     $limit = $request->has('limit') ? $request->input('limit') : 20;
 
@@ -927,7 +937,13 @@ public function trip_list(Request $request)
             $imageUrl = asset('storage/app/public/users/' . $user->profile);
             
             // Check if the user has friends
-            $isFriend = Friends::where('user_id', $user->id)->exists();
+            $isFriend = Friends::where(function($query) use ($userId, $user) {
+                $query->where('user_id', $userId)
+                      ->where('friend_user_id', $user->id);
+            })->orWhere(function($query) use ($userId, $user) {
+                $query->where('user_id', $user->id)
+                      ->where('friend_user_id', $userId);
+            })->exists();
             
             $friendStatus = $isFriend ? '1' : '0';
         } else {
@@ -966,6 +982,7 @@ public function trip_list(Request $request)
 }
 
 
+
 public function my_trip_list(Request $request)
 {
     // Get the user_id from the request
@@ -989,14 +1006,9 @@ public function my_trip_list(Request $request)
         if ($user) {
             // Image URL
             $imageUrl = asset('storage/app/public/users/' . $user->profile);
-            
-            // Check if the user has friends
-            $isFriend = Friends::where('user_id', $user->id)->exists();
-            
-            $friendStatus = $isFriend ? '1' : '0';
+          
         } else {
             $imageUrl = null; // Set default image URL if user not found
-            $friendStatus = '0';
         }
 
         $tripDetails[] = [
@@ -1010,7 +1022,6 @@ public function my_trip_list(Request $request)
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
             'to_date' => date('F j, Y', strtotime($trip->to_date)),
             'time' => '4h',
-            'friend' => $friendStatus,
             'trip_title' => $trip->trip_title,
             'trip_description' => $trip->trip_description,
             'from_location' => $trip->from_location,
@@ -1070,13 +1081,8 @@ public function trip_date(Request $request)
             // Image URL
             $imageUrl = asset('storage/app/public/users/' . $user->profile);
             
-            // Check if the user has friends
-            $isFriend = Friends::where('user_id', $user->id)->exists();
-            
-            $friendStatus = $isFriend ? '1' : '0';
         } else {
             $imageUrl = null; // Set default image URL if user not found
-            $friendStatus = '0';
         }
 
         $tripDetails[] = [
@@ -1090,7 +1096,6 @@ public function trip_date(Request $request)
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
             'to_date' => date('F j, Y', strtotime($trip->to_date)),
             'time' => '4h',
-            'friend' => $friendStatus,
             'trip_title' => $trip->trip_title,
             'trip_description' => $trip->trip_description,
             'from_location' => $trip->from_location,
@@ -1140,8 +1145,6 @@ public function latest_trip(Request $request)
 
     $user = Users::find($trip->user_id);
     
-    // Check if the user has friends
-    $isFriend = Friends::where('user_id', $trip->user_id)->exists();
 
     // Image URL
     $userProfileUrl = $user ? asset('storage/app/public/users/' . $user->profile) : null;
@@ -1157,7 +1160,6 @@ public function latest_trip(Request $request)
         'from_date' => date('F j, Y', strtotime($trip->from_date)),
         'to_date' => date('F j, Y', strtotime($trip->to_date)),
         'time' => '4h',
-        'friend' => $isFriend ? '1' : '0',
         'trip_title' => $trip->trip_title,
         'trip_description' => $trip->trip_description,
         'from_location' => $trip->from_location,
