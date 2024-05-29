@@ -915,6 +915,15 @@ public function trip_list(Request $request)
 
     $userId = $request->input('user_id');
 
+    // Validate user_id
+    $userExists = Users::find($userId);
+    if (!$userExists) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid User ID.',
+        ], 400);
+    }
+
     // Set default limit
     $limit = $request->has('limit') ? $request->input('limit') : 20;
 
