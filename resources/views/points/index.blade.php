@@ -26,7 +26,7 @@
                     <tr>
                         <th>ID <i class="fas fa-sort"></i></th>
                         <th>Points <i class="fas fa-sort"></i></th>
-                        <th>Offer Percent <i class="fas fa-sort"></i></th>
+                        <th>Offer Percentage <i class="fas fa-sort"></i></th>
                         <th>Price <i class="fas fa-sort"></i></th>
                         <th>DateTime <i class="fas fa-sort"></i></th>
                         <th>Actions</th>
@@ -37,7 +37,7 @@
                     <tr>
                         <td>{{$point->id}}</td>
                         <td>{{$point->points}}</td>
-                        <td>{{$point->offer_percent}}</td>
+                        <td>{{$point->offer_percentage}}</td>
                         <td>{{$point->price}}</td>
                         <td>{{$point->datetime}}</td>
                         <td>

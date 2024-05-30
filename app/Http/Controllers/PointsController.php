@@ -58,7 +58,7 @@ class PointsController extends Controller
     {
         $points = Points::create([
             'points' => $request->points,
-            'offer_percent' => $request->offer_percent,
+            'offer_percentage' => $request->offer_percentage,
             'price' => $request->price,
             'datetime' => now(),
         ]);
@@ -108,7 +108,7 @@ class PointsController extends Controller
 
     {
         $points->points = $request->points;
-        $points->offer_percent = $request->offer_percent;
+        $points->offer_percentage = $request->offer_percentage;
         $points->price = $request->price;
         $points->datetime = now(); 
         

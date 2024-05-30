@@ -8,7 +8,7 @@ class Points extends Model
 {
     protected $fillable = [
         'points',
-        'offer_percent',
+        'offer_percentage',
         'price',
         'datetime'
     ];

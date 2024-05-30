@@ -28,11 +28,11 @@
 
 
                 <div class="form-group">
-                    <label for="offer_percent">Offer Percent</label>
-                    <input type="number" name="offer_percent" class="form-control @error('offer_percent') is-invalid @enderror"
-                           id="offer_percent"
-                           placeholder="Offer Percent" value="{{ old('offer_percent', $points->offer_percent) }}">
-                    @error('offer_percent')
+                    <label for="offer_percentage">Offer Percentage</label>
+                    <input type="number" name="offer_percentage" class="form-control @error('offer_percentage') is-invalid @enderror"
+                           id="offer_percentage"
+                           placeholder="Offer Percentage" value="{{ old('offer_percentage', $points->offer_percentage) }}">
+                    @error('offer_percentage')
                     <span class="invalid-feedback" role="alert">
                         <strong>{{ $message }}</strong>
                     </span>

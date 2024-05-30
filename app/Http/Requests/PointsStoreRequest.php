@@ -25,7 +25,7 @@ class PointsStoreRequest extends FormRequest
     {
         return [
             'points' => 'nullable|integer',
-            'offer_percent' => 'nullable|integer',
+            'offer_percentage' => 'nullable|integer',
             'price' => 'nullable|integer',
             'datetime' => 'nullable|datetime',
             
