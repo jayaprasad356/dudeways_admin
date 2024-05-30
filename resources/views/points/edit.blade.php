@@ -26,17 +26,6 @@
                     @enderror 
                 </div>
 
-                <div class="form-group">
-                    <label for="discount_points">Discount Points</label>
-                    <input type="number" name="discount_points" class="form-control @error('discount_points') is-invalid @enderror"
-                           id="discount_points"
-                           placeholder="Discount Points" value="{{ old('discount_points', $points->discount_points) }}">
-                    @error('discount_points')
-                    <span class="invalid-feedback" role="alert">
-                        <strong>{{ $message }}</strong>
-                    </span>
-                    @enderror 
-                </div>
 
                 <div class="form-group">
                     <label for="offer_percent">Offer Percent</label>

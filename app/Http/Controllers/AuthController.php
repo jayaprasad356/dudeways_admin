@@ -1706,7 +1706,6 @@ public function points_list(Request $request)
         $pointsDetails[] = [
             'id' => $point->id,
             'points' => $point->points,
-            'discount_points' => $point->discount_points,
             'offer_percent' => $point->offer_percent,
             'price' => $point->price,
             'datetime' => Carbon::parse($point->datetime)->format('Y-m-d H:i:s'),
