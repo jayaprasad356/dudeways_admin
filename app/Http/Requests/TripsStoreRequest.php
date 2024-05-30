@@ -24,10 +24,8 @@ class TripsStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'planning' => 'nullable|string',
-            'from_location' => 'nullable|string',
-            'to_location' => 'nullable|string',
-            'meetup_location' => 'nullable|string',
+            'trip_type' => 'nullable|string',
+            'location' => 'nullable|string',
             'from_date' => 'nullable|date',
             'to_date' => 'nullable|date',
             'trip_title' => 'nullable|string',

@@ -31,15 +31,15 @@
 
                 <div class="form-group">
                     <br>
-                        <label for="planning">Planning</label>
-                        <select name="planning" class="form-control @error('planning') is-invalid @enderror" id="profession">
+                        <label for="trip_type">Trip Type</label>
+                        <select name="trip_type" class="form-control @error('trip_type') is-invalid @enderror" id="profession">
                             <option value=''>--select--</option>
-                            <option value='Road Trip' {{ old('planning', $trips->planning) == 'Road Trip' ? 'selected' : '' }}>Road Trip</option>
-                            <option value='Adventure Trip' {{ old('planning', $trips->planning) == 'Adventure Trip' ? 'selected' : '' }}>Adventure Trip</option>
-                            <option value='Explore Cities' {{ old('planning', $trips->planning) == 'Explore Cities' ? 'selected' : '' }}>Explore Cities</option>
-                            <option value='Airport Flyover' {{ old('planning', $trips->planning) == 'Airport Flyover' ? 'selected' : '' }}>Airport Flyover</option>
+                            <option value='Road Trip' {{ old('trip_type', $trips->trip_type) == 'Road Trip' ? 'selected' : '' }}>Road Trip</option>
+                            <option value='Adventure Trip' {{ old('trip_type', $trips->trip_type) == 'Adventure Trip' ? 'selected' : '' }}>Adventure Trip</option>
+                            <option value='Explore Cities' {{ old('trip_type', $trips->trip_type) == 'Explore Cities' ? 'selected' : '' }}>Explore Cities</option>
+                            <option value='Airport Flyover' {{ old('trip_type', $trips->trip_type) == 'Airport Flyover' ? 'selected' : '' }}>Airport Flyover</option>
                         </select>
-                        @error('planning')
+                        @error('trip_type')
                         <span class="invalid-feedback" role="alert">
                             <strong>{{ $message }}</strong>
                         </span>
@@ -48,41 +48,17 @@
 
 
                 <div class="form-group">
-                    <label for="from_location">From Location</label>
-                    <input type="text" name="from_location" class="form-control @error('from_location') is-invalid @enderror"
-                           id="from_location"
-                           placeholder="From Location" value="{{ old('from_location', $trips->from_location) }}">
-                    @error('from_location')
+                    <label for="location">Location</label>
+                    <input type="text" name="location" class="form-control @error('location') is-invalid @enderror"
+                           id="location"
+                           placeholder="From Location" value="{{ old('location', $trips->location) }}">
+                    @error('location')
                     <span class="invalid-feedback" role="alert">
                         <strong>{{ $message }}</strong>
                     </span>
                     @enderror
                 </div>
-
-                <div class="form-group">
-                    <label for="to_location">To Location</label>
-                    <input type="text" name="to_location" class="form-control @error('to_location') is-invalid @enderror"
-                           id="to_location"
-                           placeholder="To Location" value="{{ old('to_location', $trips->to_location) }}">
-                    @error('to_location')
-                    <span class="invalid-feedback" role="alert">
-                        <strong>{{ $message }}</strong>
-                    </span>
-                    @enderror
-                </div>
-
-                <div class="form-group">
-                    <label for="meetup_location">Meetup Location</label>
-                    <input type="text" name="meetup_location" class="form-control @error('meetup_location') is-invalid @enderror"
-                           id="meetup_location"
-                           placeholder="Meetup Location" value="{{ old('meetup_location', $trips->meetup_location) }}">
-                    @error('meetup_location')
-                    <span class="invalid-feedback" role="alert">
-                        <strong>{{ $message }}</strong>
-                    </span>
-                    @enderror
-                </div>
-
+               
                 <div class="form-group">
                     <label for="date">From Date</label>
                     <input type="date" name="from_date" class="form-control @error('from_date') is-invalid @enderror" id="mobile"

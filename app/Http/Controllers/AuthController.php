@@ -8,6 +8,7 @@ use App\Models\Users;
 use App\Models\Chats; 
 use App\Models\Trips;
 use App\Models\Friends; 
+use App\Models\Points; 
 use App\Models\Notifications; 
 use App\Models\Verifications; 
 use Carbon\Carbon;
@@ -634,23 +635,21 @@ if ($email !== null) {
 public function add_trip(Request $request)
 {
     $user_id = $request->input('user_id'); 
-    $planning = $request->input('planning');
+    $trip_type = $request->input('trip_type');
     $from_date = $request->input('from_date');
     $to_date = $request->input('to_date');
     $trip_title = $request->input('trip_title');
     $trip_description = $request->input('trip_description');
-    $from_location = $request->input('from_location');
-    $to_location = $request->input('to_location');
-    $meetup_location = $request->input('meetup_location');
+    $location = $request->input('location');
     $trip_image = $request->file('trip_image');
 
     $errors = [];
 
        // Validate each input and return specific error messages
-       if (empty($planning)) {
+       if (empty($trip_type)) {
         return response()->json([
             'success' => false,
-            'message' => 'Planning is empty.',
+            'message' => 'Trip Type is empty.',
         ], 400);
     }
     if (empty($from_date)) {
@@ -677,22 +676,10 @@ public function add_trip(Request $request)
             'message' => 'Trip Description is empty.',
         ], 400);
     }
-    if (empty($from_location)) {
+    if (empty($location)) {
         return response()->json([
             'success' => false,
-            'message' => 'From Location is empty.',
-        ], 400);
-    }
-    if (empty($to_location)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'To Location is empty.',
-        ], 400);
-    }
-    if (empty($meetup_location)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Meetup Location is empty.',
+            'message' => 'Location is empty.',
         ], 400);
     }
 
@@ -732,14 +719,12 @@ public function add_trip(Request $request)
     // Create a new user instance
     $trip = new trips();
     $trip->user_id = $user_id; 
-    $trip->planning = $planning;
+    $trip->trip_type = $trip_type;
     $trip->from_date = $from_date;
     $trip->to_date = $to_date;
     $trip->trip_title = $trip_title;
     $trip->trip_description = $trip_description;
-    $trip->from_location = $from_location;
-    $trip->to_location = $to_location;
-    $trip->meetup_location = $meetup_location;
+    $trip->location = $location;
     $trip->trip_image = basename($imagePath);
     $trip->trip_datetime = now(); 
     $trip->save();
@@ -755,18 +740,16 @@ public function add_trip(Request $request)
         'message' => 'Trip Added successfully.',
         'data' => [
             'id' => $trip->id,
-            'user_name' => $user->name,
+            'name' => $user->name,
             'unique_name' => $user->unique_name,
             'verified' => $user->verified,
-            'planning' => $trip->planning,
+            'trip_type' => $trip->trip_type,
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
             'to_date' => date('F j, Y', strtotime($trip->to_date)),
             'time' => '4h',
             'trip_title' => $trip->trip_title,
             'trip_description' => $trip->trip_description,
-            'from_location' => $trip->from_location,
-            'to_location' => $trip->to_location,
-            'meetup_location' => $trip->meetup_location,
+            'location' => $trip->location,
             'trip_status' => 0,
             'trip_image' => $imageUrl,
             'trip_datetime' => Carbon::parse($trip->trip_datetime)->format('Y-m-d H:i:s'),
@@ -797,14 +780,12 @@ public function update_trip(Request $request)
     }
 
     $user_id = $request->input('user_id'); 
-    $planning = $request->input('planning');
+    $trip_type = $request->input('trip_type');
     $from_date = $request->input('from_date');
     $to_date = $request->input('to_date');
     $trip_title = $request->input('trip_title');
     $trip_description = $request->input('trip_description');
-    $from_location = $request->input('from_location');
-    $to_location = $request->input('to_location');
-    $meetup_location = $request->input('meetup_location');
+    $location = $request->input('location');
     $trip_image = $request->file('trip_image');
 
     // Update trip details if provided
@@ -819,14 +800,14 @@ public function update_trip(Request $request)
         }
         $trip->user_id = $user_id;
     }
-    if ($planning !== null) {
-        if (empty($planning)) {
+    if ($trip_type !== null) {
+        if (empty($trip_type)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Planning is empty.',
+                'message' => 'Trip Type is empty.',
             ], 400);
         }
-        $trip->planning = $planning;
+        $trip->trip_type = $trip_type;
     }
     if ($from_date !== null) {
         if (empty($from_date)) {
@@ -864,32 +845,15 @@ public function update_trip(Request $request)
         }
         $trip->trip_description = $trip_description;
     }
-    if ($from_location !== null) {
-        if (empty($from_location)) {
+ 
+    if ($location !== null) {
+        if (empty($location)) {
             return response()->json([
                 'success' => false,
-                'message' => 'From Location is empty.',
+                'message' => 'Location is empty.',
             ], 400);
         }
-        $trip->from_location = $from_location;
-    }
-    if ($to_location !== null) {
-        if (empty($to_location)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'To Location is empty.',
-            ], 400);
-        }
-        $trip->to_location = $to_location;
-    }
-    if ($meetup_location !== null) {
-        if (empty($meetup_location)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Meetup Location is empty.',
-            ], 400);
-        }
-        $trip->meetup_location = $meetup_location;
+        $trip->location = $location;
     }
     if ($trip_image !== null) {
         $imagePath = $trip_image->store('trips', 'public');
@@ -915,15 +879,13 @@ public function update_trip(Request $request)
             'name' => $user->name,
             'unique_name' => $user->unique_name,
             'verified' => $user->verified,
-            'planning' => $trip->planning,
+            'trip_type' => $trip->trip_type,
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
             'to_date' => date('F j, Y', strtotime($trip->to_date)),
             'time' => '4h',
             'trip_title' => $trip->trip_title,
             'trip_description' => $trip->trip_description,
-            'from_location' => $trip->from_location,
-            'to_location' => $trip->to_location,
-            'meetup_location' => $trip->meetup_location,
+            'location' => $trip->location,
             'trip_status' => $trip->trip_status,
             'trip_image' => $imageUrl,
             'trip_datetime' => Carbon::parse($trip->trip_datetime)->format('Y-m-d H:i:s'),
@@ -1000,16 +962,14 @@ public function trip_list(Request $request)
             'unique_name' => $user->unique_name,
             'verified' => $user->verified,
             'profile' => $imageUrl,
-            'planning' => $trip->planning,
+            'trip_type' => $trip->trip_type,
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
             'to_date' => date('F j, Y', strtotime($trip->to_date)),
             'time' => '4h',
             'friend' => $friendStatus,
             'trip_title' => $trip->trip_title,
             'trip_description' => $trip->trip_description,
-            'from_location' => $trip->from_location,
-            'to_location' => $trip->to_location,
-            'meetup_location' => $trip->meetup_location,
+            'location' => $trip->location,
             'trip_status' => $trip->trip_status,
             'trip_image' => $tripimageUrl,
             'trip_datetime' => Carbon::parse($trip->trip_datetime)->format('Y-m-d H:i:s'),
@@ -1064,15 +1024,13 @@ public function my_trip_list(Request $request)
             'verified' => $user->verified,
             'unique_name' => $user->unique_name,
             'profile' => $imageUrl,
-            'planning' => $trip->planning,
+            'trip_type' => $trip->trip_type,
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
             'to_date' => date('F j, Y', strtotime($trip->to_date)),
             'time' => '4h',
             'trip_title' => $trip->trip_title,
             'trip_description' => $trip->trip_description,
-            'from_location' => $trip->from_location,
-            'to_location' => $trip->to_location,
-            'meetup_location' => $trip->meetup_location,
+            'location' => $trip->location,
             'trip_status' => $trip->trip_status,
             'trip_image' => $tripimageUrl,
             'trip_datetime' => Carbon::parse($trip->trip_datetime)->format('Y-m-d H:i:s'),
@@ -1141,15 +1099,13 @@ public function trip_date(Request $request)
             'verified' => $user->verified,
             'unique_name' => $user->unique_name,
             'profile' => $imageUrl,
-            'planning' => $trip->planning,
+            'trip_type' => $trip->trip_type,
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
             'to_date' => date('F j, Y', strtotime($trip->to_date)),
             'time' => '4h',
             'trip_title' => $trip->trip_title,
             'trip_description' => $trip->trip_description,
-            'from_location' => $trip->from_location,
-            'to_location' => $trip->to_location,
-            'meetup_location' => $trip->meetup_location,
+            'location' => $trip->location,
             'trip_status' => $trip->trip_status,
             'trip_image' => $tripimageUrl,
             'trip_datetime' => Carbon::parse($trip->trip_datetime)->format('Y-m-d H:i:s'),
@@ -1207,15 +1163,13 @@ public function latest_trip(Request $request)
         'verified' => $user->verified,
         'unique_name' => $user ? $user->unique_name : 'Unknown',
         'profile' => $userProfileUrl,
-        'planning' => $trip->planning,
+        'trip_type' => $trip->trip_type,
         'from_date' => date('F j, Y', strtotime($trip->from_date)),
         'to_date' => date('F j, Y', strtotime($trip->to_date)),
         'time' => '4h',
         'trip_title' => $trip->trip_title,
         'trip_description' => $trip->trip_description,
-        'from_location' => $trip->from_location,
-        'to_location' => $trip->to_location,
-        'meetup_location' => $trip->meetup_location,
+        'location' => $trip->location,
         'trip_status' => $trip->trip_status,
         'trip_image' => $tripimageUrl,
         'trip_datetime' => Carbon::parse($trip->trip_datetime)->format('Y-m-d H:i:s'),
@@ -1732,6 +1686,40 @@ public function verifications(Request $request)
             'back_image_url' => $backImageUrl,
         ],
     ], 201);
+}
+public function points_list(Request $request)
+{
+    // Fetch all points details from the database
+    $points = Points::all();
+
+    if ($points->isEmpty()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No Points found.',
+        ], 404);
+    }
+
+    $pointsDetails = [];
+
+    // Iterate through each points record and format the data
+    foreach ($points as $point) {
+        $pointsDetails[] = [
+            'id' => $point->id,
+            'points' => $point->points,
+            'discount_points' => $point->discount_points,
+            'offer_percent' => $point->offer_percent,
+            'price' => $point->price,
+            'datetime' => Carbon::parse($point->datetime)->format('Y-m-d H:i:s'),
+            'updated_at' => Carbon::parse($point->updated_at)->format('Y-m-d H:i:s'),
+            'created_at' => Carbon::parse($point->created_at)->format('Y-m-d H:i:s'),
+        ];
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Points Details retrieved successfully.',
+        'data' => $pointsDetails,
+    ], 200);
 }
 }
 

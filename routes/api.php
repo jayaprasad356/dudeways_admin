@@ -23,6 +23,7 @@ Route::post('friends_list', [AuthController::class, 'friends_list']);
 Route::post('add_notifications', [AuthController::class, 'add_notifications']);
 Route::post('notification_list', [AuthController::class, 'notification_list']);
 Route::post('verifications', [AuthController::class, 'verifications']);
+Route::post('points_list', [AuthController::class, 'points_list']);
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();

@@ -44,10 +44,8 @@
                         <th>ID <i class="fas fa-sort"></i></th>
                         <th>Trip Image</th>
                         <th>User Name <i class="fas fa-sort"></i></th>
-                        <th>Planning <i class="fas fa-sort"></i></th>
-                        <th>From Location <i class="fas fa-sort"></i></th>
-                        <th>To Location <i class="fas fa-sort"></i></th>
-                        <th>Meetup Location <i class="fas fa-sort"></i></th>
+                        <th>Trip Type <i class="fas fa-sort"></i></th>
+                        <th>Location <i class="fas fa-sort"></i></th>
                         <th>From Date <i class="fas fa-sort"></i></th>
                         <th>To Date <i class="fas fa-sort"></i></th>
                         <th>Trip Title<i class="fas fa-sort"></i></th>
@@ -71,10 +69,8 @@
     @endif
 </td>
                         <td>{{ optional($trip->users)->name }}</td> <!-- Display user name safely -->
-                        <td>{{$trip->planning}}</td>
-                        <td>{{$trip->from_location}}</td>
-                        <td>{{$trip->to_location}}</td>
-                        <td>{{$trip->meetup_location}}</td>
+                        <td>{{$trip->trip_type}}</td>
+                        <td>{{$trip->location}}</td>
                         <td>{{$trip->from_date}}</td>
                         <td>{{$trip->to_date}}</td>
                         <td>{{$trip->trip_title}}</td>

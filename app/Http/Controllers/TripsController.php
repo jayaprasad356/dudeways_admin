@@ -72,10 +72,8 @@ class TripsController extends Controller
     $imagePath = null; // or provide a default image path
 }
         $trips = Trips::create([
-            'planning' => $request->planning,
-            'from_location' => $request->from_location,
-            'to_location' => $request->to_location,
-            'meetup_location' => $request->meetup_location,
+            'trip_type' => $request->trip_type,
+            'location' => $request->location,
             'from_date' => $request->from_date,
             'to_date' => $request->to_date,
             'trip_title' => $request->trip_title,
@@ -131,10 +129,8 @@ class TripsController extends Controller
     public function update(Request $request, Trips $trips)
 
     {
-        $trips->planning = $request->planning;
-        $trips->from_location = $request->from_location;
-        $trips->to_location = $request->to_location;
-        $trips->meetup_location = $request->meetup_location;
+        $trips->trip_type = $request->trip_type;
+        $trips->location = $request->location;
         $trips->from_date = $request->from_date;
         $trips->to_date = $request->to_date;
         $trips->trip_title = $request->trip_title;
