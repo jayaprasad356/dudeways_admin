@@ -1421,7 +1421,8 @@ public function friends_list(Request $request)
         $user = $friend->user;
         $friendUser = $friend->friendUser;
 
-        $userImageUrl = asset('storage/app/public/users/' . $user->profile);
+
+        $friendImageUrl = asset('storage/app/public/users/' . $friendUser->profile);
 
         // Determine the format of last_seen
         $lastSeen = Carbon::parse($user->last_seen);
@@ -1447,10 +1448,10 @@ public function friends_list(Request $request)
         return [
             'id' => $friend->id,
             'user_id' => $friend->user_id,
-            'name' => $user->name,
-            'profile' => $userImageUrl,
-            'last_seen' => $lastSeenFormatted,
             'friend_user_id' => $friend->friend_user_id,
+            'name' => $friendUser->name,
+            'profile' => $friendImageUrl,
+            'last_seen' => $lastSeenFormatted,
             'status' => $friend->status == 1 ? 'Interested' : 'Not Interested',
             'datetime' => Carbon::parse($friend->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($friend->updated_at)->format('Y-m-d H:i:s'),
