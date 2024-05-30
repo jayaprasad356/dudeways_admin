@@ -34,6 +34,7 @@ class TripsStoreRequest extends FormRequest
             'trip_description' => 'nullable|string',
             'user_id' => 'required|exists:users,id',
             'datetime' => 'nullable|datetime',
+            'avatar' => 'nullable|trip_image',
         ];
     }
 }

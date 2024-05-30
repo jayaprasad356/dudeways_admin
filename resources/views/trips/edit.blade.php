@@ -127,6 +127,24 @@
     </span>
     @enderror
 </div>
+<div class="form-group">
+    <span>Current Trip Image:</span>
+    <img src="{{ asset('storage/app/public/trips/' . $trips->trip_image) }}" alt="{{ $trips->name }}" style="max-width: 100px; max-height: 100px;">
+    <br>
+    <label for="trip_image">New Trip Image</label>
+    <div class="custom-file">
+        <input type="file" class="custom-file-input" name="trip_image" id="trip_image">
+        <label class="custom-file-label" for="trip_image">Choose file</label>
+        @if($trips->trip_image)
+            <input type="hidden" name="existing_trip_image" value="{{ $trips->trip_image }}">
+        @endif
+    </div>
+    @error('trip_image')
+    <span class="invalid-feedback" role="alert">
+        <strong>{{ $message }}</strong>
+    </span>
+    @enderror
+</div>
 
 
                 <div class="form-group">
@@ -295,4 +313,15 @@
 });
 
     </script>
+      <script>
+document.addEventListener('DOMContentLoaded', function () {
+    const fileInput = document.getElementById('trip_image');
+    const fileInputLabel = fileInput.nextElementSibling;
+
+    fileInput.addEventListener('change', function () {
+        const fileName = this.files[0].name;
+        fileInputLabel.textContent = fileName;
+    });
+});
+</script>
     @endsection

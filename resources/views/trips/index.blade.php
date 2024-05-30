@@ -42,6 +42,7 @@
                 <thead class="thead-dark">
                     <tr>
                         <th>ID <i class="fas fa-sort"></i></th>
+                        <th>Trip Image</th>
                         <th>User Name <i class="fas fa-sort"></i></th>
                         <th>Planning <i class="fas fa-sort"></i></th>
                         <th>From Location <i class="fas fa-sort"></i></th>
@@ -60,6 +61,15 @@
                     @foreach ($trips as $trip)
                     <tr>
                         <td>{{$trip->id}}</td>
+                        <td>
+    @if(Str::startsWith($trip->trip_image, ['http://', 'https://']))
+        <img class="customer-img img-thumbnail img-fluid" src="{{ $trip->trip_image }}" alt=""
+            style="max-width: 100px; max-height: 100px;">
+    @else
+        <img class="customer-img img-thumbnail img-fluid" src="{{ asset('storage/app/public/trips/' . $trip->trip_image) }}" alt=""
+            style="max-width: 100px; max-height: 100px;">
+    @endif
+</td>
                         <td>{{ optional($trip->users)->name }}</td> <!-- Display user name safely -->
                         <td>{{$trip->planning}}</td>
                         <td>{{$trip->from_location}}</td>

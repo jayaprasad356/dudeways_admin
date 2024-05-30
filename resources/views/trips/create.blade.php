@@ -125,6 +125,18 @@
     @enderror
 </div>
 
+<div class="form-group">
+                    <label for="trip_image">Trip Image</label>
+                    <div class="custom-file">
+                        <input type="file" class="custom-file-input" name="trip_image" id="trip_image" onchange="updateProfileLabel(this)">
+                        <label class="custom-file-label" for="trip_image" id="trip_image-label">Choose File</label>
+                    </div>
+                    @error('trip_image')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                    @enderror
+                </div>
 
                 <button class="btn btn-success btn-block btn-lg" type="submit">Submit</button>
             </form>
@@ -257,5 +269,16 @@
 
         // Show the first page initially
         showPage(currentPage);
+    </script>
+       <script>
+        $(document).ready(function () {
+            bsCustomFileInput.init();
+        });
+
+        function updateProfileLabel(input) {
+            var fileName = input.files[0].name;
+            var label = $(input).siblings('.custom-file-label');
+            label.text(fileName);
+        }
     </script>
 @endsection

@@ -642,6 +642,7 @@ public function add_trip(Request $request)
     $from_location = $request->input('from_location');
     $to_location = $request->input('to_location');
     $meetup_location = $request->input('meetup_location');
+    $trip_image = $request->file('trip_image');
 
     $errors = [];
 
@@ -702,6 +703,12 @@ public function add_trip(Request $request)
         ], 400);
     }
 
+    if (empty($trip_image)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Trip Image is empty.',
+        ], 400);
+    }
     // Check if the user exists
     $user = Users::find($user_id);
     if (!$user) {
@@ -718,6 +725,10 @@ public function add_trip(Request $request)
             'message' => $errors,
         ], 400);
     }
+
+     // Store the image and get its path
+     $imagePath = $trip_image->store('trips', 'public');
+
     // Create a new user instance
     $trip = new trips();
     $trip->user_id = $user_id; 
@@ -729,8 +740,14 @@ public function add_trip(Request $request)
     $trip->from_location = $from_location;
     $trip->to_location = $to_location;
     $trip->meetup_location = $meetup_location;
+    $trip->trip_image = basename($imagePath);
     $trip->trip_datetime = now(); 
     $trip->save();
+
+        // Image URL
+        $imageUrl = asset('storage/app/public/trips/' . $trip->trip_image);
+  // Fetch user details associated with the trip
+  $user = Users::find($trip->user_id);
 
 
     return response()->json([
@@ -751,6 +768,7 @@ public function add_trip(Request $request)
             'to_location' => $trip->to_location,
             'meetup_location' => $trip->meetup_location,
             'trip_status' => 0,
+            'trip_image' => $imageUrl,
             'trip_datetime' => Carbon::parse($trip->trip_datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($trip->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($trip->created_at)->format('Y-m-d H:i:s'),
@@ -787,6 +805,7 @@ public function update_trip(Request $request)
     $from_location = $request->input('from_location');
     $to_location = $request->input('to_location');
     $meetup_location = $request->input('meetup_location');
+    $trip_image = $request->file('trip_image');
 
     // Update trip details if provided
     if ($user_id !== null) {
@@ -872,17 +891,28 @@ public function update_trip(Request $request)
         }
         $trip->meetup_location = $meetup_location;
     }
+    if ($trip_image !== null) {
+        $imagePath = $trip_image->store('trips', 'public');
+        $trip->trip_image = basename($imagePath);
+    }
+
     $trip->trip_datetime = now(); 
 
     // Save the updated trip
     $trip->save();
+
+        // Fetch user details associated with the trip
+        $user = Users::find($trip->user_id);
+
+            // Image URL
+            $imageUrl = asset('storage/app/public/trips/' . $trip->trip_image);
 
     return response()->json([
         'success' => true,
         'message' => 'Trip updated successfully.',
         'data' => [
             'id' => $trip->id,
-            'user_name' => $user->name,
+            'name' => $user->name,
             'unique_name' => $user->unique_name,
             'verified' => $user->verified,
             'planning' => $trip->planning,
@@ -895,6 +925,7 @@ public function update_trip(Request $request)
             'to_location' => $trip->to_location,
             'meetup_location' => $trip->meetup_location,
             'trip_status' => $trip->trip_status,
+            'trip_image' => $imageUrl,
             'trip_datetime' => Carbon::parse($trip->trip_datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($trip->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($trip->created_at)->format('Y-m-d H:i:s'),
@@ -960,12 +991,15 @@ public function trip_list(Request $request)
             $friendStatus = '0';
         }
 
+        $tripimageUrl = asset('storage/app/public/trips/' . $trip->trip_image);
+
         $tripDetails[] = [
             'id' => $trip->id,
-            'user_name' => $user->name,
+            'user_id' => $trip->user_id,
+            'name' => $user->name,
             'unique_name' => $user->unique_name,
             'verified' => $user->verified,
-            'user_profile' => $imageUrl,
+            'profile' => $imageUrl,
             'planning' => $trip->planning,
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
             'to_date' => date('F j, Y', strtotime($trip->to_date)),
@@ -977,6 +1011,7 @@ public function trip_list(Request $request)
             'to_location' => $trip->to_location,
             'meetup_location' => $trip->meetup_location,
             'trip_status' => $trip->trip_status,
+            'trip_image' => $tripimageUrl,
             'trip_datetime' => Carbon::parse($trip->trip_datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($trip->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($trip->created_at)->format('Y-m-d H:i:s'),
@@ -1020,13 +1055,15 @@ public function my_trip_list(Request $request)
             $imageUrl = null; // Set default image URL if user not found
         }
 
+        $tripimageUrl = asset('storage/app/public/trips/' . $trip->trip_image);
+
         $tripDetails[] = [
             'id' => $trip->id,
             'user_id' => $trip->user_id,
-            'user_name' => $user->name,
+            'name' => $user->name,
             'verified' => $user->verified,
             'unique_name' => $user->unique_name,
-            'user_profile' => $imageUrl,
+            'profile' => $imageUrl,
             'planning' => $trip->planning,
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
             'to_date' => date('F j, Y', strtotime($trip->to_date)),
@@ -1037,6 +1074,7 @@ public function my_trip_list(Request $request)
             'to_location' => $trip->to_location,
             'meetup_location' => $trip->meetup_location,
             'trip_status' => $trip->trip_status,
+            'trip_image' => $tripimageUrl,
             'trip_datetime' => Carbon::parse($trip->trip_datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($trip->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($trip->created_at)->format('Y-m-d H:i:s'),
@@ -1094,13 +1132,15 @@ public function trip_date(Request $request)
             $imageUrl = null; // Set default image URL if user not found
         }
 
+        $tripimageUrl = asset('storage/app/public/trips/' . $trip->trip_image);
+
         $tripDetails[] = [
             'id' => $trip->id,
             'user_id' => $trip->user_id,
-            'user_name' => $user->name,
+            'name' => $user->name,
             'verified' => $user->verified,
             'unique_name' => $user->unique_name,
-            'user_profile' => $imageUrl,
+            'profile' => $imageUrl,
             'planning' => $trip->planning,
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
             'to_date' => date('F j, Y', strtotime($trip->to_date)),
@@ -1111,6 +1151,7 @@ public function trip_date(Request $request)
             'to_location' => $trip->to_location,
             'meetup_location' => $trip->meetup_location,
             'trip_status' => $trip->trip_status,
+            'trip_image' => $tripimageUrl,
             'trip_datetime' => Carbon::parse($trip->trip_datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($trip->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($trip->created_at)->format('Y-m-d H:i:s'),
@@ -1157,14 +1198,15 @@ public function latest_trip(Request $request)
 
     // Image URL
     $userProfileUrl = $user ? asset('storage/app/public/users/' . $user->profile) : null;
+    $tripimageUrl = $trip ? asset('storage/app/public/trips/' . $trip->trip_image) : null;
 
     $tripDetails = [
         'id' => $trip->id,
         'user_id' => $trip->user_id,
-        'user_name' => $user ? $user->name : 'Unknown',
+        'name' => $user ? $user->name : 'Unknown',
         'verified' => $user->verified,
         'unique_name' => $user ? $user->unique_name : 'Unknown',
-        'user_profile' => $userProfileUrl,
+        'profile' => $userProfileUrl,
         'planning' => $trip->planning,
         'from_date' => date('F j, Y', strtotime($trip->from_date)),
         'to_date' => date('F j, Y', strtotime($trip->to_date)),
@@ -1175,6 +1217,7 @@ public function latest_trip(Request $request)
         'to_location' => $trip->to_location,
         'meetup_location' => $trip->meetup_location,
         'trip_status' => $trip->trip_status,
+        'trip_image' => $tripimageUrl,
         'trip_datetime' => Carbon::parse($trip->trip_datetime)->format('Y-m-d H:i:s'),
         'updated_at' => Carbon::parse($trip->updated_at)->format('Y-m-d H:i:s'),
         'created_at' => Carbon::parse($trip->created_at)->format('Y-m-d H:i:s'),
@@ -1541,10 +1584,9 @@ public function add_notifications(Request $request)
         'data' => [
             'id' => $notification->id,
             'user_id' => $notification->user_id,
-            'user_name' => $user->name,
-            'user_profile' => $userImageUrl,
+            'name' => $user->name,
+            'profile' => $userImageUrl,
             'notify_user_id' => $notification->notify_user_id,
-            'notify_user_name' => $notify_user->name,
             'message' => $notification->message,
             'datetime' => Carbon::parse($notification->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($notification->updated_at)->format('Y-m-d H:i:s'),
@@ -1555,13 +1597,16 @@ public function add_notifications(Request $request)
 
 public function notification_list(Request $request)
 {
-    // Validate the request input
-    $validatedData = $request->validate([
-        'user_id' => 'required|exists:users,id',
-    ]);
+       // Get the user_id from the request
+       $user_id = $request->input('user_id');
 
-    // Get the user_id from the validated data
-    $user_id = $validatedData['user_id'];
+       if (empty($user_id)) {
+           return response()->json([
+               'success' => false,
+               'message' => 'user_id is empty.',
+           ], 400);
+       }
+   
 
     // Fetch notifications for the specific user_id from the database
     $notifications = Notifications::where('user_id', $user_id)->get();
@@ -1578,29 +1623,41 @@ public function notification_list(Request $request)
         $user = Users::find($notification->user_id);
         $notify_user = Users::find($notification->notify_user_id);
 
-        // Generate image URLs
-        $userImageUrl = asset('storage/users/' . $user->profile);
 
-        return [
-            'id' => $notification->id,
-            'user_id' => $notification->user_id,
-            'user_name' => $user->name,
-            'user_profile' => $userImageUrl,
-            'notify_user_id' => $notification->notify_user_id,
-            'notify_user_name' => $notify_user->name,
-            'message' => $notification->message,
-            'datetime' => Carbon::parse($notification->datetime)->format('Y-m-d H:i:s'),
-            'updated_at' => Carbon::parse($notification->updated_at)->format('Y-m-d H:i:s'),
-            'created_at' => Carbon::parse($notification->created_at)->format('Y-m-d H:i:s'),
-        ];
-    });
-
-    return response()->json([
-        'success' => true,
-        'message' => 'Notification details retrieved successfully for this user.',
-        'data' => $notificationDetails,
-    ], 200);
-}
+         // Generate image URLs
+         $userImageUrl = asset('storage/users/' . $user->profile);
+         // Calculate time difference in hours
+         $notificationTime = Carbon::parse($notification->datetime);
+         $currentTime = Carbon::now();
+         $hoursDifference = $notificationTime->diffInHours($currentTime);
+         
+         // Determine the time display string
+         if ($hoursDifference == 0) {
+             $timeDifference = 'now';
+         } else {
+             $timeDifference = $hoursDifference . 'h';
+         }
+ 
+         return [
+             'id' => $notification->id,
+             'user_id' => $notification->user_id,
+             'name' => $user->name,
+             'profile' => $userImageUrl,
+             'notify_user_id' => $notification->notify_user_id,
+             'message' => $notification->message,
+             'datetime' => $notificationTime->format('Y-m-d H:i:s'),
+             'time' => $timeDifference,  // Add this line to include the time difference in hours
+             'updated_at' => Carbon::parse($notification->updated_at)->format('Y-m-d H:i:s'),
+             'created_at' => Carbon::parse($notification->created_at)->format('Y-m-d H:i:s'),
+         ];
+     });
+ 
+     return response()->json([
+         'success' => true,
+         'message' => 'Notification details retrieved successfully for this user.',
+         'data' => $notificationDetails,
+     ], 200);
+ }
 
 public function verifications(Request $request)
 {

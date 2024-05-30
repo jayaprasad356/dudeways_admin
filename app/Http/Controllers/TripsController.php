@@ -63,6 +63,14 @@ class TripsController extends Controller
     public function store(TripsStoreRequest $request)
     {
     
+        // Check if a file has been uploaded
+   if ($request->hasFile('trip_image')) {
+    $imageName = $request->file('trip_image')->getClientOriginalName(); // Get the original file name
+    $imagePath = $request->file('trip_image')->storeAs('trips', $imageName);
+} else {
+    // Handle the case where no file has been uploaded
+    $imagePath = null; // or provide a default image path
+}
         $trips = Trips::create([
             'planning' => $request->planning,
             'from_location' => $request->from_location,
@@ -73,6 +81,7 @@ class TripsController extends Controller
             'trip_title' => $request->trip_title,
             'trip_description' => $request->trip_description,
             'user_id' => $request->user_id,
+            'trip_image' => $imageName, // Save only the image name in the database
             'trip_datetime' => now(),
             
         ]);
@@ -134,6 +143,12 @@ class TripsController extends Controller
         $trips->trip_status = $request->trip_status;
         $trips->trip_datetime = now(); 
 
+        if ($request->hasFile('trip_image')) {
+            $newImagePath = $request->file('trip_image')->store('trips', 'public');
+            Storage::disk('public')->delete('trips/' . $trips->trip_image);
+            $trips->trip_image = basename($newImagePath);
+        }
+
 
         if (!$trips->save()) {
             return redirect()->back()->with('error', 'Sorry, Something went wrong while updating the customer.');
@@ -143,6 +158,11 @@ class TripsController extends Controller
 
     public function destroy(Trips $trips)
     {
+
+         // Check if the profile image exists and delete it
+         if (Storage::disk('public')->exists('trips/' . $trips->trip_image)) {
+            Storage::disk('public')->delete('trips/' . $trips->trip_image);
+        }
         $trips->delete();
 
         return response()->json([
