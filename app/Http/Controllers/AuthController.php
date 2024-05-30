@@ -1586,8 +1586,7 @@ public function notification_list(Request $request)
         $notify_user = Users::find($notification->notify_user_id);
 
 
-         // Generate image URLs
-         $userImageUrl = asset('storage/users/' . $user->profile);
+        $notifyUserImageUrl = asset('storage/app/public/users/' . $notify_user->profile);
          // Calculate time difference in hours
          $notificationTime = Carbon::parse($notification->datetime);
          $currentTime = Carbon::now();
@@ -1603,9 +1602,9 @@ public function notification_list(Request $request)
          return [
              'id' => $notification->id,
              'user_id' => $notification->user_id,
-             'name' => $user->name,
-             'profile' => $userImageUrl,
              'notify_user_id' => $notification->notify_user_id,
+             'name' => $notify_user->name,
+            'profile' => $notifyUserImageUrl,
              'message' => $notification->message,
              'datetime' => $notificationTime->format('Y-m-d H:i:s'),
              'time' => $timeDifference,  // Add this line to include the time difference in hours
