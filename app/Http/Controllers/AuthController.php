@@ -1295,6 +1295,13 @@ public function add_friends(Request $request)
         ], 400);
     }
 
+     // Check if user_id and friend_user_id are the same
+     if ($user_id == $friend_user_id) {
+        return response()->json([
+            'success' => false,
+            'message' => 'You cannot add yourself as a friend.',
+        ], 400);
+    }
     // Validate friend action
     if (!isset($friend)) {
         return response()->json([
