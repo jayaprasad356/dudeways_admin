@@ -149,7 +149,7 @@ class TripsController extends Controller
         if (!$trips->save()) {
             return redirect()->back()->with('error', 'Sorry, Something went wrong while updating the customer.');
         }
-        return redirect()->route('trips.edit')->with('success', 'Success, Trip has been updated.');
+        return redirect()->route('trips.edit', $trips->id)->with('success', 'Success, Trip has been updated.');
     }
 
     public function destroy(Trips $trips)
