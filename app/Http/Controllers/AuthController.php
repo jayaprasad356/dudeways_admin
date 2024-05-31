@@ -641,7 +641,6 @@ public function add_trip(Request $request)
     $trip_title = $request->input('trip_title');
     $trip_description = $request->input('trip_description');
     $location = $request->input('location');
-    $trip_image = $request->file('trip_image');
 
     $errors = [];
 
@@ -689,13 +688,6 @@ public function add_trip(Request $request)
             'message' => 'User ID is empty.',
         ], 400);
     }
-
-    if (empty($trip_image)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Trip Image is empty.',
-        ], 400);
-    }
     // Check if the user exists
     $user = Users::find($user_id);
     if (!$user) {
@@ -713,8 +705,6 @@ public function add_trip(Request $request)
         ], 400);
     }
 
-     // Store the image and get its path
-     $imagePath = $trip_image->store('trips', 'public');
 
     // Create a new user instance
     $trip = new trips();
@@ -725,7 +715,6 @@ public function add_trip(Request $request)
     $trip->trip_title = $trip_title;
     $trip->trip_description = $trip_description;
     $trip->location = $location;
-    $trip->trip_image = basename($imagePath);
     $trip->trip_datetime = now(); 
     $trip->save();
 
@@ -758,6 +747,48 @@ public function add_trip(Request $request)
         ],
     ], 201);
 }
+
+public function update_trip_image(Request $request)
+{
+    $tripId = $request->input('trip_id');
+
+    if (empty($tripId)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'trip_id is empty.',
+        ], 400);
+    }
+
+    $trip = Trips::find($tripId);
+
+    if (!$trip) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Trip not found.',
+        ], 404);
+    }
+
+    $tripImage = $request->file('trip_image');
+
+    if ($tripImage) {
+        $imagePath = $tripImage->store('trips', 'public');
+        $trip->trip_image = basename($imagePath);
+        $trip->trip_datetime = now(); 
+        $trip->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Trip image updated successfully.',
+        ], 200);
+    } 
+    else {
+        return response()->json([
+            'success' => false,
+            'message' => 'Trip image is empty.',
+        ], 400);
+    }
+}
+
 public function update_trip(Request $request)
 {
     $trip_id = $request->input('trip_id');

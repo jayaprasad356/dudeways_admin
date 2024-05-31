@@ -11,6 +11,7 @@ Route::post('update_image', [AuthController::class, 'update_image']);
 Route::post('update_cover_img', [AuthController::class, 'update_cover_img']);
 Route::post('update_users', [AuthController::class, 'update_users']);
 Route::post('add_trip', [AuthController::class, 'add_trip']);
+Route::post('update_trip_image', [AuthController::class, 'update_trip_image']);
 Route::post('update_trip', [AuthController::class, 'update_trip']);
 Route::post('trip_list', [AuthController::class, 'trip_list']);
 Route::post('my_trip_list', [AuthController::class, 'my_trip_list']);
