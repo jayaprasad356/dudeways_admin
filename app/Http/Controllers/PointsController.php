@@ -116,7 +116,7 @@ class PointsController extends Controller
         if (!$points->save()) {
             return redirect()->back()->with('error', 'Sorry, Something went wrong while updating the customer.');
         }
-        return redirect()->route('points.index')->with('success', 'Success, Points has been updated.');
+        return redirect()->route('points.edit')->with('success', 'Success, Points has been updated.');
     }
 
     public function destroy(Points $points)

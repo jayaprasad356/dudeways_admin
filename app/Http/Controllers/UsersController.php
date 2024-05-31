@@ -256,9 +256,9 @@ private function generateUniqueName($name, $user_id)
         if (!$users->save()) {
             return redirect()->back()->with('error', 'Sorry, Something went wrong while updating the customer.');
         }
-        return redirect()->route('users.index')->with('success', 'Success, User has been updated.');
+        return redirect()->route('users.edit')->with('success', 'Success, User has been updated.');
     }
-    
+
     public function addPointsForm($id)
     {
         $user = Users::find($id);

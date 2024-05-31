@@ -104,7 +104,7 @@ class ChatsController extends Controller
             return redirect()->back()->with('error', 'Sorry, something went wrong while updating the chat.');
         }
 
-        return redirect()->route('chats.index')->with('success', 'Success, chat has been updated.');
+        return redirect()->route('chats.edit')->with('success', 'Success, chat has been updated.');
     }
 
     public function destroy(Chats $chats)
