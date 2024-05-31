@@ -6,6 +6,7 @@
 @endsection
 @section('css')
     <link rel="stylesheet" href="{{ asset('plugins/sweetalert2/sweetalert2.min.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css">
 @endsection
 @section('content')
 <div class="card">
@@ -44,14 +45,17 @@
     <td>{{ $verification->id }}</td>
     <td>{{ optional($verification->user)->name }}</td> <!-- Display user name safely -->
     <td>
+    <a href="{{ asset('storage/app/public/verifications/' . $verification->selfie_image) }}" data-lightbox="selfie_image-{{ $verification->id }}">
         <img class="customer-img img-thumbnail img-fluid" src="{{ asset('storage/app/public/verifications/' . $verification->selfie_image) }}" alt=""
             style="max-width: 100px; max-height: 100px;">
     </td>
     <td>
+    <a href="{{ asset('storage/app/public/verifications/' . $verification->front_image) }}" data-lightbox="front_image-{{ $verification->id }}">
         <img class="customer-img img-thumbnail img-fluid" src="{{ asset('storage/app/public/verifications/' . $verification->front_image) }}" alt=""
             style="max-width: 100px; max-height: 100px;">
     </td>
     <td>
+    <a href="{{ asset('storage/app/public/verifications/' . $verification->back_image) }}" data-lightbox="back_image-{{ $verification->id }}">
         <img class="customer-img img-thumbnail img-fluid" src="{{ asset('storage/app/public/verifications/' . $verification->back_image) }}" alt=""
             style="max-width: 100px; max-height: 100px;">
     </td>
@@ -68,6 +72,7 @@
 @endsection
 @section('js')
     <script src="{{ asset('plugins/sweetalert2/sweetalert2.min.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
  <script>
   $(document).ready(function () {
             // Submit the form when user selection changes

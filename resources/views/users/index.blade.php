@@ -7,6 +7,7 @@
 @endsection
 @section('css')
     <link rel="stylesheet" href="{{ asset('plugins/sweetalert2/sweetalert2.min.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css">
 @endsection
 @section('content')
 <div class="card">
@@ -55,18 +56,22 @@
                         <td>{{$user->id}}</td>
                         <td>
     @if(Str::startsWith($user->profile, ['http://', 'https://']))
+        <a href="{{ asset('storage/app/public/users/' . $user->profile) }}" data-lightbox="profile-{{ $user->id }}">
         <img class="customer-img img-thumbnail img-fluid rounded-circle" src="{{ $user->profile }}" alt=""
             style="max-width: 100px; max-height: 100px;">
     @else
+    <a href="{{ asset('storage/app/public/users/' . $user->profile) }}" data-lightbox="profile-{{ $user->id }}">
         <img class="customer-img img-thumbnail img-fluid rounded-circle" src="{{ asset('storage/app/public/users/' . $user->profile) }}" alt=""
             style="max-width: 100px; max-height: 100px;">
     @endif
 </td>
 <td>
     @if(Str::startsWith($user->cover_img, ['http://', 'https://']))
+        <a href="{{ asset('storage/app/public/users/' . $user->cover_img) }}" data-lightbox="cover_img-{{ $user->id }}">
         <img class="customer-img img-thumbnail img-fluid " src="{{ $user->cover_img }}" alt=""
             style="max-width: 100px; max-height: 100px;">
     @else
+    <a href="{{ asset('storage/app/public/users/' . $user->cover_img) }}" data-lightbox="cover_img-{{ $user->id }}">
         <img class="customer-img img-thumbnail img-fluid" src="{{ asset('storage/app/public/users/' . $user->cover_img) }}" alt=""
             style="max-width: 100px; max-height: 100px;">
     @endif
@@ -106,6 +111,7 @@
 @endsection
 @section('js')
     <script src="{{ asset('plugins/sweetalert2/sweetalert2.min.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
     <script>
         $(document).ready(function () {
             $(document).on('click', '.btn-delete', function () {

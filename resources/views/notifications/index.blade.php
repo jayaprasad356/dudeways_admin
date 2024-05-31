@@ -6,6 +6,7 @@
 @endsection
 @section('css')
     <link rel="stylesheet" href="{{ asset('plugins/sweetalert2/sweetalert2.min.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css">
 @endsection
 @section('content')
 <div class="card">
@@ -44,6 +45,7 @@
                         </td>
                         <td>{{$notification->id}}</td>
                         <td>
+                        <a href="{{ asset('storage/app/public/users/' . $notification->user->profile) }}" data-lightbox="profile-{{ $notification->id }}">
                         <img class="customer-img img-thumbnail img-fluid rounded-circle" src="{{ asset('storage/app/public/users/' . $notification->user->profile) }}" alt=""
                         style="max-width: 100px; max-height: 100px;">
                         </td>
@@ -63,6 +65,8 @@
 @endsection
 @section('js')
     <script src="{{ asset('plugins/sweetalert2/sweetalert2.min.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
+
  <script>
   $(document).ready(function () {
             // Submit the form when user selection changes

@@ -7,6 +7,7 @@
 @endsection
 @section('css')
     <link rel="stylesheet" href="{{ asset('plugins/sweetalert2/sweetalert2.min.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css">
 @endsection
 @section('content')
 <div class="card">
@@ -65,9 +66,11 @@
                         <td>{{$trip->id}}</td>
                         <td>
     @if(Str::startsWith($trip->trip_image, ['http://', 'https://']))
+        <a href="{{ asset('storage/app/public/trips/' . $trip->trip_image) }}" data-lightbox="trip_image-{{ $trip->id }}">
         <img class="customer-img img-thumbnail img-fluid" src="{{ $trip->trip_image }}" alt=""
             style="max-width: 100px; max-height: 100px;">
-    @else
+    @else 
+    <a href="{{ asset('storage/app/public/trips/' . $trip->trip_image) }}" data-lightbox="trip_image-{{ $trip->id }}">
         <img class="customer-img img-thumbnail img-fluid" src="{{ asset('storage/app/public/trips/' . $trip->trip_image) }}" alt=""
             style="max-width: 100px; max-height: 100px;">
     @endif
@@ -101,6 +104,7 @@
 @endsection
 @section('js')
     <script src="{{ asset('plugins/sweetalert2/sweetalert2.min.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
  <script>
   $(document).ready(function () {
             // Submit the form when user selection changes
