@@ -24,26 +24,26 @@
             <table class="table table-bordered table-hover">
                 <thead class="thead-dark">
                     <tr>
+                    <th>Actions</th>
                         <th>ID <i class="fas fa-sort"></i></th>
                         <th>Points <i class="fas fa-sort"></i></th>
                         <th>Offer Percentage <i class="fas fa-sort"></i></th>
                         <th>Price <i class="fas fa-sort"></i></th>
                         <th>DateTime <i class="fas fa-sort"></i></th>
-                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($points as $point)
                     <tr>
+                    <td>
+                            <a href="{{ route('points.edit', $point) }}" class="btn btn-primary"><i class="fas fa-edit"></i></a>
+                            <button class="btn btn-danger btn-delete" data-url="{{route('points.destroy', $point)}}"><i class="fas fa-trash"></i></button>
+                        </td>
                         <td>{{$point->id}}</td>
                         <td>{{$point->points}}</td>
                         <td>{{$point->offer_percentage}}</td>
                         <td>{{$point->price}}</td>
                         <td>{{$point->datetime}}</td>
-                        <td>
-                            <a href="{{ route('points.edit', $point) }}" class="btn btn-primary"><i class="fas fa-edit"></i></a>
-                            <button class="btn btn-danger btn-delete" data-url="{{route('points.destroy', $point)}}"><i class="fas fa-trash"></i></button>
-                        </td>
                     </tr>
                     @endforeach
                 </tbody>

@@ -41,17 +41,21 @@
             <table class="table table-bordered table-hover">
                 <thead class="thead-dark">
                     <tr>
+                    <th>Actions</th>
                         <th>ID <i class="fas fa-sort"></i></th>
                         <th>Profile <i class="fas fa-sort"></i></th>
                         <th>User Name <i class="fas fa-sort"></i></th>
                         <th>Latest Message <i class="fas fa-sort"></i></th>
                         <th>DateTime<i class="fas fa-sort"></i></th>
-                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($chats as $chat)
                     <tr>
+                    <td>
+                            <a href="{{ route('chats.edit', $chat) }}" class="btn btn-primary"><i class="fas fa-edit"></i></a>
+                            <button class="btn btn-danger btn-delete" data-url="{{route('chats.destroy', $chat)}}"><i class="fas fa-trash"></i></button>
+                        </td>
                         <td>{{$chat->id}}</td>
                         <td>
                         <img class="customer-img img-thumbnail img-fluid rounded-circle" src="{{ asset('storage/app/public/users/' . $chat->user->profile) }}" alt=""
@@ -60,10 +64,6 @@
                         <td>{{ optional($chat->user)->name }}</td> <!-- Display user name safely -->
                         <td>{{$chat->latest_message}}</td>
                         <td>{{$chat->datetime}}</td>
-                        <td>
-                            <a href="{{ route('chats.edit', $chat) }}" class="btn btn-primary"><i class="fas fa-edit"></i></a>
-                            <button class="btn btn-danger btn-delete" data-url="{{route('chats.destroy', $chat)}}"><i class="fas fa-trash"></i></button>
-                        </td>
                     </tr>
                     @endforeach
                 </tbody>

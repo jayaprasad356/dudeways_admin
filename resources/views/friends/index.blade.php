@@ -27,18 +27,21 @@
             <table class="table table-bordered table-hover">
                 <thead class="thead-dark">
                     <tr>
+                    <th>Actions</th>
                         <th>ID <i class="fas fa-sort"></i></th>
                         <th>Profile <i class="fas fa-sort"></i></th>
                         <th>User Name <i class="fas fa-sort"></i></th>
                         <th>Friend User Id <i class="fas fa-sort"></i></th>
                         <th>Status<i class="fas fa-sort"></i></th>
                         <th>DateTime<i class="fas fa-sort"></i></th>
-                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($friends as $friend)
                     <tr>
+                    <td>
+                            <button class="btn btn-danger btn-delete" data-url="{{route('friends.destroy', $friend)}}"><i class="fas fa-trash"></i></button>
+                        </td>
                         <td>{{$friend->id}}</td>
                         <td>
                         <img class="customer-img img-thumbnail img-fluid rounded-circle" src="{{ asset('storage/app/public/users/' . $friend->user->profile) }}" alt=""
@@ -48,9 +51,6 @@
                         <td>{{$friend->friend_user_id}}</td>
                         <td>{{ $friend->status == 1 ? 'Interested' : 'Not Interested' }}</td>
                         <td>{{$friend->datetime}}</td>
-                        <td>
-                            <button class="btn btn-danger btn-delete" data-url="{{route('friends.destroy', $friend)}}"><i class="fas fa-trash"></i></button>
-                        </td>
                     </tr>
                     @endforeach
                 </tbody>

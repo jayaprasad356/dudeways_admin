@@ -27,18 +27,21 @@
             <table class="table table-bordered table-hover">
                 <thead class="thead-dark">
                     <tr>
+                    <th>Actions</th>
                         <th>ID <i class="fas fa-sort"></i></th>
                         <th>Profile <i class="fas fa-sort"></i></th>
                         <th>User Name <i class="fas fa-sort"></i></th>
                         <th>Notify User Id <i class="fas fa-sort"></i></th>
                         <th>Message<i class="fas fa-sort"></i></th>
                         <th>DateTime<i class="fas fa-sort"></i></th>
-                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($notifications as $notification)
                     <tr>
+                    <td>
+                            <button class="btn btn-danger btn-delete" data-url="{{route('notifications.destroy', $notification)}}"><i class="fas fa-trash"></i></button>
+                        </td>
                         <td>{{$notification->id}}</td>
                         <td>
                         <img class="customer-img img-thumbnail img-fluid rounded-circle" src="{{ asset('storage/app/public/users/' . $notification->user->profile) }}" alt=""
@@ -48,9 +51,6 @@
                         <td>{{$notification->notify_user_id}}</td>
                         <td>{{$notification->message}}</td>
                         <td>{{$notification->datetime}}</td>
-                        <td>
-                            <button class="btn btn-danger btn-delete" data-url="{{route('notifications.destroy', $notification)}}"><i class="fas fa-trash"></i></button>
-                        </td>
                     </tr>
                     @endforeach
                 </tbody>

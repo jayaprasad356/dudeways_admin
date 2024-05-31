@@ -27,17 +27,20 @@
             <table class="table table-bordered table-hover">
                 <thead class="thead-dark">
                     <tr>
+                    <th>Actions</th>
                         <th>ID <i class="fas fa-sort"></i></th>
                         <th>User Name <i class="fas fa-sort"></i></th>
                         <th>Selfie Image<i class="fas fa-sort"></i></th>
                         <th>Front Image<i class="fas fa-sort"></i></th>
                         <th>Back Image<i class="fas fa-sort"></i></th>
-                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                 @foreach ($verifications as $verification)
 <tr>
+<td>
+        <button class="btn btn-danger btn-delete" data-url="{{ route('verifications.destroy', $verification) }}"><i class="fas fa-trash"></i></button>
+    </td>
     <td>{{ $verification->id }}</td>
     <td>{{ optional($verification->user)->name }}</td> <!-- Display user name safely -->
     <td>
@@ -51,9 +54,6 @@
     <td>
         <img class="customer-img img-thumbnail img-fluid" src="{{ asset('storage/app/public/verifications/' . $verification->back_image) }}" alt=""
             style="max-width: 100px; max-height: 100px;">
-    </td>
-    <td>
-        <button class="btn btn-danger btn-delete" data-url="{{ route('verifications.destroy', $verification) }}"><i class="fas fa-trash"></i></button>
     </td>
 </tr>
 @endforeach

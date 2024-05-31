@@ -41,6 +41,7 @@
             <table class="table table-bordered table-hover">
                 <thead class="thead-dark">
                     <tr>
+                    <th>Actions</th>
                         <th>ID <i class="fas fa-sort"></i></th>
                         <th>Trip Image</th>
                         <th>User Name <i class="fas fa-sort"></i></th>
@@ -52,12 +53,15 @@
                         <th>Trip Description<i class="fas fa-sort"></i></th>
                         <th>Trip Status</th>
                         <th>Trip DateTime<i class="fas fa-sort"></i></th>
-                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($trips as $trip)
                     <tr>
+                    <td>
+                            <a href="{{ route('trips.edit', $trip) }}" class="btn btn-primary"><i class="fas fa-edit"></i></a>
+                            <button class="btn btn-danger btn-delete" data-url="{{route('trips.destroy', $trip)}}"><i class="fas fa-trash"></i></button>
+                        </td>
                         <td>{{$trip->id}}</td>
                         <td>
     @if(Str::startsWith($trip->trip_image, ['http://', 'https://']))
@@ -85,10 +89,6 @@
                     @endif
                 </td>
                         <td>{{$trip->trip_datetime}}</td>
-                        <td>
-                            <a href="{{ route('trips.edit', $trip) }}" class="btn btn-primary"><i class="fas fa-edit"></i></a>
-                            <button class="btn btn-danger btn-delete" data-url="{{route('trips.destroy', $trip)}}"><i class="fas fa-trash"></i></button>
-                        </td>
                     </tr>
                     @endforeach
                 </tbody>

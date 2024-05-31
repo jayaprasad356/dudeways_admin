@@ -24,6 +24,7 @@
             <table class="table table-bordered table-hover">
                 <thead class="thead-dark">
                     <tr>
+                    <th>Actions</th>
                     <th>ID <i class="fas fa-sort"></i></th>
                     <th>Profile</th>
                     <th>Cover Image</th>
@@ -42,12 +43,15 @@
                     <th>Verified <i class="fas fa-sort"></i></th>
                     <th>Online Status <i class="fas fa-sort"></i></th>
                     <th>DateTime <i class="fas fa-sort"></i></th>
-                    <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($users as $user)
                     <tr>
+                    <td>
+                            <a href="{{ route('users.edit', $user) }}" class="btn btn-primary"><i class="fas fa-edit"></i></a>
+                            <button class="btn btn-danger btn-delete" data-url="{{route('users.destroy', $user)}}"><i class="fas fa-trash"></i></button>
+                        </td>
                         <td>{{$user->id}}</td>
                         <td>
     @if(Str::startsWith($user->profile, ['http://', 'https://']))
@@ -90,10 +94,6 @@
                             </span>
                         </td>
                         <td>{{$user->datetime}}</td>
-                        <td>
-                            <a href="{{ route('users.edit', $user) }}" class="btn btn-primary"><i class="fas fa-edit"></i></a>
-                            <button class="btn btn-danger btn-delete" data-url="{{route('users.destroy', $user)}}"><i class="fas fa-trash"></i></button>
-                        </td>
                     </tr>
                     @endforeach
                 </tbody>
