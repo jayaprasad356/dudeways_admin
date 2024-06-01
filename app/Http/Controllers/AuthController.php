@@ -519,26 +519,10 @@ public function update_users(Request $request)
     $name = $request->input('name');
     $email = $request->input('email');
     $unique_name = $request->input('unique_name');
-    $mobile = $request->input('mobile');
     $age = $request->input('age');
-    $gender = $request->input('gender');
     $profession = $request->input('profession');
     $state = $request->input('state');
     $city = $request->input('city');
-
-   // Validation for each field
-   if ($mobile !== null) {
-    // Remove non-numeric characters from the phone number
-    $mobile = preg_replace('/[^0-9]/', '', $mobile);
-
-    // Check if the length of the phone number is not equal to 10
-    if (strlen($mobile) !== 10) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Mobile number should be exactly 10 digits.',
-        ], 400);
-    }
-}
 
 if ($age !== null) {
     if ($age < 18 || $age > 60) {
@@ -573,15 +557,11 @@ if ($email !== null) {
     if ($email !== null) {
         $user->email = $email;
     }
-    if ($mobile !== null) {
-        $user->mobile = $mobile;
-    }
+    
     if ($age !== null) {
         $user->age = $age;
     }
-    if ($gender !== null) {
-        $user->gender = $gender;
-    }
+   
     if ($profession !== null) {
         $user->profession = $profession;
     }
