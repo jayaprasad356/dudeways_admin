@@ -147,7 +147,6 @@ return response()->json([
 
 public function register(Request $request)
 {
-    $mobile = $request->input('mobile');
     $age = $request->input('age');
     $name = $request->input('name');
     $unique_name = $request->input('unique_name');
@@ -158,14 +157,6 @@ public function register(Request $request)
     $profession = $request->input('profession');
     $referred_by = $request->input('referred_by');
     $points = $request->input('points', 10);
-
-    // Validation for mandatory fields
-    if (empty($mobile)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Mobile is empty.',
-        ], 400);
-    }
 
     if (empty($state)) {
         return response()->json([
@@ -228,26 +219,6 @@ public function register(Request $request)
         ], 400);
     }
 
-    // Remove non-numeric characters from the phone number
-    $mobile = preg_replace('/[^0-9]/', '', $mobile);
-
-    // Check if the length of the phone number is not equal to 10
-    if (strlen($mobile) !== 10) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Mobile number should be exactly 10 digits.',
-        ], 400);
-    }
-
-    // Check if the user with the given phone number already exists
-    $existingUser = Users::where('mobile', $mobile)->first();
-    if ($existingUser) {
-        return response()->json([
-            'success' => false,
-            'message' => 'User already exists with this phone number.',
-        ], 409);
-    }
-
     $existingUser = Users::where('unique_name', $unique_name)->first();
     if ($existingUser) {
         return response()->json([
@@ -279,7 +250,6 @@ public function register(Request $request)
     }
 
     $user = new Users();
-    $user->mobile = $mobile;
     $user->age = $age;
     $user->name = $name;
     $user->gender = $gender;
