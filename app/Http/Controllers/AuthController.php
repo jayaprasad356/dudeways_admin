@@ -83,6 +83,68 @@ class AuthController extends Controller
     ], 200);
 }
 
+public function check_email(Request $request)
+{
+    // Retrieve phone number from the request
+    $email = $request->input('email');
+
+    if (empty($email)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Email is empty.',
+        ], 400);
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid email format.',
+        ], 400);
+    }
+
+    // Check if a customer with the given phone number exists in the database
+    $user = Users::where('email', $email)->first();
+
+    // If customer not found, return failure response
+    if (!$user) {
+        $response['success'] = true;
+        $response['registered'] = false;
+        $response['message'] = 'Email not registered.';
+        return response()->json($response, 404);
+    }
+
+// Image URL
+$imageUrl = asset('storage/app/public/users/' . $user->profile);
+$coverimageUrl = asset('storage/app/public/users/' . $user->cover_img);
+
+return response()->json([
+    'success' => true,
+    'registered' => true,
+    'message' => 'Logged in successfully.',
+    'data' => [
+        'id' => $user->id,
+        'name' => $user->name,
+        'unique_name' => $user->unique_name,
+        'email' => $user->email,
+        'mobile' => $user->mobile,
+        'age' => $user->age,
+        'gender' => $user->gender,
+        'state' => $user->state,
+        'city' => $user->city,
+        'profession' => $user->profession,
+        'refer_code' => $user->refer_code,
+        'referred_by' => $user->referred_by,
+        'profile' => $imageUrl,
+        'cover_img' => $coverimageUrl,
+        'points' => $user->points,
+        'verified' => $user->verified,
+        'online_status' => $user->online_status,
+        'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
+        'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
+        'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
+        'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
+    ],
+], 200);
+}
+
 public function register(Request $request)
 {
     $mobile = $request->input('mobile');
