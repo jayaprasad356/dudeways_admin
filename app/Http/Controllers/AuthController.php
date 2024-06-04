@@ -1470,56 +1470,79 @@ public function add_chat(Request $request)
         ], 404);
     }
 
+    // Check if a chat entry already exists between the two users
+    $existingChat = Chats::where('user_id', $user_id)
+                         ->where('chat_user_id', $chat_user_id)
+                         ->first();
 
-     // Check if a chat between these users already exists
-     $existingChat = Chats::where('user_id', $user_id)
-     ->where('chat_user_id', $chat_user_id)
-     ->first();
-if ($existingChat) {
-return response()->json([
-'success' => false,
-'message' => 'Chat between these users already exists.',
-], 400);
-}
+    // If a chat exists, update it
+    if ($existingChat) {
+        $existingChat->latest_message = $message;
+        $existingChat->latest_msg_time = now();
+        $existingChat->datetime = now();
+        if (!$existingChat->save()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update Chat.',
+            ], 500);
+        }
 
-    // Create a new chat instance
-    $chat = new Chats();
-    $chat->user_id = $user_id; 
-    $chat->chat_user_id = $chat_user_id;
-    $chat->latest_message = $message; 
-    $chat->latest_msg_time = now();
-    $chat->datetime = now(); 
+        // Return success response with updated chat data
+        return response()->json([
+            'success' => true,
+            'message' => 'Chat updated successfully.',
+            'data' => [
+                'id' => $existingChat->id,
+                'user_id' => $existingChat->user_id,
+                'chat_user_id' => $existingChat->chat_user_id,
+                'name' => $chat_user->name, 
+                'profile' => asset('storage/app/public/users/' . $chat_user->profile),
+                'latest_message' => $existingChat->latest_message,
+                'latest_msg_time' => Carbon::parse($existingChat->latest_msg_time)->format('Y-m-d H:i:s'),
+                'msg_seen' => '0',
+                'datetime' => Carbon::parse($existingChat->datetime)->format('Y-m-d H:i:s'),
+                'updated_at' => Carbon::parse($existingChat->updated_at)->format('Y-m-d H:i:s'),
+                'created_at' => Carbon::parse($existingChat->created_at)->format('Y-m-d H:i:s'),
+            ],
+        ], 200);
+    }
+
+    // If no chat exists, create a new one
+    $newChat = new Chats();
+    $newChat->user_id = $user_id; 
+    $newChat->chat_user_id = $chat_user_id;
+    $newChat->latest_message = $message; 
+    $newChat->latest_msg_time = now();
+    $newChat->datetime = now(); 
 
     // Save the chat
-    if (!$chat->save()) {
+    if (!$newChat->save()) {
         return response()->json([
             'success' => false,
             'message' => 'Failed to save Chat.',
         ], 500);
     }
 
-    // Generate image URL for chat_user
-    $chatUserImageUrl = asset('storage/app/public/users/' . $user->profile);
-
-    // Return success response
+    // Return success response with new chat data
     return response()->json([
         'success' => true,
         'message' => 'Chat added successfully.',
         'data' => [
-            'id' => $chat->id,
-            'user_id' => $chat->user_id,
-            'chat_user_id' => $chat->chat_user_id,
+            'id' => $newChat->id,
+            'user_id' => $newChat->user_id,
+            'chat_user_id' => $newChat->chat_user_id,
             'name' => $chat_user->name, 
-            'profile' => $chatUserImageUrl,
-            'latest_message' => $chat->latest_message,
-            'latest_msg_time' => Carbon::parse($chat->latest_msg_time)->format('Y-m-d H:i:s'),
+            'profile' => asset('storage/app/public/users/' . $chat_user->profile),
+            'latest_message' => $newChat->latest_message,
+            'latest_msg_time' => Carbon::parse($newChat->latest_msg_time)->format('Y-m-d H:i:s'),
             'msg_seen' => '0',
-            'datetime' => Carbon::parse($chat->datetime)->format('Y-m-d H:i:s'),
-            'updated_at' => Carbon::parse($chat->updated_at)->format('Y-m-d H:i:s'),
-            'created_at' => Carbon::parse($chat->created_at)->format('Y-m-d H:i:s'),
+            'datetime' => Carbon::parse($newChat->datetime)->format('Y-m-d H:i:s'),
+            'updated_at' => Carbon::parse($newChat->updated_at)->format('Y-m-d H:i:s'),
+            'created_at' => Carbon::parse($newChat->created_at)->format('Y-m-d H:i:s'),
         ],
     ], 201);
 }
+
 
 public function chat_list(Request $request)
 {
