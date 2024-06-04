@@ -2028,8 +2028,8 @@ public function verifications(Request $request)
         'data' => [
             'id' => $verification->id,
             'user_name' => $user->name,
-            'updated_at' => $verification->updated_at,
-            'created_at' => $verification->created_at,
+            'updated_at' => Carbon::parse($verification->updated_at)->format('Y-m-d H:i:s'),
+            'created_at' => Carbon::parse($verification->created_at)->format('Y-m-d H:i:s'),
             'selfie_image_url' => $selfieImageUrl,
             'front_image_url' => $frontImageUrl,
             'back_image_url' => $backImageUrl,
@@ -2113,8 +2113,8 @@ public function verify_front_image(Request $request)
             'data' => [
                 'id' => $existingVerification->id,
                 'user_name' => $user->name,
-                'updated_at' => $existingVerification->updated_at,
-                'created_at' => $existingVerification->created_at,
+                'updated_at' => Carbon::parse($existingVerification->updated_at)->format('Y-m-d H:i:s'),
+                'created_at' => Carbon::parse($existingVerification->created_at)->format('Y-m-d H:i:s'),
                 'front_image_url' => $frontImageUrl,
             ],
         ], 200);
@@ -2135,8 +2135,8 @@ public function verify_front_image(Request $request)
             'data' => [
                 'id' => $verification->id,
                 'user_name' => $user->name,
-                'updated_at' => $verification->updated_at,
-                'created_at' => $verification->created_at,
+                'updated_at' => Carbon::parse($verification->updated_at)->format('Y-m-d H:i:s'),
+                'created_at' => Carbon::parse($verification->created_at)->format('Y-m-d H:i:s'),
                 'front_image_url' => $frontImageUrl,
             ],
         ], 201);
@@ -2187,8 +2187,8 @@ public function verify_back_image(Request $request)
             'data' => [
                 'id' => $existingVerification->id,
                 'user_name' => $user->name,
-                'updated_at' => $existingVerification->updated_at,
-                'created_at' => $existingVerification->created_at,
+                'updated_at' => Carbon::parse($existingVerification->updated_at)->format('Y-m-d H:i:s'),
+                'created_at' => Carbon::parse($existingVerification->created_at)->format('Y-m-d H:i:s'),
                 'back_image_url' => $backImageUrl,
             ],
         ], 200);
@@ -2209,8 +2209,8 @@ public function verify_back_image(Request $request)
             'data' => [
                 'id' => $verification->id,
                 'user_name' => $user->name,
-                'updated_at' => $verification->updated_at,
-                'created_at' => $verification->created_at,
+                'updated_at' => Carbon::parse($verification->updated_at)->format('Y-m-d H:i:s'),
+                'created_at' => Carbon::parse($verification->created_at)->format('Y-m-d H:i:s'),
                 'back_image_url' => $backImageUrl,
             ],
         ], 201);
@@ -2261,8 +2261,8 @@ public function verify_selfie_image(Request $request)
             'data' => [
                 'id' => $existingVerification->id,
                 'user_name' => $user->name,
-                'updated_at' => $existingVerification->updated_at,
-                'created_at' => $existingVerification->created_at,
+                'updated_at' => Carbon::parse($existingVerification->updated_at)->format('Y-m-d H:i:s'),
+                'created_at' => Carbon::parse($existingVerification->created_at)->format('Y-m-d H:i:s'),
                 'selfie_image_url' => $selfieImageUrl,
             ],
         ], 200);
@@ -2283,8 +2283,8 @@ public function verify_selfie_image(Request $request)
             'data' => [
                 'id' => $verification->id,
                 'user_name' => $user->name,
-                'updated_at' => $verification->updated_at,
-                'created_at' => $verification->created_at,
+                'updated_at' => Carbon::parse($verification->updated_at)->format('Y-m-d H:i:s'),
+                'created_at' => Carbon::parse($verification->created_at)->format('Y-m-d H:i:s'),
                 'selfie_image_url' => $selfieImageUrl,
             ],
         ], 201);
