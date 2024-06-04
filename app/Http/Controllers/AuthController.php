@@ -1590,6 +1590,7 @@ public function chat_list(Request $request)
             'chat_user_id' => $chat->chat_user_id,
             'name' => $chat_user->name, // Display chat_user name
             'profile' => $imageUrl, // Display chat_user profile
+            'online_status' => $chat_user->online_status, // Display chat_user name
             'latest_message' => $chat->latest_message,
             'latest_msg_time' => $lastSeenFormatted,
             'msg_seen' => $chat->msg_seen,
