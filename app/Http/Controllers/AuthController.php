@@ -1523,15 +1523,18 @@ return response()->json([
 
 public function chat_list(Request $request)
 {
-    // Fetching all chats from the Chats model
-    $chats = Chats::all();
+      // Get the user_id from the request
+      $user_id = $request->input('user_id');
 
-    if ($chats->isEmpty()) {
-        return response()->json([
-            'success' => false,
-            'message' => 'No chats found.',
-        ], 404);
-    }
+      // Fetching chats for the specific user_id
+      $chats = Chats::where('user_id', $user_id)->get();
+  
+      if ($chats->isEmpty()) {
+          return response()->json([
+              'success' => false,
+              'message' => 'No chats found for the user_id.',
+          ], 404);
+      }
 
     $chatDetails = $chats->map(function ($chat) {
         $chat_user = Users::find($chat->chat_user_id); // Fetch the chat_user details
