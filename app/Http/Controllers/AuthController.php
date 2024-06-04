@@ -1227,6 +1227,72 @@ public function latest_trip(Request $request)
     ], 200);
 }
 
+public function recommend_trip_list(Request $request)
+{
+    // Get the trip_id from the request
+    $trip_id = $request->input('trip_id');
+
+    // Fetch trip details for the specific trip_id from the database
+    $trip = Trips::find($trip_id);
+
+    // Check if the trip exists
+    if (!$trip) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Trip not found.',
+        ], 404);
+    }
+
+    // Prepare trip details for the specific trip_id
+    $tripDetails[] = [
+        'id' => $trip->id,
+        'user_id' => $trip->user_id,
+        'trip_type' => $trip->trip_type,
+        'from_date' => date('F j, Y', strtotime($trip->from_date)),
+        'to_date' => date('F j, Y', strtotime($trip->to_date)),
+        'time' => '4h',
+        'trip_title' => $trip->trip_title,
+        'trip_description' => $trip->trip_description,
+        'location' => $trip->location,
+        'trip_status' => $trip->trip_status,
+        'trip_image' => asset('storage/app/public/trips/' . $trip->trip_image),
+        'trip_datetime' => Carbon::parse($trip->trip_datetime)->format('Y-m-d H:i:s'),
+        'updated_at' => Carbon::parse($trip->updated_at)->format('Y-m-d H:i:s'),
+        'created_at' => Carbon::parse($trip->created_at)->format('Y-m-d H:i:s'),
+    ];
+
+    // Fetch all trips from the database
+    $allTrips = Trips::all();
+
+    // Prepare trip details for all trips
+    $allTripDetails = [];
+    foreach ($allTrips as $trip) {
+        $allTripDetails[] = [
+            'id' => $trip->id,
+            'user_id' => $trip->user_id,
+            'trip_type' => $trip->trip_type,
+            'from_date' => date('F j, Y', strtotime($trip->from_date)),
+            'to_date' => date('F j, Y', strtotime($trip->to_date)),
+            'time' => '4h',
+            'trip_title' => $trip->trip_title,
+            'trip_description' => $trip->trip_description,
+            'location' => $trip->location,
+            'trip_status' => $trip->trip_status,
+            'trip_image' => asset('storage/app/public/trips/' . $trip->trip_image),
+            'trip_datetime' => Carbon::parse($trip->trip_datetime)->format('Y-m-d H:i:s'),
+            'updated_at' => Carbon::parse($trip->updated_at)->format('Y-m-d H:i:s'),
+            'created_at' => Carbon::parse($trip->created_at)->format('Y-m-d H:i:s'),
+        ];
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Trip details retrieved successfully.',
+        'specific_trip' => $tripDetails,
+        'all_trips' => $allTripDetails,
+    ], 200);
+}
+
 
 public function delete_trip(Request $request)
 {
@@ -1257,6 +1323,114 @@ public function delete_trip(Request $request)
         'message' => 'Trip deleted successfully.',
     ], 200);
 }
+
+public function add_chat(Request $request)
+{
+    $user_id = $request->input('user_id'); 
+    $chat_user_id = $request->input('chat_user_id');
+    $message = $request->input('message');
+
+    // Validate user_id
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 400);
+    }
+
+    // Validate chat_user_id
+    if (empty($chat_user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'chat_user_id is empty.',
+        ], 400);
+    }
+
+    // Validate message
+    if (empty($message)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Message is empty.',
+        ], 400);
+    }
+
+    // Check if user_id and chat_user_id are the same
+    if ($user_id == $chat_user_id) {
+        return response()->json([
+            'success' => false,
+            'message' => 'You cannot chat with yourself.',
+        ], 400);
+    }
+
+    // Check if user exists
+    $user = Users::find($user_id);
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user not found.',
+        ], 404);
+    }
+
+    // Check if chat_user exists
+    $chat_user = Users::find($chat_user_id);
+    if (!$chat_user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'chat_user not found.',
+        ], 404);
+    }
+
+
+     // Check if a chat between these users already exists
+     $existingChat = Chats::where('user_id', $user_id)
+     ->where('chat_user_id', $chat_user_id)
+     ->first();
+if ($existingChat) {
+return response()->json([
+'success' => false,
+'message' => 'Chat between these users already exists.',
+], 400);
+}
+
+    // Create a new chat instance
+    $chat = new Chats();
+    $chat->user_id = $user_id; 
+    $chat->chat_user_id = $chat_user_id;
+    $chat->latest_message = $message; 
+    $chat->latest_msg_time = now();
+    $chat->datetime = now(); 
+
+    // Save the chat
+    if (!$chat->save()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to save Chat.',
+        ], 500);
+    }
+
+    // Generate image URL for chat_user
+    $chatUserImageUrl = asset('storage/app/public/users/' . $user->profile);
+
+    // Return success response
+    return response()->json([
+        'success' => true,
+        'message' => 'Chat added successfully.',
+        'data' => [
+            'id' => $chat->id,
+            'user_id' => $chat->user_id,
+            'chat_user_id' => $chat->chat_user_id,
+            'name' => $chat_user->name, 
+            'profile' => $chatUserImageUrl,
+            'latest_message' => $chat->latest_message,
+            'latest_msg_time' => Carbon::parse($chat->latest_msg_time)->format('Y-m-d H:i:s'),
+            'msg_seen' => '0',
+            'datetime' => Carbon::parse($chat->datetime)->format('Y-m-d H:i:s'),
+            'updated_at' => Carbon::parse($chat->updated_at)->format('Y-m-d H:i:s'),
+            'created_at' => Carbon::parse($chat->created_at)->format('Y-m-d H:i:s'),
+        ],
+    ], 201);
+}
+
 public function chat_list(Request $request)
 {
     // Fetching all chats from the Chats model
@@ -1270,8 +1444,8 @@ public function chat_list(Request $request)
     }
 
     $chatDetails = $chats->map(function ($chat) {
-        $user = $chat->user;
-        $imageUrl = asset('storage/app/public/users/' . $user->profile);
+        $chat_user = Users::find($chat->chat_user_id); // Fetch the chat_user details
+        $imageUrl = asset('storage/app/public/users/' . $chat_user->profile);
 
           // Determine the format of last_seen
           $lastSeen = Carbon::parse($chat->latest_msg_time);
@@ -1297,9 +1471,9 @@ public function chat_list(Request $request)
         return [
             'id' => $chat->id,
             'user_id' => $chat->user_id,
-            'name' => $user->name, 
-            'profile' => $imageUrl,
             'chat_user_id' => $chat->chat_user_id,
+            'name' => $chat_user->name, // Display chat_user name
+            'profile' => $imageUrl, // Display chat_user profile
             'latest_message' => $chat->latest_message,
             'latest_msg_time' => $lastSeenFormatted,
             'msg_seen' => $chat->msg_seen,
