@@ -735,6 +735,21 @@ public function add_trip(Request $request)
   // Fetch user details associated with the trip
   $user = Users::find($trip->user_id);
 
+   // Calculate time difference in hours
+ $tripTime = Carbon::parse($trip->trip_datetime);
+ $currentTime = Carbon::now();
+ $hoursDifference = $tripTime->diffInHours($currentTime);
+ 
+ // Determine the time display string
+ if ($hoursDifference == 0) {
+     $timeDifference = 'now';
+ } elseif ($hoursDifference < 24) {
+     $timeDifference = $hoursDifference . 'h';
+ } else {
+     $daysDifference = floor($hoursDifference / 24);
+     $timeDifference = $daysDifference . 'd';
+ }
+
 
     return response()->json([
         'success' => true,
@@ -747,7 +762,7 @@ public function add_trip(Request $request)
             'trip_type' => $trip->trip_type,
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
             'to_date' => date('F j, Y', strtotime($trip->to_date)),
-            'time' => '4h',
+            'time' => $timeDifference, 
             'trip_title' => $trip->trip_title,
             'trip_description' => $trip->trip_description,
             'location' => $trip->location,
@@ -914,6 +929,22 @@ public function update_trip(Request $request)
             // Image URL
             $imageUrl = asset('storage/app/public/trips/' . $trip->trip_image);
 
+            // Calculate time difference in hours
+ $tripTime = Carbon::parse($trip->trip_datetime);
+ $currentTime = Carbon::now();
+ $hoursDifference = $tripTime->diffInHours($currentTime);
+ 
+ // Determine the time display string
+ if ($hoursDifference == 0) {
+     $timeDifference = 'now';
+ } elseif ($hoursDifference < 24) {
+     $timeDifference = $hoursDifference . 'h';
+ } else {
+     $daysDifference = floor($hoursDifference / 24);
+     $timeDifference = $daysDifference . 'd';
+ }
+
+
     return response()->json([
         'success' => true,
         'message' => 'Trip updated successfully.',
@@ -925,7 +956,7 @@ public function update_trip(Request $request)
             'trip_type' => $trip->trip_type,
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
             'to_date' => date('F j, Y', strtotime($trip->to_date)),
-            'time' => '4h',
+            'time' => $timeDifference, 
             'trip_title' => $trip->trip_title,
             'trip_description' => $trip->trip_description,
             'location' => $trip->location,
@@ -937,7 +968,6 @@ public function update_trip(Request $request)
         ],
     ], 200);
 }
-
 
 public function trip_list(Request $request)
 {
@@ -995,6 +1025,20 @@ public function trip_list(Request $request)
             $imageUrl = null; // Set default image URL if user not found
             $friendStatus = '0';
         }
+ // Calculate time difference in hours
+ $tripTime = Carbon::parse($trip->trip_datetime);
+ $currentTime = Carbon::now();
+ $hoursDifference = $tripTime->diffInHours($currentTime);
+ 
+ // Determine the time display string
+ if ($hoursDifference == 0) {
+     $timeDifference = 'now';
+ } elseif ($hoursDifference < 24) {
+     $timeDifference = $hoursDifference . 'h';
+ } else {
+     $daysDifference = floor($hoursDifference / 24);
+     $timeDifference = $daysDifference . 'd';
+ }
 
         $tripimageUrl = asset('storage/app/public/trips/' . $trip->trip_image);
 
@@ -1008,7 +1052,7 @@ public function trip_list(Request $request)
             'trip_type' => $trip->trip_type,
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
             'to_date' => date('F j, Y', strtotime($trip->to_date)),
-            'time' => '4h',
+            'time' => $timeDifference, 
             'friend' => $friendStatus,
             'trip_title' => $trip->trip_title,
             'trip_description' => $trip->trip_description,
@@ -1058,6 +1102,22 @@ public function my_trip_list(Request $request)
             $imageUrl = null; // Set default image URL if user not found
         }
 
+      // Calculate time difference in hours
+ $tripTime = Carbon::parse($trip->trip_datetime);
+ $currentTime = Carbon::now();
+ $hoursDifference = $tripTime->diffInHours($currentTime);
+ 
+ // Determine the time display string
+ if ($hoursDifference == 0) {
+     $timeDifference = 'now';
+ } elseif ($hoursDifference < 24) {
+     $timeDifference = $hoursDifference . 'h';
+ } else {
+     $daysDifference = floor($hoursDifference / 24);
+     $timeDifference = $daysDifference . 'd';
+ }
+
+
         $tripimageUrl = asset('storage/app/public/trips/' . $trip->trip_image);
 
         $tripDetails[] = [
@@ -1070,7 +1130,7 @@ public function my_trip_list(Request $request)
             'trip_type' => $trip->trip_type,
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
             'to_date' => date('F j, Y', strtotime($trip->to_date)),
-            'time' => '4h',
+            'time' => $timeDifference, 
             'trip_title' => $trip->trip_title,
             'trip_description' => $trip->trip_description,
             'location' => $trip->location,
@@ -1132,6 +1192,21 @@ public function trip_date(Request $request)
         } else {
             $imageUrl = null; // Set default image URL if user not found
         }
+       // Calculate time difference in hours
+ $tripTime = Carbon::parse($trip->trip_datetime);
+ $currentTime = Carbon::now();
+ $hoursDifference = $tripTime->diffInHours($currentTime);
+ 
+ // Determine the time display string
+ if ($hoursDifference == 0) {
+     $timeDifference = 'now';
+ } elseif ($hoursDifference < 24) {
+     $timeDifference = $hoursDifference . 'h';
+ } else {
+     $daysDifference = floor($hoursDifference / 24);
+     $timeDifference = $daysDifference . 'd';
+ }
+
 
         $tripimageUrl = asset('storage/app/public/trips/' . $trip->trip_image);
 
@@ -1145,7 +1220,7 @@ public function trip_date(Request $request)
             'trip_type' => $trip->trip_type,
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
             'to_date' => date('F j, Y', strtotime($trip->to_date)),
-            'time' => '4h',
+            'time' => $timeDifference, 
             'trip_title' => $trip->trip_title,
             'trip_description' => $trip->trip_description,
             'location' => $trip->location,
@@ -1194,6 +1269,21 @@ public function latest_trip(Request $request)
 
     $user = Users::find($trip->user_id);
     
+ // Calculate time difference in hours
+ $tripTime = Carbon::parse($trip->trip_datetime);
+ $currentTime = Carbon::now();
+ $hoursDifference = $tripTime->diffInHours($currentTime);
+ 
+ // Determine the time display string
+ if ($hoursDifference == 0) {
+     $timeDifference = 'now';
+ } elseif ($hoursDifference < 24) {
+     $timeDifference = $hoursDifference . 'h';
+ } else {
+     $daysDifference = floor($hoursDifference / 24);
+     $timeDifference = $daysDifference . 'd';
+ }
+
 
     // Image URL
     $userProfileUrl = $user ? asset('storage/app/public/users/' . $user->profile) : null;
@@ -1209,7 +1299,7 @@ public function latest_trip(Request $request)
         'trip_type' => $trip->trip_type,
         'from_date' => date('F j, Y', strtotime($trip->from_date)),
         'to_date' => date('F j, Y', strtotime($trip->to_date)),
-        'time' => '4h',
+        'time' => $timeDifference, 
         'trip_title' => $trip->trip_title,
         'trip_description' => $trip->trip_description,
         'location' => $trip->location,
@@ -1944,6 +2034,228 @@ public function points_list(Request $request)
         'data' => $pointsDetails,
     ], 200);
 }
+public function verify_front_image(Request $request)
+{
+    $user_id = $request->input('user_id');
+    $front_image = $request->file('front_image');
+
+    // Validation for required fields
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 400);
+    }
+    if (empty($front_image)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Front Image is empty.',
+        ], 400);
+    }
+    // Check if user exists
+    $user = Users::find($user_id);
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User not found.',
+        ], 404);
+    }
+
+    // Check if verification record already exists for the user
+    $existingVerification = Verifications::where('user_id', $user_id)->first();
+    if ($existingVerification) {
+        // Update existing verification record
+        $frontImagePath = $front_image->store('verifications', 'public');
+        $existingVerification->front_image = basename($frontImagePath);
+        $existingVerification->save();
+
+        // Image URLs
+        $frontImageUrl = asset('storage/app/public/verifications/' . $existingVerification->front_image);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Front Image verification updated successfully.',
+            'data' => [
+                'id' => $existingVerification->id,
+                'user_name' => $user->name,
+                'updated_at' => $existingVerification->updated_at,
+                'created_at' => $existingVerification->created_at,
+                'front_image_url' => $frontImageUrl,
+            ],
+        ], 200);
+    } else {
+        // Create a new verification record
+        $frontImagePath = $front_image->store('verifications', 'public');
+        $verification = new Verifications();
+        $verification->front_image = basename($frontImagePath);
+        $verification->user_id = $user_id;
+        $verification->save();
+
+        // Image URLs
+        $frontImageUrl = asset('storage/app/public/verifications/' . $verification->front_image);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Front Image verification added successfully.',
+            'data' => [
+                'id' => $verification->id,
+                'user_name' => $user->name,
+                'updated_at' => $verification->updated_at,
+                'created_at' => $verification->created_at,
+                'front_image_url' => $frontImageUrl,
+            ],
+        ], 201);
+    }
+}
+
+public function verify_back_image(Request $request)
+{
+    $user_id = $request->input('user_id');
+    $back_image = $request->file('back_image');
+
+    // Validation for required fields
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 400);
+    }
+    if (empty($back_image)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Back Image is empty.',
+        ], 400);
+    }
+    // Check if user exists
+    $user = Users::find($user_id);
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User not found.',
+        ], 404);
+    }
+
+    // Check if verification record already exists for the user
+    $existingVerification = Verifications::where('user_id', $user_id)->first();
+    if ($existingVerification) {
+        // Update existing verification record
+        $backImagePath = $back_image->store('verifications', 'public');
+        $existingVerification->back_image = basename($backImagePath);
+        $existingVerification->save();
+
+        // Image URLs
+        $backImageUrl = asset('storage/app/public/verifications/' . $existingVerification->back_image);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Back Image verification updated successfully.',
+            'data' => [
+                'id' => $existingVerification->id,
+                'user_name' => $user->name,
+                'updated_at' => $existingVerification->updated_at,
+                'created_at' => $existingVerification->created_at,
+                'back_image_url' => $backImageUrl,
+            ],
+        ], 200);
+    } else {
+        // Create a new verification record
+        $backImagePath = $back_image->store('verifications', 'public');
+        $verification = new Verifications();
+        $verification->back_image = basename($backImagePath);
+        $verification->user_id = $user_id;
+        $verification->save();
+
+        // Image URLs
+        $backImageUrl = asset('storage/app/public/verifications/' . $verification->back_image);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Back Image verification added successfully.',
+            'data' => [
+                'id' => $verification->id,
+                'user_name' => $user->name,
+                'updated_at' => $verification->updated_at,
+                'created_at' => $verification->created_at,
+                'back_image_url' => $backImageUrl,
+            ],
+        ], 201);
+    }
+}
+
+public function verify_selfie_image(Request $request)
+{
+    $user_id = $request->input('user_id');
+    $selfie_image = $request->file('selfie_image');
+
+    // Validation for required fields
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 400);
+    }
+    if (empty($selfie_image)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Selfie Image is empty.',
+        ], 400);
+    }
+    // Check if user exists
+    $user = Users::find($user_id);
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User not found.',
+        ], 404);
+    }
+
+    // Check if verification record already exists for the user
+    $existingVerification = Verifications::where('user_id', $user_id)->first();
+    if ($existingVerification) {
+        // Update existing verification record
+        $selfieImagePath = $selfie_image->store('verifications', 'public');
+        $existingVerification->selfie_image = basename($selfieImagePath);
+        $existingVerification->save();
+
+        // Image URLs
+        $selfieImageUrl = asset('storage/app/public/verifications/' . $existingVerification->selfie_image);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Selfie Image verification updated successfully.',
+            'data' => [
+                'id' => $existingVerification->id,
+                'user_name' => $user->name,
+                'updated_at' => $existingVerification->updated_at,
+                'created_at' => $existingVerification->created_at,
+                'selfie_image_url' => $selfieImageUrl,
+            ],
+        ], 200);
+    } else {
+        // Create a new verification record
+        $selfieImagePath = $selfie_image->store('verifications', 'public');
+        $verification = new Verifications();
+        $verification->selfie_image = basename($selfieImagePath);
+        $verification->user_id = $user_id;
+        $verification->save();
+
+        // Image URLs
+        $selfieImageUrl = asset('storage/app/public/verifications/' . $verification->selfie_image);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Selfie Image verification added successfully.',
+            'data' => [
+                'id' => $verification->id,
+                'user_name' => $user->name,
+                'updated_at' => $verification->updated_at,
+                'created_at' => $verification->created_at,
+                'selfie_image_url' => $selfieImageUrl,
+            ],
+        ], 201);
+    }
+}
+
 }
 
 

@@ -77,9 +77,10 @@
 
                 <div class="form-group">
                     <label for="gender">Gender</label>
-                    <input type="text" name="gender" class="form-control @error('gender') is-invalid @enderror"
-                           id="gender"
-                           placeholder="gender" value="{{ old('gender', $users->gender) }}">
+                    <select name="gender" class="form-control @error('gender') is-invalid @enderror" id="gender">
+                            <option value='male' {{ old('gender', $users->gender) == 'male' ? 'selected' : '' }}>male</option>
+                            <option value='female' {{ old('gender', $users->gender) == 'female' ? 'selected' : '' }}>female</option>
+                        </select>
                     @error('gender')
                     <span class="invalid-feedback" role="alert">
                         <strong>{{ $message }}</strong>
@@ -218,6 +219,21 @@
     </span>
     @enderror
 </div>
+
+<div class="form-group">
+    <label for="dummy">Dummy</label>
+    <div class="custom-control custom-switch">
+        <input type="hidden" name="dummy" value="0"> <!-- Hidden input to ensure a value is always submitted -->
+        <input type="checkbox" name="dummy" class="custom-control-input @error('dummy') is-invalid @enderror" id="dummy" value="1" {{ old('dummy', $users->dummy) == '1' ? 'checked' : '' }}>
+        <label class="custom-control-label" for="dummy"></label>
+    </div>
+    @error('dummy')
+    <span class="invalid-feedback" role="alert">
+        <strong>{{ $message }}</strong>
+    </span>
+    @enderror
+</div>
+
 
 
 

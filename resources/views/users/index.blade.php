@@ -43,6 +43,7 @@
                     <th>Points <i class="fas fa-sort"></i></th>
                     <th>Verified <i class="fas fa-sort"></i></th>
                     <th>Online Status <i class="fas fa-sort"></i></th>
+                    <th>Dummy <i class="fas fa-sort"></i></th>
                     <th>DateTime <i class="fas fa-sort"></i></th>
                     </tr>
                 </thead>
@@ -96,6 +97,11 @@
                         <td>
                         <span class="{{ $user->online_status == 1 ? 'text-enable' : 'text-disable' }}">
                                 {{ $user->online_status == 1 ? 'Enable' : 'Disable' }}
+                            </span>
+                        </td>
+                        <td>
+                        <span class="{{ $user->dummy == 1 ? 'text-enable' : 'text-disable' }}">
+                                {{ $user->dummy == 1 ? 'Enable' : 'Disable' }}
                             </span>
                         </td>
                         <td>{{$user->datetime}}</td>

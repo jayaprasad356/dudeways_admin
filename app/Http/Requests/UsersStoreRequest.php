@@ -28,7 +28,6 @@ class UsersStoreRequest extends FormRequest
             'unique_name' => 'required|string',
             'age' => 'required|string|max:100',
             'email' => 'nullable|email',
-            'mobile' => 'nullable|string|max:10',
             'gender' => 'nullable|string',
             'state' => 'nullable|string',
             'city' => 'nullable|string',
@@ -40,6 +39,7 @@ class UsersStoreRequest extends FormRequest
             'datetime' => 'nullable|datetime',
             'verified' => 'nullable|boolean',
             'online_status' => 'nullable|boolean',
+            'dummy' => 'nullable|boolean',
             'last_Seen' => 'nullable|datetime',
         ];
     }

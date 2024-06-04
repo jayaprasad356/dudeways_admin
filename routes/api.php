@@ -27,6 +27,9 @@ Route::post('friends_list', [AuthController::class, 'friends_list']);
 Route::post('add_notifications', [AuthController::class, 'add_notifications']);
 Route::post('notification_list', [AuthController::class, 'notification_list']);
 Route::post('verifications', [AuthController::class, 'verifications']);
+Route::post('verify_front_image', [AuthController::class, 'verify_front_image']);
+Route::post('verify_back_image', [AuthController::class, 'verify_back_image']);
+Route::post('verify_selfie_image', [AuthController::class, 'verify_selfie_image']);
 Route::post('points_list', [AuthController::class, 'points_list']);
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {

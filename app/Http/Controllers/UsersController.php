@@ -21,7 +21,7 @@ class UsersController extends Controller
         // Check if there's a search query
         if ($request->filled('search')) {
             $search = $request->input('search');
-            $query->where('mobile', 'like', "%$search%")
+            $query->where('email', 'like', "%$search%")
                   ->orWhere('name', 'like', "%$search%")
                   ->orWhere('refer_code', 'like', "%$search%");
         }
@@ -73,24 +73,18 @@ class UsersController extends Controller
     {
         $validatedData = $request->validate([
             'email' => 'required|email|unique:users',
-            'mobile' => 'required|numeric|digits:10|unique:users',
             'profession' => 'required|string|max:255',
             'city' => 'required|string|max:255',
             'state' => 'required|string|max:255',
             'age' => 'required|integer|between:18,60',
             'gender' => 'required|in:male,female,other',
             'profile' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'cover_img' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ], [
             'email.unique' => 'The email has already been taken.',
-            'mobile.unique' => 'The mobile number has already been taken.',
-            'mobile.digits' => 'The mobile number must be exactly 10 digits.',
             'age.between' => 'The age must be between 18 and 60.',
             'gender.in' => 'Invalid gender selected.',
             'profile.image' => 'The profile must be an image file.',
             'profile.mimes' => 'The profile must be a file of type: jpeg, png, jpg, gif.',
-            'cover_image.image' => 'The Cover Image must be an image file.',
-            'cover_image.mimes' => 'The Cover Image must be a file of type: jpeg, png, jpg, gif.',
         ]);
         // Generate a refer_code regardless of whether referred_by is provided or not
         $refer_code = $this->generateReferCode();
@@ -127,15 +121,14 @@ if ($request->hasFile('cover_img')) {
             'age' => $request->age,
             'email' => $request->email,
             'address' => $request->address,
-            'mobile' => $request->mobile,
             'gender' => $request->gender,
             'state' => $request->state,
             'city' => $request->city,
             'profession' => $request->profession,
             'refer_code' => $refer_code,
             'referred_by' => $request->referred_by,
+            'dummy' => $request->dummy,
             'profile' => $imageName, // Save only the image name in the database
-            'cover_img' => $coverImageName, // Save cover image name in the database
             'datetime' => now(),
             'last_seen' => now(),
         ]);

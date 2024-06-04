@@ -24,17 +24,6 @@
                     </span>
                     @enderror
                 </div>
-
-                <div class="form-group">
-                    <label for="mobile">Mobile Number</label>
-                    <input type="number" name="mobile" class="form-control @error('mobile') is-invalid @enderror" id="mobile"
-                           placeholder="mobile Number" value="{{ old('mobile') }}">
-                    @error('mobile')
-                    <span class="invalid-feedback" role="alert">
-                        <strong>{{ $message }}</strong>
-                    </span>
-                    @enderror
-                </div>
             
                 <div class="form-group">
                     <label for="email">Email</label>
@@ -60,8 +49,11 @@
 
                 <div class="form-group">
                     <label for="gender">Gender</label>
-                    <input type="text" name="gender" class="form-control @error('gender') is-invalid @enderror" id="gender"
-                           placeholder="gender" value="{{ old('gender') }}">
+                    <select name="gender" class="form-control @error('gender') is-invalid @enderror" id="gender">
+                        <option value=''>--select--</option>
+                        <option value='male' {{ old('gender') == 'male' ? 'selected' : '' }}>male</option>
+                        <option value='female' {{ old('gender') == 'female' ? 'selected' : '' }}>female</option>
+                    </select>
                     @error('gender')
                     <span class="invalid-feedback" role="alert">
                         <strong>{{ $message }}</strong>
@@ -132,19 +124,19 @@
                     </span>
                     @enderror
                 </div>
-
                 <div class="form-group">
-                    <label for="cover_img">Cover Img</label>
-                    <div class="custom-file">
-                        <input type="file" class="custom-file-input" name="cover_img" id="cover_img" onchange="updateProfileLabel(this)">
-                        <label class="custom-file-label" for="cover_img" id="cover_img-label">Choose File</label>
-                    </div>
-                    @error('cover_img')
-                    <span class="invalid-feedback" role="alert">
-                        <strong>{{ $message }}</strong>
-                    </span>
-                    @enderror
-                </div>
+    <label for="dummy">Dummy</label>
+    <div class="custom-control custom-switch">
+        <input type="hidden" name="dummy" value="0"> <!-- Hidden input to ensure a value is always submitted -->
+        <input type="checkbox" name="dummy" class="custom-control-input @error('dummy') is-invalid @enderror" id="dummy" value="1" {{ old('dummy') ? 'checked' : '' }}>
+        <label class="custom-control-label" for="dummy"></label>
+    </div>
+    @error('dummy')
+    <span class="invalid-feedback" role="alert">
+        <strong>{{ $message }}</strong>
+    </span>
+    @enderror
+</div>
 
 
               
