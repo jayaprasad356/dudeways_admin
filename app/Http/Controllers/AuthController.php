@@ -1549,6 +1549,14 @@ public function chat_list(Request $request)
       // Get the user_id from the request
       $user_id = $request->input('user_id');
 
+      if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 400);
+    }
+
+
       // Fetching chats for the specific user_id
       $chats = Chats::where('user_id', $user_id)->get();
   
