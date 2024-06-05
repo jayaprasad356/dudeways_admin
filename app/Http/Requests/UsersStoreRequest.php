@@ -41,6 +41,7 @@ class UsersStoreRequest extends FormRequest
             'online_status' => 'nullable|boolean',
             'dummy' => 'nullable|boolean',
             'last_Seen' => 'nullable|datetime',
+            'introduction' => 'nullable|string',
         ];
     }
 }

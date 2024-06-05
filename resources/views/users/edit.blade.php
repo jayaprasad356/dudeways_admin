@@ -192,6 +192,19 @@
     @enderror
 </div>
 
+
+<div class="form-group">
+                    <label for="introduction">Introduction</label>
+                    <input type="text" name="introduction" class="form-control @error('introduction') is-invalid @enderror"
+                           id="introduction"
+                           placeholder="introduction" value="{{ old('introduction', $users->introduction) }}">
+                    @error('introduction')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                    @enderror
+                </div>
+
 <div class="form-group">
     <label for="verified">Verified</label>
     <div class="custom-control custom-switch">
