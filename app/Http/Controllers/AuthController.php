@@ -2071,26 +2071,17 @@ public function points_list(Request $request)
 }
 public function verify_front_image(Request $request)
 {
-    $user_id = $request->input('user_id');
-    $front_image = $request->file('front_image');
+    $userId = $request->input('user_id');
 
-    // Validation for required fields
-    if (empty($user_id)) {
+    if (empty($userId)) {
         return response()->json([
             'success' => false,
             'message' => 'user_id is empty.',
         ], 400);
     }
 
-    if (empty($front_image)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Front Image is empty.',
-        ], 400);
-    }
+    $user = Users::find($userId);
 
-    // Check if user exists
-    $user = Users::find($user_id);
     if (!$user) {
         return response()->json([
             'success' => false,
@@ -2098,65 +2089,48 @@ public function verify_front_image(Request $request)
         ], 404);
     }
 
-    // Check if verification record already exists for the user
-    $verification = Verifications::where('user_id', $user_id)->first();
-    if ($verification) {
-        // Update existing verification record
-        $frontImagePath = $front_image->store('verifications', 'public');
-        $verification->front_image = basename($frontImagePath);
-        $verification->save();
+    $frontImage = $request->file('front_image');
+
+    if ($frontImage) {
+        $verification = Verifications::where('user_id', $userId)->first();
+
+        if (!$verification) {
+            $verification = new Verifications();
+            $verification->user_id = $userId;
+            $message = 'Front image added successfully.';
+        } else {
+            $message = 'Front image updated successfully.';
+        }
         
-        $responseMessage = 'Front Image updated successfully.';
+        $imagePath = $frontImage->store('verification', 'public');
+        $verification->front_image = basename($imagePath);
+        $verification->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => $message,
+        ], 200);
     } else {
-        $frontImagePath = $front_image->store('verifications', 'public');
-        $verification = new Verifications();
-        $verification->front_image = basename($frontImagePath);
-        $verification->user_id = $user_id;
-        $verification->save();
-        
-        $responseMessage = 'Front Image added successfully.';
+        return response()->json([
+            'success' => false,
+            'message' => 'Front image is empty.',
+        ], 400);
     }
-
-    // Image URLs
-    $selfieImageUrl = asset('storage/app/public/verifications/' . $verification->selfie_image);
-    $frontImageUrl = asset('storage/app/public/verifications/' . $verification->front_image);
-    $backImageUrl = asset('storage/app/public/verifications/' . $verification->back_image);
-
-    return response()->json([
-        'success' => true,
-        'message' => $responseMessage,
-        'data' => [[
-            'id' => $verification->id,
-            'user_name' => $user->name,
-            'updated_at' => Carbon::parse($verification->updated_at)->format('Y-m-d H:i:s'),
-            'created_at' => Carbon::parse($verification->created_at)->format('Y-m-d H:i:s'),
-            'selfie_image_url' => $selfieImageUrl,
-            'front_image_url' => $frontImageUrl,
-            'back_image_url' => $backImageUrl,
-        ]],
-    ], $verification ? 200 : 201);
 }
+
 public function verify_back_image(Request $request)
 {
-    $user_id = $request->input('user_id');
-    $back_image = $request->file('back_image');
+    $userId = $request->input('user_id');
 
-    // Validation for required fields
-    if (empty($user_id)) {
+    if (empty($userId)) {
         return response()->json([
             'success' => false,
             'message' => 'user_id is empty.',
         ], 400);
     }
-    if (empty($back_image)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Back Image is empty.',
-        ], 400);
-    }
 
-    // Check if user exists
-    $user = Users::find($user_id);
+    $user = Users::find($userId);
+
     if (!$user) {
         return response()->json([
             'success' => false,
@@ -2164,68 +2138,47 @@ public function verify_back_image(Request $request)
         ], 404);
     }
 
-    // Check if verification record already exists for the user
-    $verification = Verifications::where('user_id', $user_id)->first();
-    if ($verification) {
-        // Update existing verification record
-        $backImagePath = $back_image->store('verifications', 'public');
-        $verification->back_image = basename($backImagePath);
-        $verification->save();
+    $backImage = $request->file('back_image');
+
+    if ($backImage) {
+        $verification = Verifications::where('user_id', $userId)->first();
+
+        if (!$verification) {
+            $verification = new Verifications();
+            $verification->user_id = $userId;
+            $message = 'back image added successfully.';
+        } else {
+            $message = 'back image updated successfully.';
+        }
         
-        $responseMessage = 'Back Image updated successfully.';
+        $imagePath = $backImage->store('verification', 'public');
+        $verification->back_image = basename($imagePath);
+        $verification->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => $message,
+        ], 200);
     } else {
-        $backImagePath = $back_image->store('verifications', 'public');
-        $verification = new Verifications();
-        $verification->back_image = basename($backImagePath);
-        $verification->user_id = $user_id;
-        $verification->save();
-        
-        $responseMessage = 'Back Image added successfully.';
+        return response()->json([
+            'success' => false,
+            'message' => 'back image is empty.',
+        ], 400);
     }
-
-    // Image URLs
-    $selfieImageUrl = asset('storage/app/public/verifications/' . $verification->selfie_image);
-    $frontImageUrl = asset('storage/app/public/verifications/' . $verification->front_image);
-    $backImageUrl = asset('storage/app/public/verifications/' . $verification->back_image);
-
-    return response()->json([
-        'success' => true,
-        'message' => $responseMessage,
-        'data' => [[
-            'id' => $verification->id,
-            'user_name' => $user->name,
-            'updated_at' => Carbon::parse($verification->updated_at)->format('Y-m-d H:i:s'),
-            'created_at' => Carbon::parse($verification->created_at)->format('Y-m-d H:i:s'),
-            'selfie_image_url' => $selfieImageUrl,
-            'front_image_url' => $frontImageUrl,
-            'back_image_url' => $backImageUrl,
-        ]],
-    ], $verification ? 200 : 201);
 }
-
 public function verify_selfie_image(Request $request)
 {
-    $user_id = $request->input('user_id');
-    $selfie_image = $request->file('selfie_image');
+    $userId = $request->input('user_id');
 
-
-    // Validation for required fields
-    if (empty($user_id)) {
+    if (empty($userId)) {
         return response()->json([
             'success' => false,
             'message' => 'user_id is empty.',
         ], 400);
     }
-    if (empty($selfie_image)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Selfie Image is empty.',
-        ], 400);
-    }
 
+    $user = Users::find($userId);
 
-    // Check if user exists
-    $user = Users::find($user_id);
     if (!$user) {
         return response()->json([
             'success' => false,
@@ -2233,47 +2186,34 @@ public function verify_selfie_image(Request $request)
         ], 404);
     }
 
-    // Check if verification record already exists for the user
-    $verification = Verifications::where('user_id', $user_id)->first();
-    if ($verification) {
-        // Update existing verification record
-        $selfieImagePath = $selfie_image->store('verifications', 'public');
-        $verification->selfie_image = basename($selfieImagePath);
-        $verification->save();
+    $selfieImage = $request->file('selfie_image');
+
+    if ($selfieImage) {
+        $verification = Verifications::where('user_id', $userId)->first();
+
+        if (!$verification) {
+            $verification = new Verifications();
+            $verification->user_id = $userId;
+            $message = 'selfie image added successfully.';
+        } else {
+            $message = 'selfie image updated successfully.';
+        }
         
-        $responseMessage = 'Selfie Image updated successfully.';
+        $imagePath = $selfieImage->store('verification', 'public');
+        $verification->selfie_image = basename($imagePath);
+        $verification->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => $message,
+        ], 200);
     } else {
-        // Store the images and create a new verification record
-        $selfieImagePath = $selfie_image->store('verifications', 'public');
-        $verification = new Verifications();
-        $verification->selfie_image = basename($selfieImagePath);
-        $verification->user_id = $user_id;
-        $verification->save();
-        
-        $responseMessage = 'Selfie Image added successfully.';
+        return response()->json([
+            'success' => false,
+            'message' => 'selfie image is empty.',
+        ], 400);
     }
-
-    // Image URLs
-    $selfieImageUrl = asset('storage/app/public/verifications/' . $verification->selfie_image);
-    $frontImageUrl = asset('storage/app/public/verifications/' . $verification->front_image);
-    $backImageUrl = asset('storage/app/public/verifications/' . $verification->back_image);
-
-    return response()->json([
-        'success' => true,
-        'message' => $responseMessage,
-        'data' => [[
-            'id' => $verification->id,
-            'user_name' => $user->name,
-            'updated_at' => Carbon::parse($verification->updated_at)->format('Y-m-d H:i:s'),
-            'created_at' => Carbon::parse($verification->created_at)->format('Y-m-d H:i:s'),
-            'selfie_image_url' => $selfieImageUrl,
-            'front_image_url' => $frontImageUrl,
-            'back_image_url' => $backImageUrl,
-        ]],
-    ], $verification ? 200 : 201);
 }
-
-
 }
 
 
