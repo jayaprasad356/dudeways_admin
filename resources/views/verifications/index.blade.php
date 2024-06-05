@@ -45,18 +45,18 @@
     <td>{{ $verification->id }}</td>
     <td>{{ optional($verification->user)->name }}</td> <!-- Display user name safely -->
     <td>
-    <a href="{{ asset('storage/app/public/verifications/' . $verification->selfie_image) }}" data-lightbox="selfie_image-{{ $verification->id }}">
-        <img class="customer-img img-thumbnail img-fluid" src="{{ asset('storage/app/public/verifications/' . $verification->selfie_image) }}" alt=""
+    <a href="{{ asset('storage/app/public/verification/' . $verification->selfie_image) }}" data-lightbox="selfie_image-{{ $verification->id }}">
+        <img class="customer-img img-thumbnail img-fluid" src="{{ asset('storage/app/public/verification/' . $verification->selfie_image) }}" alt=""
             style="max-width: 100px; max-height: 100px;">
     </td>
     <td>
-    <a href="{{ asset('storage/app/public/verifications/' . $verification->front_image) }}" data-lightbox="front_image-{{ $verification->id }}">
-        <img class="customer-img img-thumbnail img-fluid" src="{{ asset('storage/app/public/verifications/' . $verification->front_image) }}" alt=""
+    <a href="{{ asset('storage/app/public/verification/' . $verification->front_image) }}" data-lightbox="front_image-{{ $verification->id }}">
+        <img class="customer-img img-thumbnail img-fluid" src="{{ asset('storage/app/public/verification/' . $verification->front_image) }}" alt=""
             style="max-width: 100px; max-height: 100px;">
     </td>
     <td>
-    <a href="{{ asset('storage/app/public/verifications/' . $verification->back_image) }}" data-lightbox="back_image-{{ $verification->id }}">
-        <img class="customer-img img-thumbnail img-fluid" src="{{ asset('storage/app/public/verifications/' . $verification->back_image) }}" alt=""
+    <a href="{{ asset('storage/app/public/verification/' . $verification->back_image) }}" data-lightbox="back_image-{{ $verification->id }}">
+        <img class="customer-img img-thumbnail img-fluid" src="{{ asset('storage/app/public/verification/' . $verification->back_image) }}" alt=""
             style="max-width: 100px; max-height: 100px;">
     </td>
 </tr>
