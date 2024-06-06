@@ -1292,7 +1292,7 @@ public function latest_trip(Request $request)
     $userProfileUrl = $user ? asset('storage/app/public/users/' . $user->profile) : null;
     $tripimageUrl = $trip ? asset('storage/app/public/trips/' . $trip->trip_image) : null;
 
-    $tripDetails = [
+    $tripDetails[] = [
         'id' => $trip->id,
         'user_id' => $trip->user_id,
         'name' => $user ? $user->name : 'Unknown',
