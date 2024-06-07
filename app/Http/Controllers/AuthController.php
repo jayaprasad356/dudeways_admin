@@ -1007,7 +1007,7 @@ public function trip_list(Request $request)
     $limit = $request->input('limit', 20);
 
     // Fetch trips based on the type
-    if ($type == 'latest') {
+    if ($type == 'latest' or 'nearby') {
         // Fetch the latest 20 trips
         $trips = Trips::orderBy('trip_datetime', 'desc')->limit($limit)->get();
     } elseif ($type == 'date') {
