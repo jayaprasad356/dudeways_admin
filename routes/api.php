@@ -31,6 +31,7 @@ Route::post('verify_front_image', [AuthController::class, 'verify_front_image'])
 Route::post('verify_back_image', [AuthController::class, 'verify_back_image']);
 Route::post('verify_selfie_image', [AuthController::class, 'verify_selfie_image']);
 Route::post('points_list', [AuthController::class, 'points_list']);
+Route::post('add_points', [AuthController::class, 'add_points']);
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();

@@ -11,6 +11,7 @@ use App\Models\Friends;
 use App\Models\Points; 
 use App\Models\Notifications; 
 use App\Models\Verifications; 
+use App\Models\Transaction; 
 use Carbon\Carbon;
 
 class AuthController extends Controller
@@ -974,7 +975,7 @@ public function update_trip(Request $request)
 
 public function trip_list(Request $request)
 {
-    // Check if user_id is provided
+    // Validate user_id
     if (!$request->has('user_id')) {
         return response()->json([
             'success' => false,
@@ -984,7 +985,6 @@ public function trip_list(Request $request)
 
     $userId = $request->input('user_id');
 
-    // Validate user_id
     $userExists = Users::find($userId);
     if (!$userExists) {
         return response()->json([
@@ -993,11 +993,42 @@ public function trip_list(Request $request)
         ], 400);
     }
 
-    // Set default limit
-    $limit = $request->has('limit') ? $request->input('limit') : 20;
+    // Validate type
+    if (!$request->has('type')) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Type is empty.',
+        ], 400);
+    }
 
-    // Fetch trip details from the database with the specified limit in random order
-    $trips = Trips::inRandomOrder()->limit($limit)->get();
+    $type = $request->input('type');
+
+    // Set default limit
+    $limit = $request->input('limit', 20);
+
+    // Fetch trips based on the type
+    if ($type == 'latest') {
+        // Fetch the latest 20 trips
+        $trips = Trips::orderBy('trip_datetime', 'desc')->limit($limit)->get();
+    } elseif ($type == 'date') {
+        // Check if the date parameter is provided
+        if (!$request->has('date')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Date is empty.',
+            ], 400);
+        }
+
+        $fromDate = $request->input('date');
+
+        // Fetch trips with the specified from_date
+        $trips = Trips::whereDate('from_date', $fromDate)->orderBy('created_at', 'desc')->limit($limit)->get();
+    } else {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid type provided',
+        ], 400);
+    }
 
     if ($trips->isEmpty()) {
         return response()->json([
@@ -1010,38 +1041,33 @@ public function trip_list(Request $request)
 
     foreach ($trips as $trip) {
         $user = Users::find($trip->user_id);
-        if ($user) {
-            // Image URL
-            $imageUrl = asset('storage/app/public/users/' . $user->profile);
-            
-            // Check if the user has friends
-            $isFriend = Friends::where(function($query) use ($userId, $user) {
-                $query->where('user_id', $userId)
-                      ->where('friend_user_id', $user->id);
-            })->orWhere(function($query) use ($userId, $user) {
-                $query->where('user_id', $user->id)
-                      ->where('friend_user_id', $userId);
-            })->exists();
-            
-            $friendStatus = $isFriend ? '1' : '0';
+        $imageUrl = $user ? asset('storage/app/public/users/' . $user->profile) : null;
+
+        // Check if the user is a friend
+        $isFriend = Friends::where(function($query) use ($userId, $user) {
+            $query->where('user_id', $userId)
+                  ->where('friend_user_id', $user->id);
+        })->orWhere(function($query) use ($userId, $user) {
+            $query->where('user_id', $user->id)
+                  ->where('friend_user_id', $userId);
+        })->exists();
+
+        $friendStatus = $isFriend ? '1' : '0';
+
+        // Calculate time difference in hours
+        $tripTime = Carbon::parse($trip->trip_datetime);
+        $currentTime = Carbon::now();
+        $hoursDifference = $tripTime->diffInHours($currentTime);
+
+        // Determine the time display string
+        if ($hoursDifference == 0) {
+            $timeDifference = 'now';
+        } elseif ($hoursDifference < 24) {
+            $timeDifference = $hoursDifference . 'h';
         } else {
-            $imageUrl = null; // Set default image URL if user not found
-            $friendStatus = '0';
+            $daysDifference = floor($hoursDifference / 24);
+            $timeDifference = $daysDifference . 'd';
         }
- // Calculate time difference in hours
- $tripTime = Carbon::parse($trip->trip_datetime);
- $currentTime = Carbon::now();
- $hoursDifference = $tripTime->diffInHours($currentTime);
- 
- // Determine the time display string
- if ($hoursDifference == 0) {
-     $timeDifference = 'now';
- } elseif ($hoursDifference < 24) {
-     $timeDifference = $hoursDifference . 'h';
- } else {
-     $daysDifference = floor($hoursDifference / 24);
-     $timeDifference = $daysDifference . 'd';
- }
 
         $tripimageUrl = asset('storage/app/public/trips/' . $trip->trip_image);
 
@@ -1055,7 +1081,7 @@ public function trip_list(Request $request)
             'trip_type' => $trip->trip_type,
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
             'to_date' => date('F j, Y', strtotime($trip->to_date)),
-            'time' => $timeDifference, 
+            'time' => $timeDifference,
             'friend' => $friendStatus,
             'trip_title' => $trip->trip_title,
             'trip_description' => $trip->trip_description,
@@ -1074,7 +1100,6 @@ public function trip_list(Request $request)
         'data' => $tripDetails,
     ], 200);
 }
-
 
 
 public function my_trip_list(Request $request)
@@ -1447,106 +1472,154 @@ public function add_chat(Request $request)
         ], 400);
     }
 
-    // Check if user_id and chat_user_id are the same
-    if ($user_id == $chat_user_id) {
-        return response()->json([
-            'success' => false,
-            'message' => 'You cannot chat with yourself.',
-        ], 400);
-    }
+    
+// Check if user is trying to chat with themselves
+if ($user_id == $chat_user_id) {
+    return response()->json([
+        'success' => false,
+        'message' => 'You cannot chat with yourself.',
+    ], 400);
+}
 
-    // Check if user exists
-    $user = Users::find($user_id);
-    if (!$user) {
-        return response()->json([
-            'success' => false,
-            'message' => 'user not found.',
-        ], 404);
-    }
+// Check if user and chat_user exist
+$user = Users::find($user_id);
+if (!$user) {
+    return response()->json([
+        'success' => false,
+        'message' => 'User not found.',
+    ], 404);
+}
 
-    // Check if chat_user exists
-    $chat_user = Users::find($chat_user_id);
-    if (!$chat_user) {
-        return response()->json([
-            'success' => false,
-            'message' => 'chat_user not found.',
-        ], 404);
-    }
+$chat_user = Users::find($chat_user_id);
+if (!$chat_user) {
+    return response()->json([
+        'success' => false,
+        'message' => 'Chat user not found.',
+    ], 404);
+}
 
-    // Check if a chat entry already exists between the two users
-    $existingChat = Chats::where('user_id', $user_id)
-                         ->where('chat_user_id', $chat_user_id)
-                         ->first();
+// Check if there's an existing chat between the user and chat_user
+$existingChat = Chats::where('user_id', $user_id)
+                     ->where('chat_user_id', $chat_user_id)
+                     ->first();
 
-    // If a chat exists, update it
+// Retrieve the gender of the chat user
+$chatUserGender = $chat_user->gender; // Assuming the gender field exists in the Users model
+
+// Check if chat_user's gender is not female
+if ($chatUserGender !== 'female') {
+    // If there's an existing chat, check the last update time
     if ($existingChat) {
-        $existingChat->latest_message = $message;
-        $existingChat->latest_msg_time = now();
-        $existingChat->datetime = now();
-        if (!$existingChat->save()) {
+        $lastUpdateTime = Carbon::parse($existingChat->datetime);
+        $currentTime = Carbon::now();
+
+        // If it's been more than an hour since the last update, deduct points
+        if ($lastUpdateTime->diffInHours($currentTime) >= 1) {
+            if ($user->points >= 10) {
+                $user->points -= 10;
+                if (!$user->save()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Failed to update user points.',
+                    ], 500);
+                }
+            } else {
+                // User doesn't have sufficient points to chat
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You don\'t have sufficient points to chat.',
+                ], 400);
+            }
+        }
+    } else {
+        // It's a new chat, deduct points
+        if ($user->points >= 10) {
+            $user->points -= 10;
+            if (!$user->save()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to update user points.',
+                ], 500);
+            }
+        } else {
+            // User doesn't have sufficient points to chat
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to update Chat.',
-            ], 500);
+                'message' => 'You don\'t have sufficient points to chat.',
+            ], 400);
         }
-
-        // Return success response with updated chat data
-        return response()->json([
-            'success' => true,
-            'message' => 'Chat updated successfully.',
-            'data' => [
-                'id' => $existingChat->id,
-                'user_id' => $existingChat->user_id,
-                'chat_user_id' => $existingChat->chat_user_id,
-                'name' => $chat_user->name, 
-                'profile' => asset('storage/app/public/users/' . $chat_user->profile),
-                'latest_message' => $existingChat->latest_message,
-                'latest_msg_time' => Carbon::parse($existingChat->latest_msg_time)->format('Y-m-d H:i:s'),
-                'msg_seen' => '0',
-                'datetime' => Carbon::parse($existingChat->datetime)->format('Y-m-d H:i:s'),
-                'updated_at' => Carbon::parse($existingChat->updated_at)->format('Y-m-d H:i:s'),
-                'created_at' => Carbon::parse($existingChat->created_at)->format('Y-m-d H:i:s'),
-            ],
-        ], 200);
     }
+}
 
-    // If no chat exists, create a new one
-    $newChat = new Chats();
-    $newChat->user_id = $user_id; 
-    $newChat->chat_user_id = $chat_user_id;
-    $newChat->latest_message = $message; 
-    $newChat->latest_msg_time = now();
-    $newChat->datetime = now(); 
+// Rest of the code to handle chats...
 
-    // Save the chat
-    if (!$newChat->save()) {
+// If a chat exists, update it; otherwise, create a new one
+if ($existingChat) {
+    $existingChat->latest_message = $message;
+    $existingChat->latest_msg_time = now();
+    $existingChat->datetime = now();
+    if (!$existingChat->save()) {
         return response()->json([
             'success' => false,
-            'message' => 'Failed to save Chat.',
+            'message' => 'Failed to update Chat.',
         ], 500);
     }
 
-    // Return success response with new chat data
+    // Return success response with updated chat data
     return response()->json([
         'success' => true,
-        'message' => 'Chat added successfully.',
+        'message' => 'Chat updated successfully.',
         'data' => [
-            'id' => $newChat->id,
-            'user_id' => $newChat->user_id,
-            'chat_user_id' => $newChat->chat_user_id,
+            'id' => $existingChat->id,
+            'user_id' => $existingChat->user_id,
+            'chat_user_id' => $existingChat->chat_user_id,
             'name' => $chat_user->name, 
             'profile' => asset('storage/app/public/users/' . $chat_user->profile),
-            'latest_message' => $newChat->latest_message,
-            'latest_msg_time' => Carbon::parse($newChat->latest_msg_time)->format('Y-m-d H:i:s'),
+            'latest_message' => $existingChat->latest_message,
+            'latest_msg_time' => Carbon::parse($existingChat->latest_msg_time)->format('Y-m-d H:i:s'),
             'msg_seen' => '0',
-            'datetime' => Carbon::parse($newChat->datetime)->format('Y-m-d H:i:s'),
-            'updated_at' => Carbon::parse($newChat->updated_at)->format('Y-m-d H:i:s'),
-            'created_at' => Carbon::parse($newChat->created_at)->format('Y-m-d H:i:s'),
+            'datetime' => Carbon::parse($existingChat->datetime)->format('Y-m-d H:i:s'),
+            'updated_at' => Carbon::parse($existingChat->updated_at)->format('Y-m-d H:i:s'),
+            'created_at' => Carbon::parse($existingChat->created_at)->format('Y-m-d H:i:s'),
         ],
-    ], 201);
+    ], 200);
 }
 
+// If no chat exists, create a new one
+$newChat = new Chats();
+$newChat->user_id = $user_id; 
+$newChat->chat_user_id = $chat_user_id;
+$newChat->latest_message = $message; 
+$newChat->latest_msg_time = now();
+$newChat->datetime = now(); 
 
+// Save the chat
+if (!$newChat->save()) {
+    return response()->json([
+        'success' => false,
+        'message' => 'Failed to save Chat.',
+    ], 500);
+}
+
+// Return success response with new chat data
+return response()->json([
+    'success' => true,
+    'message' => 'Chat added successfully.',
+    'data' => [
+        'id' => $newChat->id,
+        'user_id' => $newChat->user_id,
+        'chat_user_id' => $newChat->chat_user_id,
+        'name' => $chat_user->name, 
+        'profile' => asset('storage/app/public/users/' . $chat_user->profile),
+        'latest_message' => $newChat->latest_message,
+        'latest_msg_time' => Carbon::parse($newChat->latest_msg_time)->format('Y-m-d H:i:s'),
+        'msg_seen' => '0',
+        'datetime' => Carbon::parse($newChat->datetime)->format('Y-m-d H:i:s'),
+        'updated_at' => Carbon::parse($newChat->updated_at)->format('Y-m-d H:i:s'),
+        'created_at' => Carbon::parse($newChat->created_at)->format('Y-m-d H:i:s'),
+    ],
+], 201);
+}
 public function chat_list(Request $request)
 {
       // Get the user_id from the request
@@ -2039,6 +2112,78 @@ public function verifications(Request $request)
         ],
     ], 201);
 }
+public function add_points(Request $request)
+{
+    $user_id = $request->input('user_id'); 
+    $points_id = $request->input('points_id');
+
+    // Validate user_id
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 400);
+    }
+
+    // Validate points_id
+    if (empty($points_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'points_id is empty.',
+        ], 400);
+    }
+
+    // Check if user exists
+    $user = Users::find($user_id);
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User not found.',
+        ], 404);
+    }
+
+    // Check if points entry exists
+    $points_entry = Points::find($points_id);
+    if (!$points_entry) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Points entry not found.',
+        ], 404);
+    }
+
+    // Get points from the points entry
+    $points = $points_entry->points;
+
+    // Add points to the user's points field
+    $user->points += $points;
+    if (!$user->save()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to update user points.',
+        ], 500);
+    }
+
+    // Record the transaction
+    $transaction = new Transaction();
+    $transaction->user_id = $user_id;
+    $transaction->points = $points;
+    $transaction->type = 'add_points';
+    $transaction->datetime = now();
+
+    if (!$transaction->save()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to save transaction.',
+        ], 500);
+    }
+
+    // Return success response
+    return response()->json([
+        'success' => true,
+        'message' => 'Points added successfully for this user.',
+    ], 201);
+}
+
 public function points_list(Request $request)
 {
     // Fetch all points details from the database
