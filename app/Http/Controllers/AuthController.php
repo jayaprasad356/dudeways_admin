@@ -13,6 +13,7 @@ use App\Models\Notifications;
 use App\Models\Verifications; 
 use App\Models\Transaction; 
 use App\Models\Feedback; 
+use App\Models\Professions; 
 use Carbon\Carbon;
 
 class AuthController extends Controller
@@ -2448,6 +2449,33 @@ public function add_feedback(Request $request)
         'success' => true,
         'message' => 'Feedback added successfully.',
     ], 201);
+}
+
+public function profession_list(Request $request)
+{
+    // Retrieve all professions
+    $professions = Professions::all();
+
+    if ($professions->isEmpty()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No profession found.',
+        ], 404);
+    }
+
+    $professionData = [];
+    foreach ($professions as $profession) {
+        $professionData[] = [
+            'id' => $profession->id,
+            'profession' => $profession->profession,
+        ];
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Professions listed successfully.',
+        'data' => $professionData,
+    ], 200);
 }
 
 }
