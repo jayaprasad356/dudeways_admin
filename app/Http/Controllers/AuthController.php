@@ -660,6 +660,7 @@ public function update_location(Request $request)
             'message' => 'user_id is empty.',
         ], 400);
     }
+
     $user = Users::find($user_id);
 
     if (!$user) {
@@ -672,22 +673,32 @@ public function update_location(Request $request)
     $latitude = $request->input('latitude');
     $longtitude = $request->input('longtitude');
 
-    // Update offer details
-    if ($latitude !== null) {
-        $user->latitude = $latitude;
+    if (is_null($latitude)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'latitude is empty.',
+        ], 400);
     }
-    if ($longtitude !== null) {
-        $user->longtitude = $longtitude;
+
+    if (is_null($longtitude)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'longtitude is empty.',
+        ], 400);
     }
+
+    // Update user location details
+    $user->latitude = $latitude;
+    $user->longtitude = $longtitude;
 
     $user->save();
-
 
     return response()->json([
         'success' => true,
         'message' => 'User location updated successfully.',
     ], 200);
 }
+
 public function add_trip(Request $request)
 {
     $user_id = $request->input('user_id'); 
@@ -2226,8 +2237,8 @@ public function add_points(Request $request)
 
 public function points_list(Request $request)
 {
-    // Fetch all points details from the database
-    $points = Points::all();
+    // Fetch all points details from the database, ordered by price in descending order
+    $points = Points::orderBy('points', 'desc')->get();
 
     if ($points->isEmpty()) {
         return response()->json([
@@ -2257,6 +2268,7 @@ public function points_list(Request $request)
         'data' => $pointsDetails,
     ], 200);
 }
+
 public function verify_front_image(Request $request)
 {
     $userId = $request->input('user_id');

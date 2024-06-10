@@ -78,12 +78,11 @@
                     </a>
                 </li>
                 <li class="nav-item has-treeview">
-    <a href="{{ route('news.edit', ['news' => 1]) }}" class="nav-link {{ request()->is('admin/news/1/edit') ? 'active' : '' }}">
-        <i class="nav-icon fas fa-check-circle"></i>
-        <p>Settings</p>
-    </a>
-</li>
-
+                    <a href="{{ route('news.edit') }}" class="nav-link {{ activeSegment('news') }}">
+                    <i class="nav-icon fas fa-check-circle"></i>
+                        <p>Settings</p>
+                    </a>
+                </li>
                 <li class="nav-item">
                     <a href="#" class="nav-link" onclick="document.getElementById('logout-form').submit()">
                         <i class="nav-icon fas fa-power-off"></i>
