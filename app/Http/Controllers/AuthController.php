@@ -500,7 +500,7 @@ public function update_cover_img(Request $request)
 
         return response()->json([
             'success' => true,
-            'message' => 'Cover Image updated successfully For this User.',
+            'message' => 'Cover Image updated successfully.',
             'data' => [
                 'id' => $user->id,
                 'name' => $user->name,
@@ -1164,7 +1164,7 @@ public function my_trip_list(Request $request)
     if ($trips->isEmpty()) {
         return response()->json([
             'success' => false,
-            'message' => 'No trips found for this user.',
+            'message' => 'No trips found.',
         ], 404);
     }
 
@@ -1223,7 +1223,7 @@ public function my_trip_list(Request $request)
 
     return response()->json([
         'success' => true,
-        'message' => 'Trip details retrieved successfully for this user.',
+        'message' => 'Trip details retrieved successfully.',
         'data' => $tripDetails,
     ], 200);
 }
@@ -2045,7 +2045,7 @@ public function notification_list(Request $request)
     if ($notifications->isEmpty()) {
         return response()->json([
             'success' => false,
-            'message' => 'No notifications found for this user.',
+            'message' => 'No notifications found.',
         ], 404);
     }
 
@@ -2084,7 +2084,7 @@ public function notification_list(Request $request)
  
      return response()->json([
          'success' => true,
-         'message' => 'Notification details retrieved successfully for this user.',
+         'message' => 'Notification details retrieved successfully.',
          'data' => $notificationDetails,
      ], 200);
  }
@@ -2231,7 +2231,7 @@ public function add_points(Request $request)
     // Return success response
     return response()->json([
         'success' => true,
-        'message' => 'Points added successfully for this user.',
+        'message' => 'Points added successfully.',
     ], 201);
 }
 

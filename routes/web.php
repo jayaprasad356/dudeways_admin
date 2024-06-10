@@ -93,8 +93,8 @@ Route::prefix('admin')->middleware('auth')->group(function () {
         Route::get('/notifications', [NotificationsController::class, 'index'])->name('notifications.index');
         Route::delete('/notifications/{notifications}', [NotificationsController::class, 'destroy'])->name('notifications.destroy');
       
-        Route::get('/news/{1}/edit', [NewsController::class, 'edit'])->name('news.edit');
-    Route::put('/news', [NewsController::class, 'update'])->name('news.update');
+        Route::get('/news/{news}/edit', [NewsController::class, 'edit'])->name('news.edit');
+        Route::put('/news/{news}', [NewsController::class, 'update'])->name('news.update');
 
     
         //Verifications  

@@ -78,7 +78,7 @@
                     </a>
                 </li>
                 <li class="nav-item has-treeview">
-                    <a href="{{ route('news.edit') }}" class="nav-link {{ activeSegment('news') }}">
+                    <a href="{{ route('news.edit', $news) }}" class="nav-link {{ activeSegment('news') }}">
                     <i class="nav-icon fas fa-check-circle"></i>
                         <p>Settings</p>
                     </a>
