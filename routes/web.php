@@ -10,6 +10,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\NewsController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\FriendsController;
 use App\Http\Controllers\NotificationsController;
@@ -91,9 +92,11 @@ Route::prefix('admin')->middleware('auth')->group(function () {
         //Notifications  
         Route::get('/notifications', [NotificationsController::class, 'index'])->name('notifications.index');
         Route::delete('/notifications/{notifications}', [NotificationsController::class, 'destroy'])->name('notifications.destroy');
- 
+      
+        Route::get('/news/edit', [NewsController::class, 'edit'])->name('news.edit');
+    Route::put('/news', [NewsController::class, 'update'])->name('news.update');
 
-        
+    
         //Verifications  
         Route::get('/verifications', [VerificationsController::class, 'index'])->name('verifications.index');
         Route::delete('/verifications/{verifications}', [VerificationsController::class, 'destroy'])->name('verifications.destroy');

@@ -12,6 +12,7 @@ use App\Models\Points;
 use App\Models\Notifications; 
 use App\Models\Verifications; 
 use App\Models\Transaction; 
+use App\Models\Feedback; 
 use Carbon\Carbon;
 
 class AuthController extends Controller
@@ -648,6 +649,44 @@ if ($email !== null) {
     ], 200);
 }
 
+public function update_location(Request $request)
+{
+    $user_id = $request->input('user_id');
+
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 400);
+    }
+    $user = Users::find($user_id);
+
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user not found.',
+        ], 404);
+    }
+
+    $latitude = $request->input('latitude');
+    $longtitude = $request->input('longtitude');
+
+    // Update offer details
+    if ($latitude !== null) {
+        $user->latitude = $latitude;
+    }
+    if ($longtitude !== null) {
+        $user->longtitude = $longtitude;
+    }
+
+    $user->save();
+
+
+    return response()->json([
+        'success' => true,
+        'message' => 'User location updated successfully.',
+    ], 200);
+}
 public function add_trip(Request $request)
 {
     $user_id = $request->input('user_id'); 
@@ -2362,6 +2401,55 @@ public function verify_selfie_image(Request $request)
         ], 400);
     }
 }
+
+public function add_feedback(Request $request)
+{
+    $user_id = $request->input('user_id'); 
+    $feedbackContent = $request->input('feedback'); // Renamed the variable to avoid conflict
+
+    // Validate user_id and feedbackContent
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 400);
+    }
+
+    if (empty($feedbackContent)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'feedback is empty.',
+        ], 400);
+    }
+
+    // Check if user exists
+    $user = Users::find($user_id);
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user not found.',
+        ], 404);
+    }
+
+    // Create a new Feedback instance
+    $feedback = new Feedback();
+    $feedback->user_id = $user_id; 
+    $feedback->feedback = $feedbackContent; // Assign the feedback content to the model property
+
+    // Save the feedback
+    if (!$feedback->save()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to save feedback.',
+        ], 500);
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Feedback added successfully.',
+    ], 201);
+}
+
 }
 
 
