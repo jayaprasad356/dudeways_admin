@@ -1757,53 +1757,59 @@ return response()->json([
     ],
 ], 201);
 }
+
 public function chat_list(Request $request)
 {
-      // Get the user_id from the request
-      $user_id = $request->input('user_id');
+    // Get the user_id from the request
+    $user_id = $request->input('user_id');
 
-      if (empty($user_id)) {
+    if (empty($user_id)) {
         return response()->json([
             'success' => false,
             'message' => 'user_id is empty.',
         ], 400);
     }
 
+    // Fetching chats for the specific user_id
+    $chats = Chats::where('user_id', $user_id)->get();
 
-      // Fetching chats for the specific user_id
-      $chats = Chats::where('user_id', $user_id)->get();
-  
-      if ($chats->isEmpty()) {
-          return response()->json([
-              'success' => false,
-              'message' => 'No chats found for the user_id.',
-          ], 404);
-      }
+    if ($chats->isEmpty()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No chats found for the user_id.',
+        ], 404);
+    }
 
     $chatDetails = $chats->map(function ($chat) {
         $chat_user = Users::find($chat->chat_user_id); // Fetch the chat_user details
-        $imageUrl = asset('storage/app/public/users/' . $chat_user->profile);
 
-          // Determine the format of last_seen
-          $lastSeen = Carbon::parse($chat->latest_msg_time);
-          $now = Carbon::now();
-          $differenceDays = $now->diffInDays($lastSeen);
-  
-          if ($differenceDays == 0) {
-              $lastSeenFormatted = $lastSeen->format('H:i'); // Today, show time
-          } elseif ($differenceDays == 1) {
-              $lastSeenFormatted = 'Yesterday'; // Yesterday
-          } elseif ($differenceDays <= 7) {
-              $lastSeenFormatted = $lastSeen->format('l'); // Last week, show day name
-          } elseif ($differenceDays <= 14 && $lastSeen->isSameMonth($now)) {
-              $lastSeenFormatted = 'Last week'; // Within 14 days and same month, show "Last week"
-          } elseif ($lastSeen->month == $now->subMonths(1)->month) {
-              $lastSeenFormatted = 'Last month'; // Last month
-          } elseif ($lastSeen->isSameYear($now)) {
-              $lastSeenFormatted = $lastSeen->format('M jS'); // This year, show month and day with ordinal indicator
-          } else {
-              $lastSeenFormatted = $lastSeen->format('M jS, Y'); // Older than current year, show month, day, and year
-          }
+        // Check if chat_user exists
+        if (!$chat_user) {
+            return null; // Skip this chat if user not found
+        }
+
+        $imageUrl = asset('storage/app/public/users/' . $chat_user->profile); // Corrected the path
+
+        // Determine the format of last_seen
+        $lastSeen = Carbon::parse($chat->latest_msg_time);
+        $now = Carbon::now();
+        $differenceDays = $now->diffInDays($lastSeen);
+
+        if ($differenceDays == 0) {
+            $lastSeenFormatted = $lastSeen->format('H:i'); // Today, show time
+        } elseif ($differenceDays == 1) {
+            $lastSeenFormatted = 'Yesterday'; // Yesterday
+        } elseif ($differenceDays <= 7) {
+            $lastSeenFormatted = $lastSeen->format('l'); // Last week, show day name
+        } elseif ($differenceDays <= 14 && $lastSeen->isSameMonth($now)) {
+            $lastSeenFormatted = 'Last week'; // Within 14 days and same month, show "Last week"
+        } elseif ($lastSeen->month == $now->subMonths(1)->month) {
+            $lastSeenFormatted = 'Last month'; // Last month
+        } elseif ($lastSeen->isSameYear($now)) {
+            $lastSeenFormatted = $lastSeen->format('M jS'); // This year, show month and day with ordinal indicator
+        } else {
+            $lastSeenFormatted = $lastSeen->format('M jS, Y'); // Older than current year, show month, day, and year
+        }
 
         return [
             'id' => $chat->id,
@@ -1811,7 +1817,7 @@ public function chat_list(Request $request)
             'chat_user_id' => $chat->chat_user_id,
             'name' => $chat_user->name, // Display chat_user name
             'profile' => $imageUrl, // Display chat_user profile
-            'online_status' => $chat_user->online_status, // Display chat_user name
+            'online_status' => $chat_user->online_status, // Display chat_user online status
             'latest_message' => $chat->latest_message,
             'latest_msg_time' => $lastSeenFormatted,
             'msg_seen' => $chat->msg_seen,
@@ -1819,14 +1825,15 @@ public function chat_list(Request $request)
             'updated_at' => Carbon::parse($chat->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($chat->created_at)->format('Y-m-d H:i:s'),
         ];
-    });
+    })->filter(); // Remove null values from the collection
 
     return response()->json([
         'success' => true,
         'message' => 'Chat details listed successfully.',
-        'data' => $chatDetails,
+        'data' => $chatDetails->values(), // Reindex the array to prevent gaps
     ], 200);
 }
+
 
 public function add_friends(Request $request)
 {
