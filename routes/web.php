@@ -91,8 +91,12 @@ Route::prefix('admin')->middleware('auth')->group(function () {
 
         //Notifications  
         Route::get('/notifications', [NotificationsController::class, 'index'])->name('notifications.index');
+        Route::get('/notifications/create', [NotificationsController::class, 'create'])->name('notifications.create');
+        Route::get('/notifications/{notifications}/edit', [NotificationsController::class, 'edit'])->name('notifications.edit');
         Route::delete('/notifications/{notifications}', [NotificationsController::class, 'destroy'])->name('notifications.destroy');
-      
+        Route::put('/notifications/{notifications}', [NotificationsController::class, 'update'])->name('notifications.update');
+        Route::post('/notifications', [NotificationsController::class, 'store'])->name('notifications.store');
+
         Route::get('/news/{news}/edit', [NewsController::class, 'edit'])->name('news.edit');
         Route::put('/news/{news}', [NewsController::class, 'update'])->name('news.update');
 

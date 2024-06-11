@@ -3,6 +3,7 @@
 @section('title', 'Notifications Management')
 @section('content-header', 'Notifications Management')
 @section('content-actions')
+    <a href="{{route('notifications.create')}}" class="btn btn-success"><i class="fas fa-plus"></i> Add New Notifications</a>
 @endsection
 @section('css')
     <link rel="stylesheet" href="{{ asset('plugins/sweetalert2/sweetalert2.min.css') }}">
@@ -41,6 +42,7 @@
                     @foreach ($notifications as $notification)
                     <tr>
                     <td>
+                    <a href="{{ route('notifications.edit', $notification) }}" class="btn btn-primary"><i class="fas fa-edit"></i></a>
                             <button class="btn btn-danger btn-delete" data-url="{{route('notifications.destroy', $notification)}}"><i class="fas fa-trash"></i></button>
                         </td>
                         <td>{{$notification->id}}</td>
