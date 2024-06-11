@@ -40,6 +40,10 @@ class UsersStoreRequest extends FormRequest
             'verified' => 'nullable|boolean',
             'online_status' => 'nullable|boolean',
             'dummy' => 'nullable|boolean',
+            'message_notify' => 'nullable|boolean',
+            'add_friend_notify' => 'nullable|boolean',
+            'view_notify' => 'nullable|boolean',
+            'profile_verified' => 'nullable|boolean',
             'last_Seen' => 'nullable|datetime',
             'introduction' => 'nullable|string',
         ];

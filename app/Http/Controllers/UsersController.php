@@ -128,6 +128,9 @@ if ($request->hasFile('cover_img')) {
             'refer_code' => $refer_code,
             'referred_by' => $request->referred_by,
             'dummy' => $request->dummy,
+            'message_notify' => $request->message_notify,
+            'add_friend_notify' => $request->add_friend_notify,
+            'view_notify' => $request->view_notify,
             'introduction' => $request->introduction,
             'profile' => $imageName, // Save only the image name in the database
             'datetime' => now(),
@@ -232,8 +235,12 @@ private function generateUniqueName($name, $user_id)
         $users->referred_by = $request->referred_by;
         $users->verified = $request->verified;
         $users->dummy = $request->dummy;
+        $users->message_notify = $request->message_notify;
+        $users->add_friend_notify = $request->add_friend_notify;
+        $users->view_notify = $request->view_notify;
         $users->introduction = $request->introduction;
         $users->online_status = $request->online_status;
+        $users->profile_verified = $request->profile_verified;
         $users->datetime = now();
         $users->last_seen = now();
     

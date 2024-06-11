@@ -309,9 +309,13 @@ public function register(Request $request)
             'points' => $user->points,
             'introduction' => $user->introduction,
             'latitude' => $user->latitude,
-            'longtitude	' => $user->longtitude,
+            'longtitude' => $user->longtitude,
             'verified' => 0,
             'online_status' => 0,
+            'message_notify' => 1,
+            'add_friend_notify' => 1,
+            'view_notify' => 1,
+            'profile_verified' => 0,
             'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
                 'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
@@ -358,58 +362,63 @@ private function generateReferCode()
 
 public function userdetails(Request $request)
 {
-$user_id = $request->input('user_id');
+    $user_id = $request->input('user_id');
 
-if (empty($user_id)) {
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 400);
+    }
+
+    // Fetch the user details from the database based on the provided user_id
+    $user = Users::find($user_id);
+
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User not found.',
+        ], 404);
+    }
+
+    // Image URLs
+    $coverimageUrl = asset('storage/users/' . $user->cover_img);
+    $imageUrl = $user->profile_verified == 1 ? asset('storage/users/' . $user->profile) : '';
+
     return response()->json([
-        'success' => false,
-        'message' => 'user_id is empty.',
-    ], 400);
+        'success' => true,
+        'message' => 'User details retrieved successfully.',
+        'data' => [
+            'id' => $user->id,
+            'name' => $user->name,
+            'unique_name' => $user->unique_name,
+            'email' => $user->email,
+            'mobile' => $user->mobile,
+            'age' => $user->age,
+            'gender' => $user->gender,
+            'state' => $user->state,
+            'city' => $user->city,
+            'profession' => $user->profession,
+            'refer_code' => $user->refer_code,
+            'referred_by' => $user->referred_by,
+            'profile' => $imageUrl,
+            'cover_img' => $coverimageUrl,
+            'points' => $user->points,
+            'verified' => $user->verified,
+            'online_status' => $user->online_status,
+            'introduction' => $user->introduction,
+            'message_notify' => $user->message_notify,
+            'add_friend_notify' => $user->add_friend_notify,
+            'view_notify' => $user->view_notify,
+            'profile_verified' => $user->profile_verified,
+            'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
+            'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
+            'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
+            'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
+        ],
+    ], 200);
 }
 
-// Fetch the customer details from the database based on the provided customer_id
-$user = Users::find($user_id);
-
-if (!$user) {
-    return response()->json([
-        'success' => false,
-        'message' => 'user not found.',
-    ], 404);
-}
-
-// Image URL
-$imageUrl = asset('storage/app/public/users/' . $user->profile);
-$coverimageUrl = asset('storage/app/public/users/' . $user->cover_img);
-
-return response()->json([
-    'success' => true,
-    'message' => 'User details retrieved successfully.',
-    'data' => [
-        'id' => $user->id,
-        'name' => $user->name,
-        'unique_name' => $user->unique_name,
-        'email' => $user->email,
-        'mobile' => $user->mobile,
-        'age' => $user->age,
-        'gender' => $user->gender,
-        'state' => $user->state,
-        'city' => $user->city,
-        'profession' => $user->profession,
-        'refer_code' => $user->refer_code,
-        'referred_by' => $user->referred_by,
-        'profile' => $imageUrl,
-        'cover_img' => $coverimageUrl,
-        'points' => $user->points,
-        'verified' => $user->verified,
-        'online_status' => $user->online_status,
-        'introduction' => $user->introduction,
-        'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
-        'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
-        'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
-        'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
-    ],
-], 200);
-}
 public function update_image(Request $request)
 {
     $user_id = $request->input('user_id');
@@ -707,6 +716,65 @@ public function update_location(Request $request)
     return response()->json([
         'success' => true,
         'message' => 'User location updated successfully.',
+    ], 200);
+}
+
+public function update_notify(Request $request)
+{
+    $user_id = $request->input('user_id');
+
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 400);
+    }
+
+    $user = Users::find($user_id);
+
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user not found.',
+        ], 404);
+    }
+
+    $message_notify = $request->input('message_notify');
+    $add_friend_notify = $request->input('add_friend_notify');
+    $view_notify = $request->input('view_notify');
+
+    if (is_null($message_notify)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Message Notify is empty.',
+        ], 400);
+    }
+
+    if (is_null($add_friend_notify)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Add Friend Notify is empty.',
+        ], 400);
+    }
+
+    if (is_null($view_notify)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'View Notify is empty.',
+        ], 400);
+    }
+
+
+    // Update user location details
+    $user->message_notify = $message_notify;
+    $user->add_friend_notify = $add_friend_notify;
+    $user->view_notify = $view_notify;
+
+    $user->save();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'User notify updated successfully.',
     ], 200);
 }
 

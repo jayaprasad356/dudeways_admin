@@ -137,19 +137,60 @@
                 </div>
 
                 <div class="form-group">
-    <label for="dummy">Dummy</label>
-    <div class="custom-control custom-switch">
-        <input type="hidden" name="dummy" value="0"> <!-- Hidden input to ensure a value is always submitted -->
-        <input type="checkbox" name="dummy" class="custom-control-input @error('dummy') is-invalid @enderror" id="dummy" value="1" {{ old('dummy') ? 'checked' : '' }}>
-        <label class="custom-control-label" for="dummy"></label>
-    </div>
-    @error('dummy')
-    <span class="invalid-feedback" role="alert">
-        <strong>{{ $message }}</strong>
-    </span>
-    @enderror
-</div>
+                    <label for="dummy">Dummy</label>
+                    <div class="custom-control custom-switch">
+                        <input type="hidden" name="dummy" value="0"> <!-- Hidden input to ensure a value is always submitted -->
+                        <input type="checkbox" name="dummy" class="custom-control-input @error('dummy') is-invalid @enderror" id="dummy" value="1" {{ old('dummy') ? 'checked' : '' }}>
+                        <label class="custom-control-label" for="dummy"></label>
+                    </div>
+                    @error('dummy')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                    @enderror
+                </div>
 
+                <div class="form-group">
+                    <label for="message_notify">Message Notify</label>
+                    <div class="custom-control custom-switch">
+                        <input type="hidden" name="message_notify" value="0"> <!-- Hidden input to ensure a value is always submitted -->
+                        <input type="checkbox" name="message_notify" class="custom-control-input @error('message_notify') is-invalid @enderror" id="message_notify" value="1" {{ old('message_notify') ? 'checked' : '' }}>
+                        <label class="custom-control-label" for="message_notify"></label>
+                    </div>
+                    @error('message_notify')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                    @enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="add_friend_notify">Add Friend Notify</label>
+                    <div class="custom-control custom-switch">
+                        <input type="hidden" name="add_friend_notify" value="0"> <!-- Hidden input to ensure a value is always submitted -->
+                        <input type="checkbox" name="add_friend_notify" class="custom-control-input @error('add_friend_notify') is-invalid @enderror" id="add_friend_notify" value="1" {{ old('add_friend_notify') ? 'checked' : '' }}>
+                        <label class="custom-control-label" for="add_friend_notify"></label>
+                    </div>
+                    @error('add_friend_notify')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                    @enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="view_notify">View Notify</label>
+                    <div class="custom-control custom-switch">
+                        <input type="hidden" name="view_notify" value="0"> <!-- Hidden input to ensure a value is always submitted -->
+                        <input type="checkbox" name="view_notify" class="custom-control-input @error('view_notify') is-invalid @enderror" id="view_notify" value="1" {{ old('view_notify') ? 'checked' : '' }}>
+                        <label class="custom-control-label" for="view_notify"></label>
+                    </div>
+                    @error('view_notify')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                    @enderror
+                </div>
 
               
 

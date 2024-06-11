@@ -45,6 +45,10 @@
                     <th>Verified <i class="fas fa-sort"></i></th>
                     <th>Online Status <i class="fas fa-sort"></i></th>
                     <th>Dummy <i class="fas fa-sort"></i></th>
+                    <th>Message Notify <i class="fas fa-sort"></i></th>
+                    <th>Add Friend Notify <i class="fas fa-sort"></i></th>
+                    <th>View Notify <i class="fas fa-sort"></i></th>
+                    <th>Profile Verified <i class="fas fa-sort"></i></th>
                     <th>DateTime <i class="fas fa-sort"></i></th>
                     </tr>
                 </thead>
@@ -104,6 +108,29 @@
                         <td>
                         <span class="{{ $user->dummy == 1 ? 'text-enable' : 'text-disable' }}">
                                 {{ $user->dummy == 1 ? 'Enable' : 'Disable' }}
+                            </span>
+                        </td>
+                        <td>
+                        <span class="{{ $user->view_notify == 1 ? 'text-enable' : 'text-disable' }}">
+                                {{ $user->view_notify == 1 ? 'Enable' : 'Disable' }}
+                            </span>
+                        </td>
+
+                        <td>
+                        <span class="{{ $user->add_friend_notify == 1 ? 'text-enable' : 'text-disable' }}">
+                                {{ $user->add_friend_notify == 1 ? 'Enable' : 'Disable' }}
+                            </span>
+                        </td>
+
+                        <td>
+                        <span class="{{ $user->view_notify == 1 ? 'text-enable' : 'text-disable' }}">
+                                {{ $user->view_notify == 1 ? 'Enable' : 'Disable' }}
+                            </span>
+                        </td>
+
+                        <td>
+                        <span class="{{ $user->profile_verified == 1 ? 'text-enable' : 'text-disable' }}">
+                                {{ $user->profile_verified == 1 ? 'Enable' : 'Disable' }}
                             </span>
                         </td>
                         <td>{{$user->datetime}}</td>
