@@ -30,10 +30,14 @@ class HomeController extends Controller
         $trips_count = Trips::count();
         $points_count = Points::count();
 
+         // Count of pending trips
+    $pending_trips_count = Trips::where('trip_status', 0)->count();
+
         return view('home', [
             'users_count' => $users_count,
             'trips_count' => $trips_count,
             'points_count' => $points_count,
+            'pending_trips_count' => $pending_trips_count,
         ]);
     }
 }

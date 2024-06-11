@@ -34,6 +34,20 @@
                 </div>
             </div>
 
+             <div class="col-lg-4 col-6">
+                <!-- small box -->
+                <div class="small-box bg-blue">
+                    <div class="inner">
+                        <h3>{{ $pending_trips_count }}</h3>
+                        <p>Pending Trips</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-suitcase"></i>
+                    </div>
+                    <a href="{{ route('trips.index', ['trip_status' => '0']) }}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+
             <div class="col-lg-4 col-6">
                 <!-- small box -->
                 <div class="small-box bg-green">

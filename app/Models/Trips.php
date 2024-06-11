@@ -23,6 +23,13 @@ class Trips extends Authenticatable
         return $this->belongsTo(Users::class, 'user_id');
     }
 
+    public function scopeFilterByStatus($query, $trip_status)
+    {
+        if ($trip_status !== null) {
+            return $query->where('trip_status', $trip_status);
+        }
+        return $query;
+    }
     protected $hidden = [
         'password', 'remember_token',
     ];

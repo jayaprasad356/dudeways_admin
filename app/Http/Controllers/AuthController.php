@@ -1069,9 +1069,12 @@ public function trip_list(Request $request)
     $limit = $request->input('limit', 20);
 
     // Fetch trips based on the type
-    if ($type == 'latest' or 'nearby') {
-        // Fetch the latest 20 trips
-        $trips = Trips::orderBy('trip_datetime', 'desc')->limit($limit)->get();
+    if ($type == 'latest' || $type == 'nearby') {
+        // Fetch the latest 20 trips with trip_status 1
+        $trips = Trips::where('trip_status', 1)
+                      ->orderBy('trip_datetime', 'desc')
+                      ->limit($limit)
+                      ->get();
     } elseif ($type == 'date') {
         // Check if the date parameter is provided
         if (!$request->has('date')) {
@@ -1083,8 +1086,12 @@ public function trip_list(Request $request)
 
         $fromDate = $request->input('date');
 
-        // Fetch trips with the specified from_date
-        $trips = Trips::whereDate('from_date', $fromDate)->orderBy('created_at', 'desc')->limit($limit)->get();
+        // Fetch trips with the specified from_date and trip_status 1
+        $trips = Trips::where('trip_status', 1)
+                      ->whereDate('from_date', $fromDate)
+                      ->orderBy('created_at', 'desc')
+                      ->limit($limit)
+                      ->get();
     } else {
         return response()->json([
             'success' => false,

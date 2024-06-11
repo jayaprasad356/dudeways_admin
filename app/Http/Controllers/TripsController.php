@@ -24,20 +24,28 @@ class TripsController extends Controller
 
      public function index(Request $request)
      {
-         $query = Trips::query()->with('users'); // Eager load the user relationship
+         $query = Trips::query()->with('users');
      
-         // Filter by user if user_id is provided
          if ($request->has('user_id')) {
              $user_id = $request->input('user_id');
              $query->where('user_id', $user_id);
          }
      
-         $trips = $query->latest()->paginate(10); // Paginate the results
+         if ($request->has('trip_status')) {
+             $trip_status = $request->input('trip_status');
+             $query->where('trip_status', $trip_status);
+         } else {
+             // By default, fetch pending trips
+             $query->where('trip_status', 0);
+         }
      
-         $users = Users::all(); // Fetch all users for the filter dropdown
+         $trips = $query->latest()->paginate(10);
+         $users = Users::all();
      
-         return view('trips.index', compact('trips', 'users')); // Pass trips and users to the view
+         return view('trips.index', compact('trips', 'users'));
      }
+     
+     
      
     /**
      * Show the form for creating a new resource.
