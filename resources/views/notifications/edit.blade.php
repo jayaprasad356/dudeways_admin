@@ -30,7 +30,7 @@
                 <button type="button" class="btn btn-primary" onclick="toggleUserListModal()">Select User</button>
 
 
-                <div class="form-group">
+                <div class="form-group"><br>
                     <label for="notify_user_id">Notify User ID</label>
                     <input type="number" name="notify_user_id" class="form-control @error('notify_user_id') is-invalid @enderror"
                            id="notify_user_id"
