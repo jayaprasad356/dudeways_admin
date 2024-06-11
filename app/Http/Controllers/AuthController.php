@@ -159,6 +159,7 @@ public function register(Request $request)
     $city = $request->input('city');
     $profession = $request->input('profession');
     $referred_by = $request->input('referred_by');
+    $introduction = $request->input('introduction');
     $points = $request->input('points', 10);
 
     if (empty($state)) {
@@ -171,6 +172,12 @@ public function register(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'city is empty.',
+        ], 400);
+    }
+    if (empty($introduction)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'introduction is empty.',
         ], 400);
     }
     if (empty($age)) {
@@ -263,6 +270,7 @@ public function register(Request $request)
     $user->state = $state;
     $user->city = $city;
     $user->referred_by = $referred_by;
+    $user->introduction = $introduction;
     $user->datetime = now(); 
     $user->last_seen = now(); 
     // Save the user
@@ -299,6 +307,9 @@ public function register(Request $request)
             'profile' => $imageUrl,
             'cover_img' => $coverimageUrl,
             'points' => $user->points,
+            'introduction' => $user->introduction,
+            'latitude' => $user->latitude,
+            'longtitude	' => $user->longtitude,
             'verified' => 0,
             'online_status' => 0,
             'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
