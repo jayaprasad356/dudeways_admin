@@ -1136,13 +1136,43 @@ public function trip_list(Request $request)
     // Set default limit
     $limit = $request->input('limit', 20);
 
+    // Fetch the user's latitude and longtitude
+    $userLatitude = (float)$userExists->latitude;
+    $userLongtitude = (float)$userExists->longtitude;
+
     // Fetch trips based on the type
-    if ($type == 'latest' || $type == 'nearby') {
+    if ($type == 'latest') {
         // Fetch the latest 20 trips with trip_status 1
         $trips = Trips::where('trip_status', 1)
                       ->orderBy('trip_datetime', 'desc')
                       ->limit($limit)
                       ->get();
+    } elseif ($type == 'nearby') {
+        // Fetch trips with trip_status 1
+        $trips = Trips::where('trip_status', 1)->get();
+
+        $tripDetails = [];
+
+        foreach ($trips as $trip) {
+            $tripUser = Users::find($trip->user_id);
+
+            // Calculate the distance between the users using their latitude and longtitude
+            $distance = $this->calculateDistance($userLatitude, $userLongtitude, (float)$tripUser->latitude, (float)$tripUser->longtitude);
+
+            $tripDetails[] = [
+                'trip' => $trip,
+                'user' => $tripUser,
+                'distance' => $distance
+            ];
+        }
+
+        // Sort trips by distance
+        usort($tripDetails, function($a, $b) {
+            return $a['distance'] <=> $b['distance'];
+        });
+
+        // Limit the number of trips
+        $tripDetails = array_slice($tripDetails, 0, $limit);
     } elseif ($type == 'date') {
         // Check if the date parameter is provided
         if (!$request->has('date')) {
@@ -1167,17 +1197,20 @@ public function trip_list(Request $request)
         ], 400);
     }
 
-    if ($trips->isEmpty()) {
+    if ($type != 'nearby' && $trips->isEmpty()) {
         return response()->json([
             'success' => false,
             'message' => 'No trips found.',
         ], 404);
     }
 
-    $tripDetails = [];
+    $tripDetailsFormatted = [];
 
-    foreach ($trips as $trip) {
-        $user = Users::find($trip->user_id);
+    foreach ($tripDetails as $detail) {
+        $trip = $detail['trip'];
+        $user = $detail['user'];
+        $distance = $detail['distance'];
+
         $imageUrl = $user ? asset('storage/app/public/users/' . $user->profile) : null;
 
         // Check if the user is a friend
@@ -1208,7 +1241,7 @@ public function trip_list(Request $request)
 
         $tripimageUrl = asset('storage/app/public/trips/' . $trip->trip_image);
 
-        $tripDetails[] = [
+        $tripDetailsFormatted[] = [
             'id' => $trip->id,
             'user_id' => $trip->user_id,
             'name' => $user->name,
@@ -1234,8 +1267,25 @@ public function trip_list(Request $request)
     return response()->json([
         'success' => true,
         'message' => 'Trip details retrieved successfully.',
-        'data' => $tripDetails,
+        'data' => $tripDetailsFormatted,
     ], 200);
+}
+
+// Function to calculate distance between two points using their latitude and longtitude
+private function calculateDistance($latitudeFrom, $longtitudeFrom, $latitudeTo, $longtitudeTo, $earthRadius = 6371)
+{
+    // convert from degrees to radians
+    $latFrom = deg2rad($latitudeFrom);
+    $lonFrom = deg2rad($longtitudeFrom);
+    $latTo = deg2rad($latitudeTo);
+    $lonTo = deg2rad($longtitudeTo);
+
+    $latDelta = $latTo - $latFrom;
+    $lonDelta = $lonTo - $lonFrom;
+
+    $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
+      cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
+    return $angle * $earthRadius;
 }
 
 
