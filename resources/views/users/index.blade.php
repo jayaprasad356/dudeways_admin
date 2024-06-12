@@ -16,7 +16,8 @@
         <div class="ml-auto">
         <form action="{{ route('users.index') }}" method="GET">
                     <div class="input-group">
-                        <input type="text" name="search" class="form-control" placeholder="Search by....">
+                    <input type="text" id="user-search" name="search" class="form-control" placeholder="Search by....">
+
                     </div>
                 </form>
             </div>
@@ -181,39 +182,76 @@
     </script>
 
 <script>
-        $(document).ready(function() {
-            $('.table th').click(function() {
-                var table = $(this).parents('table').eq(0);
-                var index = $(this).index();
-                var rows = table.find('tr:gt(0)').toArray().sort(comparer(index));
-                this.asc = !this.asc;
-                if (!this.asc) {
-                    rows = rows.reverse();
-                }
-                for (var i = 0; i < rows.length; i++) {
-                    table.append(rows[i]);
-                }
-                // Update arrows
-                updateArrows(table, index, this.asc);
-            });
-
-            function comparer(index) {
-                return function(a, b) {
-                    var valA = getCellValue(a, index),
-                        valB = getCellValue(b, index);
-                    return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.localeCompare(valB);
-                };
+    $(document).ready(function () {
+        $('.table th').click(function () {
+            var table = $(this).parents('table').eq(0);
+            var index = $(this).index();
+            var rows = table.find('tr:gt(0)').toArray().sort(comparer(index));
+            this.asc = !this.asc;
+            if (!this.asc) {
+                rows = rows.reverse();
             }
-
-            function getCellValue(row, index) {
-                return $(row).children('td').eq(index).text();
+            for (var i = 0; i < rows.length; i++) {
+                table.append(rows[i]);
             }
-
-            function updateArrows(table, index, asc) {
-                table.find('.arrow').remove();
-                var arrow = asc ? '<i class="fas fa-arrow-up arrow"></i>' : '<i class="fas fa-arrow-down arrow"></i>';
-                table.find('th').eq(index).append(arrow);
-            }
+            // Update arrows after sorting
+            updateArrows(table, index, this.asc);
         });
-    </script>
+
+        function comparer(index) {
+            return function (a, b) {
+                var valA = getCellValue(a, index),
+                    valB = getCellValue(b, index);
+                return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.localeCompare(valB);
+            };
+        }
+
+        function getCellValue(row, index) {
+            return $(row).children('td').eq(index).text();
+        }
+
+        function updateArrows(table, index, asc) {
+            table.find('.arrow').remove();
+            var arrow = asc ? '<i class="fas fa-arrow-up arrow"></i>' : '<i class="fas fa-arrow-down arrow"></i>';
+            table.find('th').eq(index).append(arrow);
+        }
+    });
+</script>
+
+
+<script>
+    $(document).ready(function () {
+        // Function to perform filtering
+        function filterUsers(searchValue) {
+            var rows = $('.table tbody tr');
+
+            // Loop through each row and hide/show based on search value
+            rows.each(function () {
+                var name = $(this).find('td:eq(4)').text().toLowerCase(); // Name column
+                var uniqueName = $(this).find('td:eq(5)').text().toLowerCase(); // Unique Name column
+                var email = $(this).find('td:eq(6)').text().toLowerCase(); // Email column
+
+                // Check if search value exists in any of the columns
+                if (name.includes(searchValue.toLowerCase()) || 
+                    uniqueName.includes(searchValue.toLowerCase()) || 
+                    email.includes(searchValue.toLowerCase())) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+        }
+
+        // Perform filtering when input value changes
+        $('#user-search').on('input', function () {
+            var searchValue = $(this).val().trim();
+            filterUsers(searchValue);
+        });
+
+        // Display all data when page is loaded or refreshed
+        filterUsers('');
+    });
+</script>
+
+
 @endsection

@@ -70,10 +70,6 @@ return [
             'model' => App\Models\Admin::class,
         ],
     
-        'shops' => [
-            'driver' => 'eloquent',
-            'model' => App\Models\Shops::class,
-        ],
     ],
 
     /*

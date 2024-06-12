@@ -97,8 +97,10 @@ Route::prefix('admin')->middleware('auth')->group(function () {
         Route::put('/notifications/{notifications}', [NotificationsController::class, 'update'])->name('notifications.update');
         Route::post('/notifications', [NotificationsController::class, 'store'])->name('notifications.store');
 
-        Route::get('/news/{news}/edit', [NewsController::class, 'edit'])->name('news.edit');
-        Route::put('/news/{news}', [NewsController::class, 'update'])->name('news.update');
+
+    
+        Route::get('news/1/edit', [NewsController::class, 'edit'])->name('news.edit');
+        Route::post('news/1/update', [NewsController::class, 'update'])->name('news.update');
 
     
         //Verifications  

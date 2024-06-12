@@ -31,10 +31,10 @@
     <div class="col-md-4 text-right">
         <!-- Search Form -->
         <form action="{{ route('chats.index') }}" method="GET">
-                    <div class="input-group">
-                        <input type="text" name="search" class="form-control" placeholder="Search by....">
-                    </div>
-                </form>
+            <div class="input-group">
+                <input type="text" name="search" class="form-control" placeholder="Search by....">
+            </div>
+        </form>
     </div>
 </div>
 
@@ -42,7 +42,7 @@
             <table class="table table-bordered table-hover">
                 <thead class="thead-dark">
                     <tr>
-                    <th>Actions</th>
+                        <th>Actions</th>
                         <th>ID <i class="fas fa-sort"></i></th>
                         <th>Profile <i class="fas fa-sort"></i></th>
                         <th>User Name <i class="fas fa-sort"></i></th>
@@ -53,15 +53,21 @@
                 <tbody>
                     @foreach ($chats as $chat)
                     <tr>
-                    <td>
+                        <td>
                             <a href="{{ route('chats.edit', $chat) }}" class="btn btn-primary"><i class="fas fa-edit"></i></a>
                             <button class="btn btn-danger btn-delete" data-url="{{route('chats.destroy', $chat)}}"><i class="fas fa-trash"></i></button>
                         </td>
                         <td>{{$chat->id}}</td>
                         <td>
-                        <a href="{{ asset('storage/app/public/users/' . $chat->user->profile) }}" data-lightbox="profile-{{ $chat->id }}">
-                        <img class="customer-img img-thumbnail img-fluid rounded-circle" src="{{ asset('storage/app/public/users/' . $chat->user->profile) }}" alt=""
-                        style="max-width: 100px; max-height: 100px;">
+                            @if($chat->user && $chat->user->profile)
+                                <a href="{{ asset('storage/app/public/users/' . $chat->user->profile) }}" data-lightbox="profile-{{ $chat->id }}">
+                                    <img class="customer-img img-thumbnail img-fluid rounded-circle" src="{{ asset('storage/app/public/users/' . $chat->user->profile) }}" alt=""
+                                    style="max-width: 100px; max-height: 100px;">
+                                </a>
+                            @else
+                                <img class="customer-img img-thumbnail img-fluid rounded-circle" src="{{ asset('path/to/default/profile.png') }}" alt=""
+                                style="max-width: 100px; max-height: 100px;">
+                            @endif
                         </td>
                         <td>{{ optional($chat->user)->name }}</td> <!-- Display user name safely -->
                         <td>{{$chat->latest_message}}</td>
@@ -74,13 +80,12 @@
         {{ $chats->render() }}
     </div>
 </div>
-
 @endsection
 @section('js')
     <script src="{{ asset('plugins/sweetalert2/sweetalert2.min.js') }}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
- <script>
-  $(document).ready(function () {
+    <script>
+        $(document).ready(function () {
             // Submit the form when user selection changes
             $('#user-filter').change(function () {
                 if ($(this).val() !== '') {
@@ -89,11 +94,7 @@
                     window.location.href = "{{ route('chats.index') }}";
                 }
             });
-        });
-            </script>
-            <script>
 
-        $(document).ready(function () {
             $(document).on('click', '.btn-delete', function () {
                 $this = $(this);
                 const swalWithBootstrapButtons = Swal.mixin({
@@ -102,11 +103,11 @@
                         cancelButton: 'btn btn-danger'
                     },
                     buttonsStyling: false
-                })
+                });
 
                 swalWithBootstrapButtons.fire({
                     title: 'Are you sure?',
-                    text: "Do you really want to delete this customer?",
+                    text: "Do you really want to delete this chat?",
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonText: 'Yes, delete it!',
@@ -117,16 +118,12 @@
                         $.post($this.data('url'), {_method: 'DELETE', _token: '{{csrf_token()}}'}, function (res) {
                             $this.closest('tr').fadeOut(500, function () {
                                 $(this).remove();
-                            })
-                        })
+                            });
+                        });
                     }
-                })
-            })
-        })
-    </script>
+                });
+            });
 
-<script>
-        $(document).ready(function() {
             $('.table th').click(function() {
                 var table = $(this).parents('table').eq(0);
                 var index = $(this).index();
@@ -138,7 +135,6 @@
                 for (var i = 0; i < rows.length; i++) {
                     table.append(rows[i]);
                 }
-                // Update arrows
                 updateArrows(table, index, this.asc);
             });
 

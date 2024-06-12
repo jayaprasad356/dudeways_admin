@@ -2,36 +2,22 @@
 
 @section('title', 'Update Settings')
 @section('content-header', 'Update Settings')
-
 @section('content')
 <div class="card">
     <div class="card-body">
-  
-        <form action="{{ route('news.update') }}" method="post">
-            @method('PUT')
+       
+        <form action="{{ route('news.update', $news->id) }}" method="POST">
             @csrf
-
+            @method('POST')
             <div class="form-group">
                 <label for="telegram">Telegram</label>
-                <input type="text" name="telegram" class="form-control @error('telegram') is-invalid @enderror" id="telegram" placeholder="telegram" value="{{ old('telegram', $news->telegram) }}">
-                @error('telegram')
-                <span class="invalid-feedback" role="alert">
-                    <strong>{{ $message }}</strong>
-                </span>
-                @enderror
+                <input type="text" class="form-control" id="telegram" name="telegram" value="{{ $news->telegram }}" required>
             </div>
-
             <div class="form-group">
-                <label for="whatsapp">Whatsapp</label>
-                <input type="text" name="whatsapp" class="form-control @error('whatsapp') is-invalid @enderror" id="whatsapp" placeholder="whatsapp" value="{{ old('whatsapp', $news->whatsapp) }}">
-                @error('whatsapp')
-                <span class="invalid-feedback" role="alert">
-                    <strong>{{ $message }}</strong>
-                </span>
-                @enderror
+                <label for="instagram">Instagram</label>
+                <input type="text" class="form-control" id="instagram" name="instagram" value="{{ $news->instagram }}" required>
             </div>
-
-            <button type="submit" class="btn btn-success btn-block btn-lg"><i class="fas fa-check"></i> Submit Changes</button>
+            <button type="submit" class="btn btn-primary">Update</button>
         </form>
     </div>
 </div>

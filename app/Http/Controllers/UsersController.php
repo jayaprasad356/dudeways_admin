@@ -21,9 +21,9 @@ class UsersController extends Controller
         // Check if there's a search query
         if ($request->filled('search')) {
             $search = $request->input('search');
-            $query->where('email', 'like', "%$search%")
+            $query->where('unique_name', 'like', "%$search%")
                   ->orWhere('name', 'like', "%$search%")
-                  ->orWhere('refer_code', 'like', "%$search%");
+                  ->orWhere('email', 'like', "%$search%");
         }
 
         // Check if the request is AJAX

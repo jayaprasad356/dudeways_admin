@@ -77,7 +77,14 @@
                         <p>Verifications</p>
                     </a>
                 </li>
-            
+               
+                <li class="nav-item has-treeview">
+                    <a href="{{ route('news.edit') }}" class="nav-link {{ activeSegment('news') }}">
+                        <i class="nav-icon fas fa-gear"></i>
+                        <p>Settings</p>
+                    </a>
+                </li>
+
                 <li class="nav-item">
                     <a href="#" class="nav-link" onclick="document.getElementById('logout-form').submit()">
                         <i class="nav-icon fas fa-power-off"></i>
