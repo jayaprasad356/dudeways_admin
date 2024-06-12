@@ -1266,10 +1266,9 @@ public function trip_list(Request $request)
             'trip_datetime' => Carbon::parse($trip->trip_datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($trip->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($trip->created_at)->format('Y-m-d H:i:s'),
-            'distance' => isset($detail['distance']) ? $detail['distance'] . ' km' : null
+            'distance' => $distance . ' km'
         ];
     }
-
     return response()->json([
         'success' => true,
         'message' => 'Trip details retrieved successfully.',
