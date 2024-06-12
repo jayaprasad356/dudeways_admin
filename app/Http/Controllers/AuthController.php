@@ -1136,9 +1136,9 @@ public function trip_list(Request $request)
     // Set default limit
     $limit = $request->input('limit', 20);
 
-    // Fetch the user's latitude and longtitude
+    // Fetch the user's latitude and longitude
     $userLatitude = (float)$userExists->latitude;
-    $userLongtitude = (float)$userExists->longtitude;
+    $userLongitude = (float)$userExists->longitude;
 
     // Fetch trips based on the type
     if ($type == 'latest') {
@@ -1156,8 +1156,13 @@ public function trip_list(Request $request)
         foreach ($trips as $trip) {
             $tripUser = Users::find($trip->user_id);
 
-            // Calculate the distance between the users using their latitude and longtitude
-            $distance = $this->calculateDistance($userLatitude, $userLongtitude, (float)$tripUser->latitude, (float)$tripUser->longtitude);
+            // Skip the trip if it belongs to the same user
+            if ($tripUser->id == $userId) {
+                continue;
+            }
+
+            // Calculate the distance between the users using their latitude and longitude
+            $distance = $this->calculateDistance($userLatitude, $userLongitude, (float)$tripUser->latitude, (float)$tripUser->longitude);
 
             $tripDetails[] = [
                 'trip' => $trip,
@@ -1271,14 +1276,14 @@ public function trip_list(Request $request)
     ], 200);
 }
 
-// Function to calculate distance between two points using their latitude and longtitude
-private function calculateDistance($latitudeFrom, $longtitudeFrom, $latitudeTo, $longtitudeTo, $earthRadius = 6371)
+// Function to calculate distance between two points using their latitude and longitude
+private function calculateDistance($latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo, $earthRadius = 6371)
 {
     // convert from degrees to radians
     $latFrom = deg2rad($latitudeFrom);
-    $lonFrom = deg2rad($longtitudeFrom);
+    $lonFrom = deg2rad($longitudeFrom);
     $latTo = deg2rad($latitudeTo);
-    $lonTo = deg2rad($longtitudeTo);
+    $lonTo = deg2rad($longitudeTo);
 
     $latDelta = $latTo - $latFrom;
     $lonDelta = $lonTo - $lonFrom;
@@ -1287,7 +1292,6 @@ private function calculateDistance($latitudeFrom, $longtitudeFrom, $latitudeTo, 
       cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
     return $angle * $earthRadius;
 }
-
 
 public function my_trip_list(Request $request)
 {
