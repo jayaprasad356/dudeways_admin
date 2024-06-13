@@ -2074,8 +2074,13 @@ public function friends_list(Request $request)
             'user_id' => $friend->user_id,
             'friend_user_id' => $friend->friend_user_id,
             'name' => $friendUser->name,
+            'introduction' => $friendUser->introduction,
+            'gender' => $friendUser->gender,
+            'age' => $friendUser->age,
+            'online_status' => $friendUser->online_status,
             'profile' => $friendImageUrl,
             'last_seen' => $lastSeenFormatted,
+            'distance' =>'2km',
             'status' => $friend->status == 1 ? 'Interested' : 'Not Interested',
             'datetime' => Carbon::parse($friend->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($friend->updated_at)->format('Y-m-d H:i:s'),
@@ -2085,7 +2090,7 @@ public function friends_list(Request $request)
 
     return response()->json([
         'success' => true,
-        'message' => 'Friends details listed successfully for the specified user.',
+        'message' => 'Friends details listed successfully.',
         'data' => $friendDetails,
     ], 200);
 }
