@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+
 <html>
 
 <head>
@@ -17,6 +17,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <!-- Google Font: Kanit -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Arvo:400,700&display=swap">
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(function(OneSignal) {
+    OneSignal.init({
+      appId: "09d58e82-67e5-49d9-a4b9-1cfd2fb15986",
+    });
+  });
+</script>
     @yield('css')
     <style>
         body, input, button {
@@ -56,9 +65,6 @@
         }
   
     </style>
- 
-   
-
 
     <script>
         window.APP = <?php echo json_encode([
@@ -66,6 +72,7 @@
                             'warning_quantity' => config('settings.warning_quantity')
                         ]) ?>
     </script>
+
 </head>
 
 <body class="hold-transition sidebar-mini">
@@ -108,7 +115,7 @@
         </aside>
         <!-- /.control-sidebar -->
     </div><!-- /.wrapper -->
-
+ 
     <script src="{{ asset('public/js/app.js') }}"></script>
     @yield('js')
 </body>

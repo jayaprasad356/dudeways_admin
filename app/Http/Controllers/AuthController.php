@@ -140,6 +140,7 @@ return response()->json([
         'points' => $user->points,
         'verified' => $user->verified,
         'online_status' => $user->online_status,
+        'introduction' => $user->introduction,
         'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
         'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
         'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),

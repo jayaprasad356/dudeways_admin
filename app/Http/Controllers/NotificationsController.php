@@ -7,6 +7,9 @@ use App\Models\Users;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Log;
+use OneSignal;
+
 
 class NotificationsController extends Controller
 {
@@ -46,29 +49,50 @@ class NotificationsController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  NotificationsStoreRequest  $request
      * @return \Illuminate\Http\Response
      */
     public function store(NotificationsStoreRequest $request)
     {
-        $notifications = Notifications::create([
+        $notification = Notifications::create([
             'message' => $request->message,
             'user_id' => $request->user_id,
             'notify_user_id' => $request->notify_user_id,
             'datetime' => now(),
         ]);
 
-        if (!$notifications) {
-            return redirect()->back()->with('error', 'Sorry, something went wrong while creating the chat.');
+        if (!$notification) {
+            return redirect()->back()->with('error', 'Sorry, something went wrong while creating the notification.');
         }
 
-        return redirect()->route('notifications.index')->with('success', 'Success, new chat has been added successfully!');
+        // Debugging output
+        Log::info('Attempting to send notification');
+        Log::info('Notification data: ', [
+            'message' => $notification->message,
+            'user_id' => $notification->notify_user_id,
+        ]);
+        
+        try {
+            OneSignal::sendNotificationToUser(
+                $notification->message,
+                $notification->notify_user_id,
+                null,
+                null,
+                null,
+                null
+            );
+        } catch (\Exception $e) {
+            Log::error('OneSignal Error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Sorry, something went wrong while sending the notification.');
+        }
+        
+        Log::info('Notification sent successfully');
+        
     }
-
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Notifications  $Notifications
+     * @param  Notifications  $notifications
      * @return \Illuminate\Http\Response
      */
     public function show(Notifications $notifications)
@@ -79,7 +103,7 @@ class NotificationsController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Notifications  $Notifications
+     * @param  Notifications  $notifications
      * @return \Illuminate\Http\Response
      */
     public function edit(Notifications $notifications)
@@ -91,8 +115,8 @@ class NotificationsController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Notifications  $Notifications
+     * @param  Request  $request
+     * @param  Notifications  $notifications
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, Notifications $notifications)
@@ -103,12 +127,18 @@ class NotificationsController extends Controller
         $notifications->datetime = now();
 
         if (!$notifications->save()) {
-            return redirect()->back()->with('error', 'Sorry, something went wrong while updating the chat.');
+            return redirect()->back()->with('error', 'Sorry, something went wrong while updating the notification.');
         }
 
-        return redirect()->route('notifications.edit', $notifications->id)->with('success', 'Success, notifications has been updated.');
+        return redirect()->route('notifications.edit', $notifications->id)->with('success', 'Success, notification has been updated.');
     }
 
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  Notifications  $notifications
+     * @return \Illuminate\Http\Response
+     */
     public function destroy(Notifications $notifications)
     {
         $notifications->delete();
@@ -118,4 +148,3 @@ class NotificationsController extends Controller
         ]);
     }
 }
-

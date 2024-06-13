@@ -26,6 +26,15 @@
     <!-- Styles -->
     <link href="{{ asset('public/css/app.css') }}" rel="stylesheet">
     
+    <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async=""></script>
+    <script>
+        var OneSignal = window.OneSignal || [];
+        OneSignal.push(function() {
+            OneSignal.init({
+                appId: "{{ env('09d58e82-67e5-49d9-a4b9-1cfd2fb15986') }}",
+            });
+        });
+    </script>
 </head>
 <body>
     <div id="app">
