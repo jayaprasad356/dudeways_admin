@@ -1831,7 +1831,7 @@ public function chat_list(Request $request)
     if ($chats->isEmpty()) {
         return response()->json([
             'success' => false,
-            'message' => 'No chats found for the user_id.',
+            'message' => 'No chats found.',
         ], 404);
     }
 
@@ -2037,7 +2037,7 @@ public function friends_list(Request $request)
     if ($friends->isEmpty()) {
         return response()->json([
             'success' => false,
-            'message' => 'No friends found for the specified user.',
+            'message' => 'No friends found.',
         ], 404);
     }
 
@@ -2440,7 +2440,7 @@ public function spin_points(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Failed to save transaction.',
-        ], 500);
+        ], 500);    
     }
 
     // Return success response
