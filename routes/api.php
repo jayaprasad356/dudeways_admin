@@ -23,6 +23,7 @@ Route::post('recommend_trip_list', [AuthController::class, 'recommend_trip_list'
 Route::post('delete_trip', [AuthController::class, 'delete_trip']);
 Route::post('add_chat', [AuthController::class, 'add_chat']);
 Route::post('chat_list', [AuthController::class, 'chat_list']);
+Route::post('blocked_chat', [AuthController::class, 'blocked_chat']);
 Route::post('add_friends', [AuthController::class, 'add_friends']);
 Route::post('friends_list', [AuthController::class, 'friends_list']);
 Route::post('add_notifications', [AuthController::class, 'add_notifications']);

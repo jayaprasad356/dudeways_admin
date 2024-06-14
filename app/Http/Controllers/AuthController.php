@@ -115,7 +115,7 @@ public function check_email(Request $request)
     }
 
 // Image URL
-$imageUrl = asset('storage/app/public/users/' . $user->profile);
+$imageUrl = $user->profile_verified == 1 ? asset('storage/app/public/users/' . $user->profile) : '';
 $coverimageUrl = asset('storage/app/public/users/' . $user->cover_img);
 
 return response()->json([
@@ -141,6 +141,10 @@ return response()->json([
         'verified' => $user->verified,
         'online_status' => $user->online_status,
         'introduction' => $user->introduction,
+        'message_notify' => $user->message_notify,
+        'add_friend_notify' => $user->add_friend_notify,
+        'view_notify' => $user->view_notify,
+        'profile_verified' => $user->profile_verified,
         'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
         'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
         'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
@@ -286,7 +290,7 @@ public function register(Request $request)
     $user->save();
 
     // Image URL
-    $imageUrl = asset('storage/app/public/users/' . $user->profile);
+    $imageUrl = $user->profile_verified == 1 ? asset('storage/app/public/users/' . $user->profile) : '';
     $coverimageUrl = asset('storage/app/public/users/' . $user->cover_img);
 
     return response()->json([
@@ -448,7 +452,7 @@ public function update_image(Request $request)
         $user->datetime = now(); 
         $user->save();
         // Image URL
-         $imageUrl = asset('storage/app/public/users/' . $user->profile);
+        $imageUrl = $user->profile_verified == 1 ? asset('storage/app/public/users/' . $user->profile) : '';
          $coverimageUrl = asset('storage/app/public/users/' . $user->cover_img);
 
         return response()->json([
@@ -473,6 +477,10 @@ public function update_image(Request $request)
                 'verified' => $user->verified,
                 'online_status' => $user->online_status,
                 'introduction' => $user->introduction,
+                'message_notify' => $user->message_notify,
+                'add_friend_notify' => $user->add_friend_notify,
+                'view_notify' => $user->view_notify,
+                'profile_verified' => $user->profile_verified,
                 'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
                 'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
                 'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
@@ -516,7 +524,7 @@ public function update_cover_img(Request $request)
         $user->datetime = now(); 
         $user->save();
         // Image URL
-         $imageUrl = asset('storage/app/public/users/' . $user->profile);
+        $imageUrl = $user->profile_verified == 1 ? asset('storage/app/public/users/' . $user->profile) : '';
          $coverimageUrl = asset('storage/app/public/users/' . $user->cover_img);
 
         return response()->json([
@@ -541,6 +549,10 @@ public function update_cover_img(Request $request)
                 'verified' => $user->verified,
                 'online_status' => $user->online_status,
                 'introduction' => $user->introduction,
+                'message_notify' => $user->message_notify,
+                'add_friend_notify' => $user->add_friend_notify,
+                'view_notify' => $user->view_notify,
+                'profile_verified' => $user->profile_verified,
                 'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
                 'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
                 'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
@@ -639,7 +651,7 @@ if ($email !== null) {
     $user->save();
 
     // Image URL
-    $imageUrl = asset('storage/app/public/users/' . $user->profile);
+    $imageUrl = $user->profile_verified == 1 ? asset('storage/app/public/users/' . $user->profile) : '';
     $coverimageUrl = asset('storage/app/public/users/' . $user->cover_img);
 
     return response()->json([
@@ -663,6 +675,11 @@ if ($email !== null) {
             'points' => $user->points,
             'verified' => $user->verified,
             'online_status' => $user->online_status,
+            'introduction' => $user->introduction,
+            'message_notify' => $user->message_notify,
+            'add_friend_notify' => $user->add_friend_notify,
+            'view_notify' => $user->view_notify,
+            'profile_verified' => $user->profile_verified,
             'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
@@ -1664,36 +1681,56 @@ public function add_chat(Request $request)
         ], 400);
     }
 
-    
-// Check if user is trying to chat with themselves
-if ($user_id == $chat_user_id) {
-    return response()->json([
-        'success' => false,
-        'message' => 'You cannot chat with yourself.',
-    ], 400);
-}
+    // Check if user is trying to chat with themselves
+    if ($user_id == $chat_user_id) {
+        return response()->json([
+            'success' => false,
+            'message' => 'You cannot chat with yourself.',
+        ], 400);
+    }
 
-// Check if user and chat_user exist
-$user = Users::find($user_id);
-if (!$user) {
-    return response()->json([
-        'success' => false,
-        'message' => 'User not found.',
-    ], 404);
-}
+    // Check if user and chat_user exist
+    $user = Users::find($user_id);
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User not found.',
+        ], 404);
+    }
 
-$chat_user = Users::find($chat_user_id);
-if (!$chat_user) {
-    return response()->json([
-        'success' => false,
-        'message' => 'Chat user not found.',
-    ], 404);
-}
+    $chat_user = Users::find($chat_user_id);
+    if (!$chat_user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Chat user not found.',
+        ], 404);
+    }
 
-// Check if there's an existing chat between the user and chat_user
-$existingChat = Chats::where('user_id', $user_id)
-                     ->where('chat_user_id', $chat_user_id)
-                     ->first();
+     // Check if there's an existing chat between the user and chat_user
+     $existingChat = Chats::where(function($query) use ($user_id, $chat_user_id) {
+        $query->where('user_id', $user_id)
+              ->where('chat_user_id', $chat_user_id);
+    })
+    ->orWhere(function($query) use ($user_id, $chat_user_id) {
+        $query->where('user_id', $chat_user_id)
+              ->where('chat_user_id', $user_id);
+    })
+    ->first();
+
+// Check if the chat is blocked
+if ($existingChat && $existingChat->chat_blocked == 1) {
+if ($existingChat->user_id == $user_id) {
+return response()->json([
+'success' => false,
+'message' => 'You have blocked this user.',
+], 403);
+} else {
+return response()->json([
+'success' => false,
+'message' => 'You are blocked by this user.',
+], 403);
+}
+}
 
 // Retrieve the gender of the chat user
 $chatUserGender = $chat_user->gender; // Assuming the gender field exists in the Users model
@@ -1886,6 +1923,74 @@ public function chat_list(Request $request)
         'success' => true,
         'message' => 'Chat details listed successfully.',
         'data' => $chatDetails->values(), // Reindex the array to prevent gaps
+    ], 200);
+}
+
+public function blocked_chat(Request $request)
+{
+    $user_id = $request->input('user_id');
+    $chat_user_id = $request->input('chat_user_id');
+    $chat_blocked = $request->input('chat_blocked');
+
+    // Validate user_id
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 400);
+    }
+
+    // Validate chat_user_id
+    if (empty($chat_user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'chat_user_id is empty.',
+        ], 400);
+    }
+
+    
+    if ($chat_blocked === null) { // Check for null instead of empty
+        return response()->json([
+            'success' => false,
+            'message' => 'chat_blocked is empty.',
+        ], 400);
+    }
+
+
+    // Validate chat_blocked to ensure it's either 0 or 1
+    if (!is_numeric($chat_blocked) || ($chat_blocked != 0 && $chat_blocked != 1)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'chat_blocked should be either 0 or 1.',
+        ], 400);
+    }
+
+    // Check if the chat record exists
+    $chat = Chats::where('user_id', $user_id)
+                 ->where('chat_user_id', $chat_user_id)
+                 ->first();
+
+    if (!$chat) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Chat record not found.',
+        ], 404);
+    }
+
+    // Update the chat_blocked field for the chat record
+    $chat->chat_blocked = (int)$chat_blocked; // Ensure the value is an integer
+
+    // Save the chat record
+    if (!$chat->save()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to save chat blocked status.',
+        ], 500);
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Chat blocked status updated successfully.',
     ], 200);
 }
 

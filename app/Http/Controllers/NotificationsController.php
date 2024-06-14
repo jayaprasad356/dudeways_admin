@@ -1,18 +1,23 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Http\Requests\NotificationsStoreRequest;
 use App\Models\Notifications;
-use App\Models\Users;
+use App\Models\Users; // Assuming User model is singular
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Log;
-use OneSignal;
-
+use Berkayk\OneSignal\OneSignalClient; // Import OneSignalClient
 
 class NotificationsController extends Controller
 {
+    protected $oneSignal;
+
+    public function __construct(OneSignalClient $oneSignal)
+    {
+        $this->oneSignal = $oneSignal;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -30,9 +35,9 @@ class NotificationsController extends Controller
 
         $notifications = $query->latest()->paginate(10); // Paginate the results
 
-        $users = Users::all(); // Fetch all users for the filter dropdown
+        $users = Users::all(); // Fetch all users (assuming User model is singular)
 
-        return view('notifications.index', compact('notifications', 'users')); // Pass trips and users to the view
+        return view('notifications.index', compact('notifications', 'users')); // Pass notifications and users to the view
     }
 
     /**
@@ -42,7 +47,7 @@ class NotificationsController extends Controller
      */
     public function create()
     {
-        $users = Users::all(); // Fetch all users
+        $users = Users::all(); // Fetch all users (assuming User model is singular)
         return view('notifications.create', compact('users')); // Pass users to the view
     }
 
@@ -62,33 +67,28 @@ class NotificationsController extends Controller
         ]);
 
         if (!$notification) {
-            return redirect()->back()->with('error', 'Sorry, something went wrong while creating the notification.');
+            return redirect()->back()->with('error', 'Something went wrong while creating the notification.');
         }
 
-        // Debugging output
-        Log::info('Attempting to send notification');
-        Log::info('Notification data: ', [
+        Log::info('Attempting to send notification', [
             'message' => $notification->message,
             'user_id' => $notification->notify_user_id,
         ]);
-        
+
         try {
-            OneSignal::sendNotificationToUser(
+            $this->oneSignal->sendNotificationToUser(
                 $notification->message,
-                $notification->notify_user_id,
-                null,
-                null,
-                null,
-                null
+                $notification->notify_user_id
             );
         } catch (\Exception $e) {
             Log::error('OneSignal Error: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Sorry, something went wrong while sending the notification.');
+            return redirect()->back()->with('error', 'Something went wrong while sending the notification.');
         }
-        
+
         Log::info('Notification sent successfully');
-        
+        return redirect()->route('notifications.index')->with('success', 'Notification created and sent successfully.');
     }
+
     /**
      * Display the specified resource.
      *
@@ -108,7 +108,7 @@ class NotificationsController extends Controller
      */
     public function edit(Notifications $notifications)
     {
-        $users = Users::all(); // Fetch all users
+        $users = Users::all(); // Fetch all users (assuming User model is singular)
         return view('notifications.edit', compact('notifications', 'users'));
     }
 
