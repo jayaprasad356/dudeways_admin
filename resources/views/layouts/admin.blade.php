@@ -59,6 +59,10 @@
         .text-disable {
             color: red;
         }
+        .text-disables {
+            color:  #007bff;
+}
+
     </style>
 </head>
 <body class="hold-transition sidebar-mini">

@@ -57,6 +57,7 @@
                         <th>Selfie Image <i class="fas fa-sort"></i></th>
                         <th>Front Image <i class="fas fa-sort"></i></th>
                         <th>Back Image <i class="fas fa-sort"></i></th>
+                        <th>Status <i class="fas fa-sort"></i></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -82,6 +83,11 @@
                                 <img class="customer-img img-thumbnail img-fluid" src="{{ asset('storage/app/public/verification/' . $verification->back_image) }}" alt=""
                                     style="max-width: 100px; max-height: 100px;">
                             </a>
+                        </td>
+                        <td>
+                        <span class="{{ $verification->status == 1 ? 'text-enable' : 'text-disables' }}">
+                                {{ $verification->status == 1 ? 'Verified' : 'Pending' }}
+                            </span>
                         </td>
                     </tr>
                     @endforeach
