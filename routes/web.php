@@ -109,6 +109,7 @@ Route::prefix('admin')->middleware('auth')->group(function () {
         Route::post('/verifications/verify', [VerificationsController::class, 'verify'])->name('verifications.verify');
 
 
+
         //Bulk Users
        // web.php
 // Define the route for the "Upload Bulk Users" page

@@ -185,54 +185,56 @@
         });
     </script>
 <script>
-    $(document).ready(function() {
-        // Handle "Select All" checkbox
-        $('#checkAll').change(function() {
-            $('.checkbox').prop('checked', $(this).prop('checked'));
+$(document).ready(function() {
+    // Handle "Select All" checkbox
+    $('#checkAll').change(function() {
+        $('.checkbox').prop('checked', $(this).prop('checked'));
+    });
+
+    // Handle Verify Button click
+    $('#verifyButton').click(function() {
+        var verificationIds = [];
+        $('.checkbox:checked').each(function() {
+            verificationIds.push($(this).data('id'));
         });
 
-        // Handle Verify Button click
-        $('#verifyButton').click(function() {
-            var verificationIds = [];
-            $('.checkbox:checked').each(function() {
-                verificationIds.push($(this).data('id'));
-            });
-
-            if (verificationIds.length > 0) {
-                // AJAX call to backend
-                $.ajax({
-                    url: "{{ route('verifications.verify') }}", // Use the correct route name here
-                    method: 'POST',
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        user_ids: verificationIds
-                    },
-                    success: function(response) {
-                        // Handle success response
-                        alert('Points updated successfully!');
-                        location.reload(); // Reload the page or update UI as needed
-                    },
-                    error: function(xhr, status, error) {
-                        // Handle error response
-                        console.error(error);
-                        alert('Error updating points. Please try again.');
-                    }
-                });
-            } else {
-                alert('Please select at least one verification.');
-            }
-        });
-       // Handle status filter change
-       $('#status-filter').change(function() {
-                var status = $(this).val();
-                var url = "{{ route('verifications.index') }}";
-                if (status) {
-                    url += '?status=' + status;
+        if (verificationIds.length > 0) {
+            // AJAX call to backend
+            $.ajax({
+                url: "{{ route('verifications.verify') }}",
+                method: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    verification_ids: verificationIds
+                },
+                success: function(response) {
+                    // Handle success response
+                    alert('Points updated successfully!');
+                    location.reload(); // Reload the page or update UI as needed
+                },
+                error: function(xhr, status, error) {
+                    // Handle error response
+                    console.error(error);
+                    alert('Error updating points. Please try again.');
                 }
-                window.location.href = url;
             });
-        });
+        } else {
+            alert('Please select at least one verification.');
+        }
+    });
+
+    // Handle status filter change
+    $('#status-filter').change(function() {
+        var status = $(this).val();
+        var url = "{{ route('verifications.index') }}";
+        if (status) {
+            url += '?status=' + status;
+        }
+        window.location.href = url;
+    });
+});
 </script>
+
 
 
 
