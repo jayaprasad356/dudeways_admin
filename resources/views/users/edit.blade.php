@@ -40,18 +40,6 @@
                     @enderror
                 </div>
 
-
-                <div class="form-group">
-                    <label for="mobile">Mobile Number</label>
-                    <input type="number" name="mobile" class="form-control @error('mobile') is-invalid @enderror" id="mobile"
-                           placeholder="mobile" value="{{ old('mobile', $users->mobile) }}">
-                    @error('mobile')
-                    <span class="invalid-feedback" role="alert">
-                        <strong>{{ $message }}</strong>
-                    </span>
-                    @enderror
-                </div>
-
                 <div class="form-group">
                     <label for="email">Email</label>
                     <input type="text" name="email" class="form-control @error('email') is-invalid @enderror" id="email"
@@ -297,6 +285,21 @@
                             <label class="custom-control-label" for="profile_verified"></label>
                         </div>
                         @error('profile_verified')
+                        <span class="invalid-feedback" role="alert">
+                            <strong>{{ $message }}</strong>
+                        </span>
+                        @enderror
+                    </div>
+
+
+                    <div class="form-group">
+                        <label for="cover_img_verified">Cover Image Verified</label>
+                        <div class="custom-control custom-switch">
+                            <input type="hidden" name="cover_img_verified" value="0"> <!-- Hidden input to ensure a value is always submitted -->
+                            <input type="checkbox" name="cover_img_verified" class="custom-control-input @error('cover_img_verified') is-invalid @enderror" id="cover_img_verified" value="1" {{ old('cover_img_verified', $users->cover_img_verified) == '1' ? 'checked' : '' }}>
+                            <label class="custom-control-label" for="cover_img_verified"></label>
+                        </div>
+                        @error('cover_img_verified')
                         <span class="invalid-feedback" role="alert">
                             <strong>{{ $message }}</strong>
                         </span>

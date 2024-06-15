@@ -26,6 +26,17 @@ class UsersController extends Controller
                   ->orWhere('email', 'like', "%$search%");
         }
 
+
+            // Filter by profile verification status
+    if ($request->filled('profile_verified')) {
+        $profile_verified = $request->input('profile_verified');
+        $query->where('profile_verified', $profile_verified);
+    }
+
+    if ($request->filled('cover_img_verified')) {
+        $cover_img_verified = $request->input('cover_img_verified');
+        $query->where('cover_img_verified', $cover_img_verified);
+    }
         // Check if the request is AJAX
         if ($request->wantsJson()) {
             return response($query->get());
@@ -195,7 +206,6 @@ private function generateUniqueName($name, $user_id)
             'name' => 'required|string|max:255',
             'age' => 'required|integer|between:18,60',
             'email' => 'required|email|unique:users,email,' . $users->id,
-            'mobile' => 'required|numeric|digits:10|unique:users,mobile,' . $users->id,
             'gender' => 'required|in:male,female,other',
             'state' => 'required|string|max:255',
             'city' => 'required|string|max:255',
@@ -209,8 +219,7 @@ private function generateUniqueName($name, $user_id)
         ], [
             'unique_name.unique' => 'The unique name has already been taken.',
             'email.unique' => 'The email has already been taken.',
-            'mobile.unique' => 'The mobile number has already been taken.',
-            'mobile.digits' => 'The mobile number must be exactly 10 digits.',
+        
             'age.between' => 'The age must be between 18 and 60.',
             'gender.in' => 'Invalid gender selected.',
             'profile.image' => 'The profile must be an image file.',
@@ -226,7 +235,6 @@ private function generateUniqueName($name, $user_id)
         $users->unique_name = $request->unique_name;
         $users->age = $request->age;
         $users->email = $request->email;
-        $users->mobile = $request->mobile;
         $users->gender = $request->gender;
         $users->state = $request->state;
         $users->city = $request->city;
@@ -241,6 +249,7 @@ private function generateUniqueName($name, $user_id)
         $users->introduction = $request->introduction;
         $users->online_status = $request->online_status;
         $users->profile_verified = $request->profile_verified;
+        $users->cover_img_verified = $request->cover_img_verified;
         $users->datetime = now();
         $users->last_seen = now();
     

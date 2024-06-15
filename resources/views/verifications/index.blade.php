@@ -4,64 +4,87 @@
 @section('content-header', 'Verifications Management')
 @section('content-actions')
 @endsection
+
 @section('css')
     <link rel="stylesheet" href="{{ asset('plugins/sweetalert2/sweetalert2.min.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css">
 @endsection
+
 @section('content')
 <div class="card">
     <div class="card-body">
-    <div class="row mb-4">
-    <div class="col-md-8"></div> <!-- Create a placeholder column to push the search box to the right -->
-    <div class="col-md-4">
-        <!-- Search Form -->
-        <form action="{{ route('verifications.index') }}" method="GET">
-            <div class="input-group">
-                <input type="text" name="search" class="form-control" placeholder="Search by....">
+        <div class="row mb-4">
+            <div class="col-md-8 d-flex align-items-center">
+                <!-- Checkbox for Select All -->
+                <div class="form-check mr-3">
+                    <input type="checkbox" class="form-check-input" id="checkAll">
+                    <label class="form-check-label" for="checkAll">Select All</label>
+                </div>
+                
+                <!-- Verify Button -->
+                <button class="btn btn-primary mr-3" id="verifyButton">Verify</button>
+                
+                <!-- Filter by Status -->
+                <div class="form-group mb-0 d-flex align-items-center">
+                    <label for="status-filter" class="mr-2 mb-0">Filter by status:</label>
+                    <select name="status" id="status-filter" class="form-control">
+                        <option value="">All</option>
+                        <option value="1" {{ request()->input('status') === '1' ? 'selected' : '' }}>Verified</option>
+                        <option value="0" {{ request()->input('status') === '0' ? 'selected' : '' }}>Pending</option>
+                    </select>
+                </div>
             </div>
-        </form>
-    </div>
-</div>
-
-
+            
+            <div class="col-md-4 text-md-right mt-3 mt-md-0">
+                <!-- Search Form -->
+                <form action="{{ route('verifications.index') }}" method="GET" class="form-inline">
+                    <div class="input-group">
+                        <input type="text" name="search" class="form-control" placeholder="Search by....">
+                        <div class="input-group-append">
+                            <button type="submit" class="btn btn-outline-secondary">Search</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
         <div class="table-responsive">
             <table class="table table-bordered table-hover">
                 <thead class="thead-dark">
                     <tr>
-                    <th>Actions</th>
+                        <th>Checkbox</th>
                         <th>ID <i class="fas fa-sort"></i></th>
                         <th>User Name <i class="fas fa-sort"></i></th>
-                        <th>Selfie Image<i class="fas fa-sort"></i></th>
-                        <th>Front Image<i class="fas fa-sort"></i></th>
-                        <th>Back Image<i class="fas fa-sort"></i></th>
+                        <th>Selfie Image <i class="fas fa-sort"></i></th>
+                        <th>Front Image <i class="fas fa-sort"></i></th>
+                        <th>Back Image <i class="fas fa-sort"></i></th>
                     </tr>
                 </thead>
                 <tbody>
-                @foreach ($verifications as $verification)
-<tr>
-<td>
-        <button class="btn btn-danger btn-delete" data-url="{{ route('verifications.destroy', $verification) }}"><i class="fas fa-trash"></i></button>
-    </td>
-    <td>{{ $verification->id }}</td>
-    <td>{{ optional($verification->user)->name }}</td> <!-- Display user name safely -->
-    <td>
-    <a href="{{ asset('storage/app/public/verification/' . $verification->selfie_image) }}" data-lightbox="selfie_image-{{ $verification->id }}">
-        <img class="customer-img img-thumbnail img-fluid" src="{{ asset('storage/app/public/verification/' . $verification->selfie_image) }}" alt=""
-            style="max-width: 100px; max-height: 100px;">
-    </td>
-    <td>
-    <a href="{{ asset('storage/app/public/verification/' . $verification->front_image) }}" data-lightbox="front_image-{{ $verification->id }}">
-        <img class="customer-img img-thumbnail img-fluid" src="{{ asset('storage/app/public/verification/' . $verification->front_image) }}" alt=""
-            style="max-width: 100px; max-height: 100px;">
-    </td>
-    <td>
-    <a href="{{ asset('storage/app/public/verification/' . $verification->back_image) }}" data-lightbox="back_image-{{ $verification->id }}">
-        <img class="customer-img img-thumbnail img-fluid" src="{{ asset('storage/app/public/verification/' . $verification->back_image) }}" alt=""
-            style="max-width: 100px; max-height: 100px;">
-    </td>
-</tr>
-@endforeach
-
+                    @foreach ($verifications as $verification)
+                    <tr>
+                        <td><input type="checkbox" class="checkbox" data-id="{{ $verification->id }}"></td>
+                        <td>{{ $verification->id }}</td>
+                        <td>{{ optional($verification->user)->name }}</td>
+                        <td>
+                            <a href="{{ asset('storage/app/public/verification/' . $verification->selfie_image) }}" data-lightbox="selfie_image-{{ $verification->id }}">
+                                <img class="customer-img img-thumbnail img-fluid" src="{{ asset('storage/app/public/verification/' . $verification->selfie_image) }}" alt=""
+                                    style="max-width: 100px; max-height: 100px;">
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{{ asset('storage/app/public/verification/' . $verification->front_image) }}" data-lightbox="front_image-{{ $verification->id }}">
+                                <img class="customer-img img-thumbnail img-fluid" src="{{ asset('storage/app/public/verification/' . $verification->front_image) }}" alt=""
+                                    style="max-width: 100px; max-height: 100px;">
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{{ asset('storage/app/public/verification/' . $verification->back_image) }}" data-lightbox="back_image-{{ $verification->id }}">
+                                <img class="customer-img img-thumbnail img-fluid" src="{{ asset('storage/app/public/verification/' . $verification->back_image) }}" alt=""
+                                    style="max-width: 100px; max-height: 100px;">
+                            </a>
+                        </td>
+                    </tr>
+                    @endforeach
                 </tbody>
             </table>
         </div>
@@ -155,4 +178,56 @@
             }
         });
     </script>
+<script>
+    $(document).ready(function() {
+        // Handle "Select All" checkbox
+        $('#checkAll').change(function() {
+            $('.checkbox').prop('checked', $(this).prop('checked'));
+        });
+
+        // Handle Verify Button click
+        $('#verifyButton').click(function() {
+            var verificationIds = [];
+            $('.checkbox:checked').each(function() {
+                verificationIds.push($(this).data('id'));
+            });
+
+            if (verificationIds.length > 0) {
+                // AJAX call to backend
+                $.ajax({
+                    url: "{{ route('verifications.verify') }}", // Use the correct route name here
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        user_ids: verificationIds
+                    },
+                    success: function(response) {
+                        // Handle success response
+                        alert('Points updated successfully!');
+                        location.reload(); // Reload the page or update UI as needed
+                    },
+                    error: function(xhr, status, error) {
+                        // Handle error response
+                        console.error(error);
+                        alert('Error updating points. Please try again.');
+                    }
+                });
+            } else {
+                alert('Please select at least one verification.');
+            }
+        });
+       // Handle status filter change
+       $('#status-filter').change(function() {
+                var status = $(this).val();
+                var url = "{{ route('verifications.index') }}";
+                if (status) {
+                    url += '?status=' + status;
+                }
+                window.location.href = url;
+            });
+        });
+</script>
+
+
+
 @endsection

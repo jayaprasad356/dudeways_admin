@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\NotificationsStoreRequest;
-use App\Models\Notifications;
-use App\Models\Users; // Assuming User model is singular
+use App\Models\Notifications; // Assuming your model is named Notification (singular)
+use App\Models\Users; // Assuming your model is named User (singular)
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Berkayk\OneSignal\OneSignalClient; // Import OneSignalClient
+use Berkayk\OneSignal\OneSignalClient;
 
 class NotificationsController extends Controller
 {
@@ -18,45 +18,26 @@ class NotificationsController extends Controller
         $this->oneSignal = $oneSignal;
     }
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index(Request $request)
     {
-        $query = Notifications::query()->with('user'); // Eager load the user relationship
+        $query = Notifications::query()->with('user');
 
-        // Filter by user if user_id is provided
         if ($request->has('user_id')) {
-            $user_id = $request->input('user_id');
-            $query->where('user_id', $user_id);
+            $query->where('user_id', $request->input('user_id'));
         }
 
-        $notifications = $query->latest()->paginate(10); // Paginate the results
+        $notifications = $query->latest()->paginate(10);
+        $users = Users::all();
 
-        $users = Users::all(); // Fetch all users (assuming User model is singular)
-
-        return view('notifications.index', compact('notifications', 'users')); // Pass notifications and users to the view
+        return view('notifications.index', compact('notifications', 'users'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
-        $users = Users::all(); // Fetch all users (assuming User model is singular)
-        return view('notifications.create', compact('users')); // Pass users to the view
+        $users = Users::all();
+        return view('notifications.create', compact('users'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  NotificationsStoreRequest  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(NotificationsStoreRequest $request)
     {
         $notification = Notifications::create([

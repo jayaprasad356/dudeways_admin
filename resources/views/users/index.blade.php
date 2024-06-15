@@ -3,21 +3,47 @@
 @section('title', 'User Management')
 @section('content-header', 'User Management')
 @section('content-actions')
-    <a href="{{route('users.create')}}" class="btn btn-success"><i class="fas fa-plus"></i> Add New Users</a>
+    <a href="{{ route('users.create') }}" class="btn btn-success"><i class="fas fa-plus"></i> Add New Users</a>
 @endsection
+
 @section('css')
     <link rel="stylesheet" href="{{ asset('plugins/sweetalert2/sweetalert2.min.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css">
 @endsection
+
 @section('content')
 <div class="card">
     <div class="card-body">
-    <div class="row mb-4">
-        <div class="ml-auto">
-        <form action="{{ route('users.index') }}" method="GET">
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <!-- User Filter Dropdowns -->
+                <form id="user-filter-form" action="{{ route('users.index') }}" method="GET" class="form-inline">
+                    <div class="form-group mr-3">
+                        <label for="profile-filter" class="mr-2">Filter by Profile:</label>
+                        <select name="profile_verified" id="profile-filter" class="form-control">
+                            <option value="">All</option>
+                            <option value="1" {{ request()->input('profile_verified') === '1' ? 'selected' : '' }}>Verified</option>
+                            <option value="0" {{ request()->input('profile_verified') === '0' ? 'selected' : '' }}>Not Verified</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="cover-filter" class="mr-2">Filter by Cover Image:</label>
+                        <select name="cover_img_verified" id="cover-filter" class="form-control">
+                            <option value="">All</option>
+                            <option value="1" {{ request()->input('cover_img_verified') === '1' ? 'selected' : '' }}>Verified</option>
+                            <option value="0" {{ request()->input('cover_img_verified') === '0' ? 'selected' : '' }}>Not Verified</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-4 text-right">
+                <!-- Search Form -->
+                <form action="{{ route('users.index') }}" method="GET">
                     <div class="input-group">
-                    <input type="text" id="user-search" name="search" class="form-control" placeholder="Search by....">
-
+                        <input type="text" name="search" class="form-control" placeholder="Search by...">
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" type="submit">Search</button>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -50,6 +76,7 @@
                     <th>Add Friend Notify <i class="fas fa-sort"></i></th>
                     <th>View Notify <i class="fas fa-sort"></i></th>
                     <th>Profile Verified <i class="fas fa-sort"></i></th>
+                    <th>Cover Image Verified <i class="fas fa-sort"></i></th>
                     <th>DateTime <i class="fas fa-sort"></i></th>
                     </tr>
                 </thead>
@@ -134,6 +161,12 @@
                                 {{ $user->profile_verified == 1 ? 'Enable' : 'Disable' }}
                             </span>
                         </td>
+
+                        <td>
+                        <span class="{{ $user->cover_img_verified == 1 ? 'text-enable' : 'text-disable' }}">
+                                {{ $user->cover_img_verified == 1 ? 'Enable' : 'Disable' }}
+                            </span>
+                        </td>
                         <td>{{$user->datetime}}</td>
                     </tr>
                     @endforeach
@@ -150,6 +183,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
     <script>
         $(document).ready(function () {
+
+            $('#profile-filter, #cover-filter').change(function () {
+                $('#user-filter-form').submit();
+            });
+
+
             $(document).on('click', '.btn-delete', function () {
                 $this = $(this);
                 const swalWithBootstrapButtons = Swal.mixin({

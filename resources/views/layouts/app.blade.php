@@ -5,23 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ config('app.name', 'Laravel') }}</title>
-    <script src="{{ asset('public/js/app.js') }}" defer></script>
+    <script src="{{ asset('js/app.js') }}" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
-    <link href="{{ asset('public/css/app.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 
-    <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async></script>
-<script>
-    var OneSignal = window.OneSignal || [];
-    OneSignal.push(function() {
-        OneSignal.init({
-            appId: "4f929ed9-584d-4208-a3e8-7de1ae4f679e", // Directly use the OneSignal app ID here
-        });
-    });
-</script>
-
+  
 </head>
 <body>
     <div id="app">
@@ -71,19 +62,5 @@
             @yield('content')
         </main>
     </div>
-
-    <script>
-        OneSignal.push(function() {
-            OneSignal.on('notificationDisplay', function(event) {
-                console.log('OneSignal notification displayed:', event);
-                alert('Notification received: ' + event.content);
-            });
-
-            OneSignal.on('notificationClick', function(event) {
-                console.log('OneSignal notification clicked:', event);
-                window.location.href = '/notifications/' + event.id;
-            });
-        });
-    </script>
 </body>
 </html>

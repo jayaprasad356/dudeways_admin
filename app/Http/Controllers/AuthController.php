@@ -115,14 +115,14 @@ public function check_email(Request $request)
     }
 
 // Image URL
-$imageUrl = $user->profile_verified == 1 ? asset('storage/app/public/users/' . $user->profile) : '';
+$imageUrl = asset('storage/app/public/users/' . $user->profile);
 $coverimageUrl = asset('storage/app/public/users/' . $user->cover_img);
 
 return response()->json([
     'success' => true,
     'registered' => true,
     'message' => 'Logged in successfully.',
-    'data' => [
+    'data' => [ 
         'id' => $user->id,
         'name' => $user->name,
         'unique_name' => $user->unique_name,
@@ -145,6 +145,7 @@ return response()->json([
         'add_friend_notify' => $user->add_friend_notify,
         'view_notify' => $user->view_notify,
         'profile_verified' => $user->profile_verified,
+        'cover_img_verified' => $user->cover_img_verified,
         'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
         'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
         'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
@@ -165,7 +166,8 @@ public function register(Request $request)
     $profession = $request->input('profession');
     $referred_by = $request->input('referred_by');
     $introduction = $request->input('introduction');
-    $points = $request->input('points', 10);
+    $points = $request->input('points', 50);
+    $total_points = $request->input('total_points', 50);
 
     if (empty($state)) {
         return response()->json([
@@ -272,6 +274,7 @@ public function register(Request $request)
     $user->refer_code = $this->generateReferCode();
     $user->email = $email;
     $user->points = $points;
+    $user->total_points = $total_points;
     $user->state = $state;
     $user->city = $city;
     $user->referred_by = $referred_by;
@@ -290,7 +293,7 @@ public function register(Request $request)
     $user->save();
 
     // Image URL
-    $imageUrl = $user->profile_verified == 1 ? asset('storage/app/public/users/' . $user->profile) : '';
+    $imageUrl = asset('storage/app/public/users/' . $user->profile);
     $coverimageUrl = asset('storage/app/public/users/' . $user->cover_img);
 
     return response()->json([
@@ -312,6 +315,7 @@ public function register(Request $request)
             'profile' => $imageUrl,
             'cover_img' => $coverimageUrl,
             'points' => $user->points,
+            'total_points' => $user->total_points,
             'introduction' => $user->introduction,
             'latitude' => $user->latitude,
             'longtitude' => $user->longtitude,
@@ -321,6 +325,7 @@ public function register(Request $request)
             'add_friend_notify' => 1,
             'view_notify' => 1,
             'profile_verified' => 0,
+            'cover_img_verified' => 0,
             'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
                 'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
@@ -331,9 +336,8 @@ public function register(Request $request)
 
 private function generateUniqueName($name, $user_id)
 {
-    // Extract the first part of the user's name
-    $parts = explode(' ', $name);
-    $firstPart = $parts[0];
+    // Extract the first part of the user's name and limit to first 8 characters
+    $firstPart = substr($name, 0, 8);
 
     // Generate the unique name by concatenating the first part with the user's id
     $unique_name = $firstPart . $user_id;
@@ -387,8 +391,9 @@ public function userdetails(Request $request)
     }
 
     // Image URLs
+    $imageUrl = asset('storage/app/public/users/' . $user->profile);
     $coverimageUrl = asset('storage/app/public/users/' . $user->cover_img);
-    $imageUrl = $user->profile_verified == 1 ? asset('storage/app/public/users/' . $user->profile) : '';
+    
 
     return response()->json([
         'success' => true,
@@ -416,6 +421,7 @@ public function userdetails(Request $request)
             'add_friend_notify' => $user->add_friend_notify,
             'view_notify' => $user->view_notify,
             'profile_verified' => $user->profile_verified,
+            'cover_img_verified' => $user->cover_img_verified,
             'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
@@ -452,8 +458,10 @@ public function update_image(Request $request)
         $user->datetime = now(); 
         $user->save();
         // Image URL
-        $imageUrl = $user->profile_verified == 1 ? asset('storage/app/public/users/' . $user->profile) : '';
-         $coverimageUrl = asset('storage/app/public/users/' . $user->cover_img);
+
+        $imageUrl = asset('storage/app/public/users/' . $user->profile);
+        $coverimageUrl = asset('storage/app/public/users/' . $user->cover_img);
+      
 
         return response()->json([
             'success' => true,
@@ -481,6 +489,7 @@ public function update_image(Request $request)
                 'add_friend_notify' => $user->add_friend_notify,
                 'view_notify' => $user->view_notify,
                 'profile_verified' => $user->profile_verified,
+                'cover_img_verified' => $user->cover_img_verified,
                 'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
                 'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
                 'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
@@ -524,8 +533,9 @@ public function update_cover_img(Request $request)
         $user->datetime = now(); 
         $user->save();
         // Image URL
-        $imageUrl = $user->profile_verified == 1 ? asset('storage/app/public/users/' . $user->profile) : '';
-         $coverimageUrl = asset('storage/app/public/users/' . $user->cover_img);
+        $imageUrl = asset('storage/app/public/users/' . $user->profile);
+        $coverimageUrl = asset('storage/app/public/users/' . $user->cover_img);
+      
 
         return response()->json([
             'success' => true,
@@ -553,6 +563,7 @@ public function update_cover_img(Request $request)
                 'add_friend_notify' => $user->add_friend_notify,
                 'view_notify' => $user->view_notify,
                 'profile_verified' => $user->profile_verified,
+                'cover_img_verified' => $user->cover_img_verified,
                 'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
                 'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
                 'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
@@ -594,6 +605,7 @@ public function update_users(Request $request)
     $profession = $request->input('profession');
     $state = $request->input('state');
     $city = $request->input('city');
+    $introduction = $request->input('introduction');
 
 if ($age !== null) {
     if ($age < 18 || $age > 60) {
@@ -645,13 +657,16 @@ if ($email !== null) {
     if ($unique_name !== null) {
         $user->unique_name = $unique_name;
     }
+    if ($introduction !== null) {
+        $user->introduction = $introduction;
+    }
 
     $user->datetime = now(); 
 
     $user->save();
 
     // Image URL
-    $imageUrl = $user->profile_verified == 1 ? asset('storage/app/public/users/' . $user->profile) : '';
+    $imageUrl = asset('storage/app/public/users/' . $user->profile);
     $coverimageUrl = asset('storage/app/public/users/' . $user->cover_img);
 
     return response()->json([
@@ -680,6 +695,7 @@ if ($email !== null) {
             'add_friend_notify' => $user->add_friend_notify,
             'view_notify' => $user->view_notify,
             'profile_verified' => $user->profile_verified,
+            'cover_img_verified' => $user->cover_img_verified,
             'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
@@ -1234,7 +1250,8 @@ public function trip_list(Request $request)
         $user = $detail['user'];
         $distance = $detail['distance'];
 
-        $imageUrl = $user ? asset('storage/app/public/users/' . $user->profile) : null;
+        $imageUrl = $user->profile_verified == 1 ? asset('storage/app/public/users/' . $user->profile) : '';
+        $coverimageUrl = $user->cover_img_verified == 1 ? asset('storage/app/public/users/' . $user->cover_img) : '';
 
         // Check if the user is a friend
         $isFriend = Friends::where(function($query) use ($userId, $user) {
@@ -1271,6 +1288,7 @@ public function trip_list(Request $request)
             'unique_name' => $user->unique_name,
             'verified' => $user->verified,
             'profile' => $imageUrl,
+            'cover_image' => $coverimageUrl,
             'trip_type' => $trip->trip_type,
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
             'to_date' => date('F j, Y', strtotime($trip->to_date)),
@@ -1332,11 +1350,14 @@ public function my_trip_list(Request $request)
     foreach ($trips as $trip) {
         $user = Users::find($trip->user_id);
         if ($user) {
-            // Image URL
-            $imageUrl = asset('storage/app/public/users/' . $user->profile);
+           
+            $imageUrl = $user->profile_verified == 1 ? asset('storage/app/public/users/' . $user->profile) : '';
+            $coverimageUrl = $user->cover_img_verified == 1 ? asset('storage/app/public/users/' . $user->cover_img) : '';
+            
           
         } else {
             $imageUrl = null; // Set default image URL if user not found
+            $coverimageUrl = null; // Set default image URL if user not found
         }
 
       // Calculate time difference in hours
@@ -1364,6 +1385,7 @@ public function my_trip_list(Request $request)
             'verified' => $user->verified,
             'unique_name' => $user->unique_name,
             'profile' => $imageUrl,
+            'cover_image' => $coverimageUrl,
             'trip_type' => $trip->trip_type,
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
             'to_date' => date('F j, Y', strtotime($trip->to_date)),
@@ -1424,7 +1446,8 @@ public function trip_date(Request $request)
         $user = Users::find($trip->user_id);
         if ($user) {
             // Image URL
-            $imageUrl = asset('storage/app/public/users/' . $user->profile);
+            $imageUrl = $user->profile_verified == 1 ? asset('storage/app/public/users/' . $user->profile) : '';
+            $coverimageUrl = $user->cover_img_verified == 1 ? asset('storage/app/public/users/' . $user->cover_img) : '';
             
         } else {
             $imageUrl = null; // Set default image URL if user not found
@@ -1454,6 +1477,7 @@ public function trip_date(Request $request)
             'verified' => $user->verified,
             'unique_name' => $user->unique_name,
             'profile' => $imageUrl,
+            'cover_image' => $coverimageUrl,
             'trip_type' => $trip->trip_type,
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
             'to_date' => date('F j, Y', strtotime($trip->to_date)),
@@ -1802,8 +1826,9 @@ if ($existingChat) {
             'id' => $existingChat->id,
             'user_id' => $existingChat->user_id,
             'chat_user_id' => $existingChat->chat_user_id,
-            'name' => $chat_user->name, 
-            'profile' => asset('storage/app/public/users/' . $chat_user->profile),
+            'name' => $chat_user->name,
+           'profile' => $chat_user->profile_verified == 1 ? asset('storage/app/public/users/' . $chat_user->profile) : '',
+            'cover_image' => $chat_user->cover_img_verified == 1 ? asset('storage/app/public/users/' . $chat_user->cover_image) : '',
             'latest_message' => $existingChat->latest_message,
             'latest_msg_time' => Carbon::parse($existingChat->latest_msg_time)->format('Y-m-d H:i:s'),
             'msg_seen' => '0',
@@ -1811,6 +1836,7 @@ if ($existingChat) {
             'updated_at' => Carbon::parse($existingChat->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($existingChat->created_at)->format('Y-m-d H:i:s'),
         ],
+
     ], 200);
 }
 
@@ -1839,7 +1865,8 @@ return response()->json([
         'user_id' => $newChat->user_id,
         'chat_user_id' => $newChat->chat_user_id,
         'name' => $chat_user->name, 
-        'profile' => asset('storage/app/public/users/' . $chat_user->profile),
+        'profile' => $chat_user->profile_verified == 1 ? asset('storage/app/public/users/' . $chat_user->profile) : '',
+         'cover_image' => $chat_user->cover_img_verified == 1 ? asset('storage/app/public/users/' . $chat_user->cover_image) : '',
         'latest_message' => $newChat->latest_message,
         'latest_msg_time' => Carbon::parse($newChat->latest_msg_time)->format('Y-m-d H:i:s'),
         'msg_seen' => '0',
@@ -1880,7 +1907,8 @@ public function chat_list(Request $request)
             return null; // Skip this chat if user not found
         }
 
-        $imageUrl = asset('storage/app/public/users/' . $chat_user->profile); // Corrected the path
+        $imageUrl = $chat_user->profile_verified == 1 ? asset('storage/app/public/users/' . $chat_user->profile) : '';
+        $coverImageUrl = $chat_user->cover_img_verified == 1 ? asset('storage/app/public/users/' . $chat_user->cover_img) : '';
 
         // Determine the format of last_seen
         $lastSeen = Carbon::parse($chat->latest_msg_time);
@@ -1909,6 +1937,7 @@ public function chat_list(Request $request)
             'chat_user_id' => $chat->chat_user_id,
             'name' => $chat_user->name, // Display chat_user name
             'profile' => $imageUrl, // Display chat_user profile
+            'cover_img' => $coverImageUrl, // Display chat_user profile
             'online_status' => $chat_user->online_status, // Display chat_user online status
             'latest_message' => $chat->latest_message,
             'latest_msg_time' => $lastSeenFormatted,
@@ -1994,7 +2023,6 @@ public function blocked_chat(Request $request)
     ], 200);
 }
 
-
 public function add_friends(Request $request)
 {
     $user_id = $request->input('user_id'); 
@@ -2017,13 +2045,14 @@ public function add_friends(Request $request)
         ], 400);
     }
 
-     // Check if user_id and friend_user_id are the same
-     if ($user_id == $friend_user_id) {
+    // Check if user_id and friend_user_id are the same
+    if ($user_id == $friend_user_id) {
         return response()->json([
             'success' => false,
             'message' => 'You cannot add yourself as a friend.',
         ], 400);
     }
+
     // Validate friend action
     if (!isset($friend)) {
         return response()->json([
@@ -2081,6 +2110,8 @@ public function add_friends(Request $request)
                 'message' => 'You have already added this friend.',
             ], 400);
         }
+
+        // Create a new friend instance
         $friend = new Friends();
         $friend->user_id = $user_id; 
         $friend->friend_user_id = $friend_user_id;
@@ -2096,7 +2127,8 @@ public function add_friends(Request $request)
         }
 
         // Generate image URLs
-        $userImageUrl = asset('storage/app/public/users/' . $user->profile);
+        $friendUserImageUrl = $friend_user->profile_verified == 1 ? asset('storage/app/public/users/' . $friend_user->profile) : '';
+        $friendUserCoverImageUrl = $friend_user->cover_img_verified == 1 ? asset('storage/app/public/users/' . $friend_user->cover_img) : '';
 
         // Return success response
         return response()->json([
@@ -2105,10 +2137,10 @@ public function add_friends(Request $request)
             'data' => [
                 'id' => $friend->id,
                 'user_id' => $friend->user_id,
-                'name' => $user->name,
-                'profile' => $userImageUrl,
-                'friend_user_id' => $friend->friend_user_id,
-                'friend_user_name' => $friend_user->name,
+                'friend_user_id' => $friend_user->id,
+                'name' => $friend_user->name,
+                'profile' => $friendUserImageUrl,
+                'cover_img' => $friendUserCoverImageUrl,
                 'status' => $friend->status == 1 ? 'Interested' : 'Not Interested',
                 'datetime' => Carbon::parse($friend->datetime)->format('Y-m-d H:i:s'),
                 'updated_at' => Carbon::parse($friend->updated_at)->format('Y-m-d H:i:s'),
@@ -2151,7 +2183,9 @@ public function friends_list(Request $request)
         $friendUser = $friend->friendUser;
 
 
-        $friendImageUrl = asset('storage/app/public/users/' . $friendUser->profile);
+        $imageUrl = $friendUser->profile_verified == 1 ? asset('storage/app/public/users/' . $friendUser->profile) : '';
+        $coverImageUrl = $friendUser->cover_img_verified == 1 ? asset('storage/app/public/users/' . $friendUser->cover_img) : '';
+
 
         // Determine the format of last_seen
         $lastSeen = Carbon::parse($user->last_seen);
@@ -2183,7 +2217,8 @@ public function friends_list(Request $request)
             'gender' => $friendUser->gender,
             'age' => $friendUser->age,
             'online_status' => $friendUser->online_status,
-            'profile' => $friendImageUrl,
+            'profile' => $imageUrl,
+            'cover_img' => $coverImageUrl,
             'last_seen' => $lastSeenFormatted,
             'distance' =>'2km',
             'status' => $friend->status == 1 ? 'Interested' : 'Not Interested',
@@ -2214,7 +2249,7 @@ public function add_notifications(Request $request)
         ], 400);
     }
 
-    // Validate friend_user_id
+    // Validate notify_user_id
     if (empty($notify_user_id)) {
         return response()->json([
             'success' => false,
@@ -2222,8 +2257,8 @@ public function add_notifications(Request $request)
         ], 400);
     }
 
-      // Validate message
-      if (empty($message)) {
+    // Validate message
+    if (empty($message)) {
         return response()->json([
             'success' => false,
             'message' => 'Message is empty.',
@@ -2239,7 +2274,7 @@ public function add_notifications(Request $request)
         ], 404);
     }
 
-    // Check if friend_user exists
+    // Check if notify_user exists
     $notify_user = Users::find($notify_user_id);
     if (!$notify_user) {
         return response()->json([
@@ -2248,14 +2283,14 @@ public function add_notifications(Request $request)
         ], 404);
     }
 
-    // Create a new friends instance
+    // Create a new notifications instance
     $notification = new Notifications();
     $notification->user_id = $user_id; 
     $notification->notify_user_id = $notify_user_id;
     $notification->message = $message; 
     $notification->datetime = now(); 
 
-    // Save the friend
+    // Save the notification
     if (!$notification->save()) {
         return response()->json([
             'success' => false,
@@ -2263,8 +2298,10 @@ public function add_notifications(Request $request)
         ], 500);
     }
 
-    // Generate image URLs
-    $userImageUrl = asset('storage/app/public/users/' . $user->profile);
+    // Generate image URLs for user and notify_user
+    //$userImageUrl = $user->profile_verified == 1 ? asset('storage/app/public/users/' . $user->profile) : '';
+    $notifyUserImageUrl = $notify_user->profile_verified == 1 ? asset('storage/app/public/users/' . $notify_user->profile) : '';
+    $notifyUserCoverImageUrl = $notify_user->cover_img_verified == 1 ? asset('storage/app/public/users/' . $notify_user->cover_img) : '';
 
     // Return success response
     return response()->json([
@@ -2273,9 +2310,10 @@ public function add_notifications(Request $request)
         'data' => [
             'id' => $notification->id,
             'user_id' => $notification->user_id,
-            'name' => $user->name,
-            'profile' => $userImageUrl,
             'notify_user_id' => $notification->notify_user_id,
+            'name' => $notify_user->name,
+            'profile' => $notifyUserImageUrl,
+            'cover_img' => $notifyUserCoverImageUrl,
             'message' => $notification->message,
             'datetime' => Carbon::parse($notification->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($notification->updated_at)->format('Y-m-d H:i:s'),
@@ -2312,8 +2350,9 @@ public function notification_list(Request $request)
         $user = Users::find($notification->user_id);
         $notify_user = Users::find($notification->notify_user_id);
 
-
-        $notifyUserImageUrl = asset('storage/app/public/users/' . $notify_user->profile);
+        $imageUrl = $notify_user->profile_verified == 1 ? asset('storage/app/public/users/' . $notify_user->profile) : '';
+        $coverImageUrl = $notify_user->cover_img_verified == 1 ? asset('storage/app/public/users/' . $notify_user->cover_img) : '';
+        //$notifyUserImageUrl = asset('storage/app/public/users/' . $notify_user->profile);
          // Calculate time difference in hours
          $notificationTime = Carbon::parse($notification->datetime);
          $currentTime = Carbon::now();
@@ -2331,7 +2370,8 @@ public function notification_list(Request $request)
              'user_id' => $notification->user_id,
              'notify_user_id' => $notification->notify_user_id,
              'name' => $notify_user->name,
-            'profile' => $notifyUserImageUrl,
+            'profile' => $imageUrl,
+            'cover_img' => $coverImageUrl,
              'message' => $notification->message,
              'datetime' => $notificationTime->format('Y-m-d H:i:s'),
              'time' => $timeDifference,  // Add this line to include the time difference in hours

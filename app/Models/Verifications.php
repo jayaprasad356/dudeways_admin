@@ -14,6 +14,7 @@ class Verifications extends Model
         'selfie_image',
         'front_image',
         'back_image',
+        'status',
     ];
 
     public function user()

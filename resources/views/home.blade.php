@@ -62,8 +62,52 @@
                 </div>
             </div>
             <!-- ./col -->
+
+            <div class="col-lg-4 col-6">
+                <!-- small box -->
+                <div class="small-box bg-yellow">
+                    <div class="inner">
+                        <h3>{{ $pending_profile_count }}</h3>
+                        <p>Pending Profiles</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-id-badge"></i>
+                    </div>
+                    <a href="{{ route('users.index') }}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <!-- ./col -->
+
+            <div class="col-lg-4 col-6">
+                <!-- small box -->
+                <div class="small-box bg-orange">
+                    <div class="inner">
+                        <h3>{{ $pending_cover_image_count }}</h3>
+                        <p>Pending Cover Images</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-image"></i>
+                    </div>
+                    <a href="{{ route('users.index') }}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-6">
+                <!-- small box -->
+                <div class="small-box bg-info">
+                    <div class="inner">
+                        <h3>{{ $pending_verification }}</h3>
+                        <p>Pending Verification</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-user-clock"></i> <!-- Example of a different icon -->
+                    </div>
+                    <a href="{{ route('verifications.index') }}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+
+            <!-- ./col -->
         </div>
         <!-- /.row -->
     </div>
 @endsection
-

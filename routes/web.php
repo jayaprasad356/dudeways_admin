@@ -106,7 +106,9 @@ Route::prefix('admin')->middleware('auth')->group(function () {
         //Verifications  
         Route::get('/verifications', [VerificationsController::class, 'index'])->name('verifications.index');
         Route::delete('/verifications/{verifications}', [VerificationsController::class, 'destroy'])->name('verifications.destroy');
- 
+        Route::post('/verifications/verify', [VerificationsController::class, 'verify'])->name('verifications.verify');
+
+
         //Bulk Users
        // web.php
 // Define the route for the "Upload Bulk Users" page
@@ -118,4 +120,8 @@ Route::post('bulk-users/upload', [BulkUserController::class, 'store'])->name('bu
     Route::post('/cart/change-qty', [CartController::class, 'changeQty']);
     Route::delete('/cart/delete', [CartController::class, 'delete']);
     Route::delete('/cart/empty', [CartController::class, 'empty']);
+});
+// OneSignal service worker route
+Route::get('/OneSignalSDKWorker.js', function () {
+    return response()->file(public_path('OneSignalSDKWorker.js'));
 });

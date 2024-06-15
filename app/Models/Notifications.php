@@ -1,22 +1,28 @@
 <?php
+
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Notifications\Notifiable;
 
 class Notifications extends Model
 {
-    use Notifiable;
-
-    protected $table = 'notifications';
+    use HasFactory;
 
     protected $fillable = [
-        'notify_user_id', 'user_id', 'datetime','message',
+        'message',
+        'user_id',
+        'notify_user_id',
+        'datetime',
     ];
 
     public function user()
     {
         return $this->belongsTo(Users::class, 'user_id');
     }
-}
 
+    public function notifyUser()
+    {
+        return $this->belongsTo(Users::class, 'notify_user_id');
+    }
+}
