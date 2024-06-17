@@ -2505,6 +2505,7 @@ public function add_points(Request $request)
 
     // Add points to the user's points field
     $user->points += $points;
+    $user->total_points += $points;
     if (!$user->save()) {
         return response()->json([
             'success' => false,
