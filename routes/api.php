@@ -34,6 +34,7 @@ Route::post('verify_back_image', [AuthController::class, 'verify_back_image']);
 Route::post('verify_selfie_image', [AuthController::class, 'verify_selfie_image']);
 Route::post('points_list', [AuthController::class, 'points_list']);
 Route::post('add_points', [AuthController::class, 'add_points']);
+Route::post('reward_points', [AuthController::class, 'reward_points']);
 Route::post('spin_points', [AuthController::class, 'spin_points']);
 Route::post('add_feedback', [AuthController::class, 'add_feedback']);
 Route::post('update_location', [AuthController::class, 'update_location']);

@@ -2532,6 +2532,67 @@ public function add_points(Request $request)
         'message' => 'Points added successfully.',
     ], 201);
 }
+public function reward_points(Request $request)
+{
+    $user_id = $request->input('user_id'); 
+    $points = $request->input('points');
+
+    // Validate user_id
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 400);
+    }
+
+    // Validate points
+    if (empty($points)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'points is empty.',
+        ], 400);
+    }
+
+    // Check if user exists
+    $user = Users::find($user_id);
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User not found.',
+        ], 404);
+    }
+
+    // Update user points
+    $user->points += $points;
+    $user->total_points += $points;
+    
+    if (!$user->save()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to update user points.',
+        ], 500);
+    }
+
+    // Record the transaction
+    $transaction = new Transaction();
+    $transaction->user_id = $user_id;
+    $transaction->points = $points;
+    $transaction->type = 'reward_points';
+    $transaction->datetime = now();
+
+    if (!$transaction->save()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to save transaction.',
+        ], 500);    
+    }
+
+    // Return success response
+    return response()->json([
+        'success' => true,
+        'message' => 'Reward Points added successfully.',
+    ], 201);
+}
 
 public function spin_points(Request $request)
 {
