@@ -2525,11 +2525,12 @@ public function add_points(Request $request)
             'message' => 'Failed to save transaction.',
         ], 500);
     }
-
+    $user = Users::select('name', 'points', 'total_points')->find($user_id);
     // Return success response
     return response()->json([
         'success' => true,
         'message' => 'Points added successfully.',
+        'data' =>[$user],
     ], 201);
 }
 public function reward_points(Request $request)
@@ -2587,10 +2588,12 @@ public function reward_points(Request $request)
         ], 500);    
     }
 
+    $user = Users::select('name', 'points', 'total_points')->find($user_id);
     // Return success response
     return response()->json([
         'success' => true,
         'message' => 'Reward Points added successfully.',
+        'data' =>[$user],
     ], 201);
 }
 
@@ -2648,11 +2651,12 @@ public function spin_points(Request $request)
             'message' => 'Failed to save transaction.',
         ], 500);    
     }
-
+    $user = Users::select('name', 'points', 'total_points')->find($user_id);
     // Return success response
     return response()->json([
         'success' => true,
         'message' => 'Spin Points added successfully.',
+        'data' =>[$user],
     ], 201);
 }
 
