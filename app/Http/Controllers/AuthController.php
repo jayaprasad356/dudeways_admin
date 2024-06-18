@@ -1889,8 +1889,8 @@ public function chat_list(Request $request)
         ], 400);
     }
 
-    // Fetching chats for the specific user_id
-    $chats = Chats::where('user_id', $user_id)->get();
+      // Fetching chats for the specific user_id, ordered by datetime
+      $chats = Chats::where('user_id', $user_id)->orderBy('datetime', 'desc')->get();
 
     if ($chats->isEmpty()) {
         return response()->json([
