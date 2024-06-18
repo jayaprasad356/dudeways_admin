@@ -1351,8 +1351,8 @@ public function my_trip_list(Request $request)
         $user = Users::find($trip->user_id);
         if ($user) {
            
-            $imageUrl = $user->profile_verified == 1 ? asset('storage/app/public/users/' . $user->profile) : '';
-            $coverimageUrl = $user->cover_img_verified == 1 ? asset('storage/app/public/users/' . $user->cover_img) : '';
+            $imageUrl = asset('storage/app/public/users/' . $user->profile) ;
+            $coverimageUrl = asset('storage/app/public/users/' . $user->cover_img) ;
             
           
         } else {
