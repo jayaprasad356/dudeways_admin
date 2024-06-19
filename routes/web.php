@@ -15,6 +15,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\FriendsController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\VerificationsController;
+use App\Http\Controllers\ProfessionsController;
 use App\Http\Controllers\BulkUserController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -96,6 +97,16 @@ Route::prefix('admin')->middleware('auth')->group(function () {
         Route::delete('/notifications/{notifications}', [NotificationsController::class, 'destroy'])->name('notifications.destroy');
         Route::put('/notifications/{notifications}', [NotificationsController::class, 'update'])->name('notifications.update');
         Route::post('/notifications', [NotificationsController::class, 'store'])->name('notifications.store');
+
+
+        
+        //Professions  
+        Route::get('/professions', [ProfessionsController::class, 'index'])->name('professions.index');
+        Route::get('/professions/create', [ProfessionsController::class, 'create'])->name('professions.create');
+        Route::get('/professions/{professions}/edit', [ProfessionsController::class, 'edit'])->name('professions.edit');
+        Route::delete('/professions/{professions}', [ProfessionsController::class, 'destroy'])->name('professions.destroy');
+        Route::put('/professions/{professions}', [ProfessionsController::class, 'update'])->name('professions.update');
+        Route::post('/professions', [ProfessionsController::class, 'store'])->name('professions.store');
 
 
     
