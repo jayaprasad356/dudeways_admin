@@ -13,7 +13,21 @@
 <div class="card">
     <div class="card-body">
         <div class="row mb-4">
-            <div class="col-md-8">
+            <div class="col-md-8 d-flex align-items-center">
+                <!-- Checkbox for Select All -->
+                <div class="form-check mr-3">
+                <input type="checkbox" class="form-check-input" id="checkAll">
+                <label class="form-check-label" for="checkAll">Select All</label>
+                </div>
+                
+                <!-- Verify Button -->
+                <button class="btn btn-primary mr-3" id="pendingButton">Pending</button>
+                <button class="btn btn-success mr-3" id="verifyButton">Approved</button>
+                <button class="btn btn-danger mr-3" id="cancelButton">Cancelled</button>
+                
+            </div>
+            
+            <div class="col-md-8"><br>
                 <!-- User Filter Dropdown -->
                 <form id="filter-form" action="{{ route('trips.index') }}" method="GET" class="form-inline">
                     <div class="form-group mr-3">
@@ -54,6 +68,7 @@
             <table class="table table-bordered table-hover">
                 <thead class="thead-dark">
                     <tr>
+                    <th>Checkbox</th>
                         <th>Actions</th>
                         <th>ID <i class="fas fa-sort"></i></th>
                         <th>Trip Image</th>
@@ -71,6 +86,7 @@
                 <tbody>
                     @foreach ($trips as $trip)
                         <tr>
+                        <td><input type="checkbox" class="checkbox" data-id="{{ $trip->id }}"></td>
                             <td>
                                 <a href="{{ route('trips.edit', $trip) }}" class="btn btn-primary"><i class="fas fa-edit"></i></a>
                                 <button class="btn btn-danger btn-delete" data-url="{{ route('trips.destroy', $trip) }}"><i class="fas fa-trash"></i></button>
@@ -203,4 +219,60 @@
             }
         });
     </script>
+    <script>
+$(document).ready(function () {
+    // Handle "Select All" checkbox
+    $('#checkAll').change(function () {
+        $('.checkbox').prop('checked', $(this).prop('checked'));
+    });
+
+    // Handle Pending Button click
+    $('#pendingButton').click(function () {
+        updateStatus(0);
+    });
+
+    // Handle Approve Button click
+    $('#verifyButton').click(function () {
+        updateStatus(1);
+    });
+
+    // Handle Cancel Button click
+    $('#cancelButton').click(function () {
+        updateStatus(2);
+    });
+
+    // Update Status function
+    function updateStatus(status) {
+        var tripIds = [];
+        $('.checkbox:checked').each(function () {
+            tripIds.push($(this).data('id'));
+        });
+
+        if (tripIds.length > 0) {
+            $.ajax({
+                url: "{{ route('trips.updateStatus') }}",
+                method: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    trip_ids: tripIds,
+                    status: status
+                },
+                success: function (response) {
+                    if (response.success) {
+                        location.reload();
+                    } else {
+                        alert('Failed to update status. Please try again.');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error(error);
+                    alert('An error occurred. Please try again.');
+                }
+            });
+        } else {
+            alert('Please select at least one trip.');
+        }
+    }
+});
+</script>
 @endsection

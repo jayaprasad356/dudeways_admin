@@ -67,6 +67,8 @@ Route::prefix('admin')->middleware('auth')->group(function () {
      Route::delete('/trips/{trips}', [TripsController::class, 'destroy'])->name('trips.destroy');
      Route::put('/trips/{trips}', [TripsController::class, 'update'])->name('trips.update');
      Route::post('/trips', [TripsController::class, 'store'])->name('trips.store');
+     Route::post('/trips/updateStatus', [TripsController::class, 'updateStatus'])->name('trips.updateStatus');
+
 
 
      //Chats  

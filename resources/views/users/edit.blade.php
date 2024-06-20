@@ -102,21 +102,23 @@
                 </div>
 
                 <div class="form-group">
-                        <label for="profession">Profession</label>
-                        <select name="profession" class="form-control @error('profession') is-invalid @enderror" id="profession">
-                            <option value=''>--select--</option>
-                            <option value='engineer' {{ old('profession', $users->profession) == 'engineer' ? 'selected' : '' }}>engineer</option>
-                            <option value='chef' {{ old('profession', $users->profession) == 'chef' ? 'selected' : '' }}>chef</option>
-                            <option value='electrician' {{ old('profession', $users->profession) == 'electrician' ? 'selected' : '' }}>electrician</option>
-                            <option value='physician' {{ old('profession', $users->profession) == 'physician' ? 'selected' : '' }}>physician</option>
-                            <option value='dentist' {{ old('profession', $users->profession) == 'dentist' ? 'selected' : '' }}>dentist</option>
-                        </select>
-                        @error('profession')
-                        <span class="invalid-feedback" role="alert">
-                            <strong>{{ $message }}</strong>
-                        </span>
-                        @enderror
-                    </div>
+    <label for="profession">Profession</label>
+    <select name="profession" class="form-control @error('profession') is-invalid @enderror" id="profession">
+        <option value=''>--select--</option>
+        <option value='engineer' {{ old('profession', strtolower($users->profession)) == 'engineer' ? 'selected' : '' }}>Engineer</option>
+        <option value='chef' {{ old('profession', strtolower($users->profession)) == 'chef' ? 'selected' : '' }}>Chef</option>
+        <option value='electrician' {{ old('profession', strtolower($users->profession)) == 'electrician' ? 'selected' : '' }}>Electrician</option>
+        <option value='physician' {{ old('profession', strtolower($users->profession)) == 'physician' ? 'selected' : '' }}>Physician</option>
+        <option value='dentist' {{ old('profession', strtolower($users->profession)) == 'dentist' ? 'selected' : '' }}>Dentist</option>
+        <option value='doctor' {{ old('profession', strtolower($users->profession)) == 'doctor' ? 'selected' : '' }}>Doctor</option>
+    </select>
+    @error('profession')
+    <span class="invalid-feedback" role="alert">
+        <strong>{{ $message }}</strong>
+    </span>
+    @enderror
+</div>
+
 
                 <div class="form-group">
                     <label for="referred_by">Referred By</label>

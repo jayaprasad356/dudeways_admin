@@ -1174,6 +1174,9 @@ public function trip_list(Request $request)
     $userLatitude = (float)$userExists->latitude;
     $userLongitude = (float)$userExists->longitude;
 
+    // Initialize trip details array
+    $tripDetails = [];
+
     // Fetch trips based on the type
     if ($type == 'latest') {
         // Fetch the latest 20 trips with trip_status 1
@@ -1181,37 +1184,60 @@ public function trip_list(Request $request)
                       ->orderBy('trip_datetime', 'desc')
                       ->limit($limit)
                       ->get();
+
+        foreach ($trips as $trip) {
+            $tripDetails[] = [
+                'trip' => $trip,
+                'user' => Users::find($trip->user_id),
+                'distance' => null
+            ];
+        }
+           // Sort trips: show authenticated user's trips first, then sort others by distance
+           usort($tripDetails, function($a, $b) use ($userId) {
+            if ($a['user']->id == $userId && $b['user']->id != $userId) {
+                return -1; // $a (authenticated user's trip) should come before $b (other user's trip)
+            } elseif ($a['user']->id != $userId && $b['user']->id == $userId) {
+                return 1; // $b (authenticated user's trip) should come before $a (other user's trip)
+            } else {
+                // Sort by distance for trips from other users
+                return $a['distance'] <=> $b['distance'];
+            }
+        });
+    
+        // Limit the number of trips
+        $tripDetails = array_slice($tripDetails, 0, $limit);
     } elseif ($type == 'nearby') {
         // Fetch trips with trip_status 1
         $trips = Trips::where('trip_status', 1)->get();
-
-        $tripDetails = [];
-
+    
         foreach ($trips as $trip) {
             $tripUser = Users::find($trip->user_id);
-
-            // Skip the trip if it belongs to the same user
-            if ($tripUser->id == $userId) {
-                continue;
-            }
-
+    
             // Calculate the distance between the users using their latitude and longitude
             $distance = $this->calculateDistance($userLatitude, $userLongitude, (float)$tripUser->latitude, (float)$tripUser->longitude);
-
+    
             $tripDetails[] = [
                 'trip' => $trip,
                 'user' => $tripUser,
                 'distance' => $distance
             ];
         }
-
-        // Sort trips by distance
-        usort($tripDetails, function($a, $b) {
-            return $a['distance'] <=> $b['distance'];
+    
+        // Sort trips: show authenticated user's trips first, then sort others by distance
+        usort($tripDetails, function($a, $b) use ($userId) {
+            if ($a['user']->id == $userId && $b['user']->id != $userId) {
+                return -1; // $a (authenticated user's trip) should come before $b (other user's trip)
+            } elseif ($a['user']->id != $userId && $b['user']->id == $userId) {
+                return 1; // $b (authenticated user's trip) should come before $a (other user's trip)
+            } else {
+                // Sort by distance for trips from other users
+                return $a['distance'] <=> $b['distance'];
+            }
         });
-
+    
         // Limit the number of trips
         $tripDetails = array_slice($tripDetails, 0, $limit);
+        
     } elseif ($type == 'date') {
         // Check if the date parameter is provided
         if (!$request->has('date')) {
@@ -1229,6 +1255,14 @@ public function trip_list(Request $request)
                       ->orderBy('created_at', 'desc')
                       ->limit($limit)
                       ->get();
+
+        foreach ($trips as $trip) {
+            $tripDetails[] = [
+                'trip' => $trip,
+                'user' => Users::find($trip->user_id),
+                'distance' => null
+            ];
+        }
     } else {
         return response()->json([
             'success' => false,
@@ -1236,7 +1270,7 @@ public function trip_list(Request $request)
         ], 400);
     }
 
-    if ($type != 'nearby' && $trips->isEmpty()) {
+    if ($type != 'nearby' && empty($tripDetails)) {
         return response()->json([
             'success' => false,
             'message' => 'No trips found.',
@@ -1302,15 +1336,17 @@ public function trip_list(Request $request)
             'trip_datetime' => Carbon::parse($trip->trip_datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($trip->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($trip->created_at)->format('Y-m-d H:i:s'),
-            'distance' => $distance . ' km'
+            'distance' => $distance !== null ? $distance . ' km' : null
         ];
     }
+
     return response()->json([
         'success' => true,
         'message' => 'Trip details retrieved successfully.',
         'data' => $tripDetailsFormatted,
     ], 200);
 }
+
 
 // Function to calculate distance between two points using their latitude and longitude
 private function calculateDistance($latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo, $earthRadius = 6371)
@@ -1804,77 +1840,101 @@ if ($chatUserGender !== 'female') {
     }
 }
 
-// Rest of the code to handle chats...
+   // If there's no existing chat, create new entries for both directions
+   if (!$existingChat) {
+    $currentTime = now();
 
-// If a chat exists, update it; otherwise, create a new one
-if ($existingChat) {
-    $existingChat->latest_message = $message;
-    $existingChat->latest_msg_time = now();
-    $existingChat->datetime = now();
-    if (!$existingChat->save()) {
+    // Create first chat entry: user_id -> chat_user_id
+    $newChat1 = new Chats();
+    $newChat1->user_id = $user_id;
+    $newChat1->chat_user_id = $chat_user_id;
+    $newChat1->latest_message = $message;
+    $newChat1->latest_msg_time = $currentTime;
+    $newChat1->datetime = $currentTime;
+
+    // Create second chat entry: chat_user_id -> user_id
+    $newChat2 = new Chats();
+    $newChat2->user_id = $chat_user_id;
+    $newChat2->chat_user_id = $user_id;
+    $newChat2->latest_message = $message;
+    $newChat2->latest_msg_time = $currentTime;
+    $newChat2->datetime = $currentTime;
+
+    // Save both chat entries
+    if (!$newChat1->save() || !$newChat2->save()) {
         return response()->json([
             'success' => false,
-            'message' => 'Failed to update Chat.',
+            'message' => 'Failed to save Chat entries.',
         ], 500);
     }
 
-    // Return success response with updated chat data
+    // Return success response with new chat data
     return response()->json([
         'success' => true,
-        'message' => 'Chat updated successfully.',
+        'message' => 'Chat added successfully.',
         'data' => [
-            'id' => $existingChat->id,
-            'user_id' => $existingChat->user_id,
-            'chat_user_id' => $existingChat->chat_user_id,
-            'name' => $chat_user->name,
-           'profile' => $chat_user->profile_verified == 1 ? asset('storage/app/public/users/' . $chat_user->profile) : '',
-            'cover_image' => $chat_user->cover_img_verified == 1 ? asset('storage/app/public/users/' . $chat_user->cover_image) : '',
-            'latest_message' => $existingChat->latest_message,
-            'latest_msg_time' => Carbon::parse($existingChat->latest_msg_time)->format('Y-m-d H:i:s'),
-            'msg_seen' => '0',
-            'datetime' => Carbon::parse($existingChat->datetime)->format('Y-m-d H:i:s'),
-            'updated_at' => Carbon::parse($existingChat->updated_at)->format('Y-m-d H:i:s'),
-            'created_at' => Carbon::parse($existingChat->created_at)->format('Y-m-d H:i:s'),
+            'chat1' => [
+                'id' => $newChat1->id,
+                'user_id' => $newChat1->user_id,
+                'chat_user_id' => $newChat1->chat_user_id,
+                'name' => $chat_user->name, 
+                'profile' => $chat_user->profile_verified == 1 ? asset('storage/app/public/users/' . $chat_user->profile) : '',
+                'cover_image' => $chat_user->cover_img_verified == 1 ? asset('storage/app/public/users/' . $chat_user->cover_image) : '',
+                'latest_message' => $newChat1->latest_message,
+                'latest_msg_time' => Carbon::parse($newChat1->latest_msg_time)->format('Y-m-d H:i:s'),
+                'msg_seen' => '0',
+                'datetime' => Carbon::parse($newChat1->datetime)->format('Y-m-d H:i:s'),
+                'updated_at' => Carbon::parse($newChat1->updated_at)->format('Y-m-d H:i:s'),
+                'created_at' => Carbon::parse($newChat1->created_at)->format('Y-m-d H:i:s'),
+            ],
+            'chat2' => [
+                'id' => $newChat2->id,
+                'user_id' => $newChat2->user_id,
+                'chat_user_id' => $newChat2->chat_user_id,
+                'name' => $user->name,
+                'profile' => $user->profile_verified == 1 ? asset('storage/app/public/users/' . $user->profile) : '',
+                'cover_image' => $user->cover_img_verified == 1 ? asset('storage/app/public/users/' . $user->cover_image) : '',
+                'latest_message' => $newChat2->latest_message,
+                'latest_msg_time' => Carbon::parse($newChat2->latest_msg_time)->format('Y-m-d H:i:s'),
+                'msg_seen' => '0',
+                'datetime' => Carbon::parse($newChat2->datetime)->format('Y-m-d H:i:s'),
+                'updated_at' => Carbon::parse($newChat2->updated_at)->format('Y-m-d H:i:s'),
+                'created_at' => Carbon::parse($newChat2->created_at)->format('Y-m-d H:i:s'),
+            ],
         ],
-
-    ], 200);
+    ], 201);
 }
 
-// If no chat exists, create a new one
-$newChat = new Chats();
-$newChat->user_id = $user_id; 
-$newChat->chat_user_id = $chat_user_id;
-$newChat->latest_message = $message; 
-$newChat->latest_msg_time = now();
-$newChat->datetime = now(); 
-
-// Save the chat
-if (!$newChat->save()) {
+// If an existing chat exists, update it
+$existingChat->latest_message = $message;
+$existingChat->latest_msg_time = now();
+$existingChat->datetime = now();
+if (!$existingChat->save()) {
     return response()->json([
         'success' => false,
-        'message' => 'Failed to save Chat.',
+        'message' => 'Failed to update Chat.',
     ], 500);
 }
 
-// Return success response with new chat data
+// Return success response with updated chat data
 return response()->json([
     'success' => true,
-    'message' => 'Chat added successfully.',
+    'message' => 'Chat updated successfully.',
     'data' => [
-        'id' => $newChat->id,
-        'user_id' => $newChat->user_id,
-        'chat_user_id' => $newChat->chat_user_id,
-        'name' => $chat_user->name, 
+        'id' => $existingChat->id,
+        'user_id' => $existingChat->user_id,
+        'chat_user_id' => $existingChat->chat_user_id,
+        'name' => $chat_user->name,
         'profile' => $chat_user->profile_verified == 1 ? asset('storage/app/public/users/' . $chat_user->profile) : '',
-         'cover_image' => $chat_user->cover_img_verified == 1 ? asset('storage/app/public/users/' . $chat_user->cover_image) : '',
-        'latest_message' => $newChat->latest_message,
-        'latest_msg_time' => Carbon::parse($newChat->latest_msg_time)->format('Y-m-d H:i:s'),
+        'cover_image' => $chat_user->cover_img_verified == 1 ? asset('storage/app/public/users/' . $chat_user->cover_image) : '',
+        'latest_message' => $existingChat->latest_message,
+        'latest_msg_time' => Carbon::parse($existingChat->latest_msg_time)->format('Y-m-d H:i:s'),
         'msg_seen' => '0',
-        'datetime' => Carbon::parse($newChat->datetime)->format('Y-m-d H:i:s'),
-        'updated_at' => Carbon::parse($newChat->updated_at)->format('Y-m-d H:i:s'),
-        'created_at' => Carbon::parse($newChat->created_at)->format('Y-m-d H:i:s'),
+        'datetime' => Carbon::parse($existingChat->datetime)->format('Y-m-d H:i:s'),
+        'updated_at' => Carbon::parse($existingChat->updated_at)->format('Y-m-d H:i:s'),
+        'created_at' => Carbon::parse($existingChat->created_at)->format('Y-m-d H:i:s'),
     ],
-], 201);
+], 200);
 }
 
 public function chat_list(Request $request)

@@ -11,12 +11,6 @@ use Berkayk\OneSignal\OneSignalClient;
 
 class NotificationsController extends Controller
 {
-    protected $oneSignal;
-
-    public function __construct(OneSignalClient $oneSignal)
-    {
-        $this->oneSignal = $oneSignal;
-    }
 
     public function index(Request $request)
     {
@@ -49,21 +43,6 @@ class NotificationsController extends Controller
 
         if (!$notification) {
             return redirect()->back()->with('error', 'Something went wrong while creating the notification.');
-        }
-
-        Log::info('Attempting to send notification', [
-            'message' => $notification->message,
-            'user_id' => $notification->notify_user_id,
-        ]);
-
-        try {
-            $this->oneSignal->sendNotificationToUser(
-                $notification->message,
-                $notification->notify_user_id
-            );
-        } catch (\Exception $e) {
-            Log::error('OneSignal Error: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Something went wrong while sending the notification.');
         }
 
         Log::info('Notification sent successfully');

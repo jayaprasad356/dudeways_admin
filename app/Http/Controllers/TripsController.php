@@ -19,7 +19,24 @@ class TripsController extends Controller
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
-     */
+     */  
+    public function updateStatus(Request $request)
+    {
+        $tripIds = $request->input('trip_ids', []);
+        $status = $request->input('status');
+    
+        foreach ($tripIds as $tripId) {
+            $trip = Trips::find($tripId);
+            if ($trip) {
+                $trip->trip_status = $status;
+                $trip->save();
+            }
+        }
+    
+        return response()->json(['success' => true]);
+    }
+    
+
 
 
      public function index(Request $request)
