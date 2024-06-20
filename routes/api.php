@@ -39,6 +39,7 @@ Route::post('spin_points', [AuthController::class, 'spin_points']);
 Route::post('add_feedback', [AuthController::class, 'add_feedback']);
 Route::post('update_location', [AuthController::class, 'update_location']);
 Route::post('profession_list', [AuthController::class, 'profession_list']);
+Route::post('settings_list', [AuthController::class, 'settings_list']);
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();

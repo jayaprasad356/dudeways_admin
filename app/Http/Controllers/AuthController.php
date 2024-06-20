@@ -14,6 +14,7 @@ use App\Models\Verifications;
 use App\Models\Transaction; 
 use App\Models\Feedback; 
 use App\Models\Professions; 
+use App\Models\News; 
 use Carbon\Carbon;
 
 class AuthController extends Controller
@@ -336,6 +337,9 @@ public function register(Request $request)
 
 private function generateUniqueName($name, $user_id)
 {
+    // Remove spaces and convert the name to lowercase
+    $name = strtolower(str_replace(' ', '', $name));
+
     // Extract the first part of the user's name and limit to first 8 characters
     $firstPart = substr($name, 0, 8);
 
@@ -352,6 +356,7 @@ private function generateUniqueName($name, $user_id)
 
     return $unique_name;
 }
+
 private function generateReferCode()
 {
     // Generate a random string
@@ -2245,14 +2250,21 @@ public function friends_list(Request $request)
         ], 404);
     }
 
-    $friendDetails = $friends->map(function ($friend) {
+    $friendDetails = $friends->map(function ($friend) use ($user_id) {
         $user = $friend->user;
         $friendUser = $friend->friendUser;
 
+        // Check if user and friendUser have latitude and longitude
+        if (!empty($user->latitude) && !empty($user->longtitude) && !empty($friendUser->latitude) && !empty($friendUser->longtitude)) {
+            // Calculate distance between user and friendUser
+            $distance = $this->calculateDistance((float)$user->latitude, (float)$user->longtitude, (float)$friendUser->latitude, (float)$friendUser->longtitude);
+            $distanceFormatted = round($distance, 2) . ' km'; // Round to 2 decimal places
+        } else {
+            $distanceFormatted = null; // Handle case where latitude or longitude is missing
+        }
 
         $imageUrl = $friendUser->profile_verified == 1 ? asset('storage/app/public/users/' . $friendUser->profile) : '';
         $coverImageUrl = $friendUser->cover_img_verified == 1 ? asset('storage/app/public/users/' . $friendUser->cover_img) : '';
-
 
         // Determine the format of last_seen
         $lastSeen = Carbon::parse($user->last_seen);
@@ -2287,7 +2299,7 @@ public function friends_list(Request $request)
             'profile' => $imageUrl,
             'cover_img' => $coverImageUrl,
             'last_seen' => $lastSeenFormatted,
-            'distance' =>'2km',
+            'distance' => isset($distanceFormatted) ? $distanceFormatted : null, // Distance between user and friend
             'status' => $friend->status == 1 ? 'Interested' : 'Not Interested',
             'datetime' => Carbon::parse($friend->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($friend->updated_at)->format('Y-m-d H:i:s'),
@@ -2982,6 +2994,35 @@ public function profession_list(Request $request)
         'data' => $professionData,
     ], 200);
 }
+
+public function settings_list(Request $request)
+{
+    // Retrieve all news settings
+    $news = News::all();
+
+    if ($news->isEmpty()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No settings found.',
+        ], 404);
+    }
+
+    $newsData = [];
+    foreach ($news as $item) {
+        $newsData[] = [
+            'id' => $item->id,
+            'instagram_link' => $item->instagram,
+            'telegram_link' => $item->telegram,
+        ];
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Settings listed successfully.',
+        'data' => $newsData,
+    ], 200);
+}
+
 
 }
 
