@@ -29,6 +29,7 @@ class TripsController extends Controller
             $trip = Trips::find($tripId);
             if ($trip) {
                 $trip->trip_status = $status;
+                $trip->trip_datetime = now(); 
                 $trip->save();
             }
         }
