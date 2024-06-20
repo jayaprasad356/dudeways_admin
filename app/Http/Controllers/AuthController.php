@@ -1352,21 +1352,24 @@ public function trip_list(Request $request)
 // Function to calculate distance between two points using their latitude and longitude
 private function calculateDistance($latitudeFrom, $longtitudeFrom, $latitudeTo, $longtitudeTo, $earthRadius = 6371)
 {
-    // Convert from degrees to radians
+    // Convert latitude and longitude from degrees to radians
     $latFrom = deg2rad($latitudeFrom);
     $lonFrom = deg2rad($longtitudeFrom);
     $latTo = deg2rad($latitudeTo);
     $lonTo = deg2rad($longtitudeTo);
 
-    // Calculate distance using Haversine formula
-    $latDelta = $latTo - $latFrom;
-    $lonDelta = $lonTo - $lonFrom;
+    // Calculate differences in latitude and longitude
+    $latDiff = $latTo - $latFrom;
+    $lonDiff = $lonTo - $lonFrom;
 
-    $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
-        cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
+    // Calculate using Haversine formula
+    $a = sin($latDiff / 2) * sin($latDiff / 2) + cos($latFrom) * cos($latTo) * sin($lonDiff / 2) * sin($lonDiff / 2);
+    $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+    $distance = $earthRadius * $c;
 
-    return $angle * $earthRadius;
+    return $distance;
 }
+
 
 
 public function my_trip_list(Request $request)
