@@ -1177,7 +1177,7 @@ public function trip_list(Request $request)
 
     // Fetch the user's latitude and longitude
     $userLatitude = (float)$userExists->latitude;
-    $userLongitude = (float)$userExists->longitude;
+    $userLongtitude = (float)$userExists->longtitude;
 
     // Initialize trip details array
     $tripDetails = [];
@@ -1195,7 +1195,7 @@ public function trip_list(Request $request)
         foreach ($trips as $trip) {
             $tripUser = Users::find($trip->user_id);
             // Calculate the distance for each trip
-            $distance = $this->calculateDistance($userLatitude, $userLongitude, (float)$tripUser->latitude, (float)$tripUser->longitude);
+            $distance = $this->calculateDistance($userLatitude, $userLongtitude, (float)$tripUser->latitude, (float)$tripUser->longtitude);
             
             $tripDetails[] = [
                 'trip' => $trip,
@@ -1213,7 +1213,7 @@ public function trip_list(Request $request)
             $tripUser = Users::find($trip->user_id);
 
             // Calculate the distance between the users using their latitude and longitude
-            $distance = $this->calculateDistance($userLatitude, $userLongitude, (float)$tripUser->latitude, (float)$tripUser->longitude);
+            $distance = $this->calculateDistance($userLatitude, $userLongtitude, (float)$tripUser->latitude, (float)$tripUser->longtitude);
 
             $tripDetails[] = [
                 'trip' => $trip,
@@ -1242,7 +1242,7 @@ public function trip_list(Request $request)
         foreach ($trips as $trip) {
             $tripUser = Users::find($trip->user_id);
             // Calculate the distance for each trip
-            $distance = $this->calculateDistance($userLatitude, $userLongitude, (float)$tripUser->latitude, (float)$tripUser->longitude);
+            $distance = $this->calculateDistance($userLatitude, $userLongtitude, (float)$tripUser->latitude, (float)$tripUser->longtitude);
             
             $tripDetails[] = [
                 'trip' => $trip,
@@ -1350,13 +1350,13 @@ public function trip_list(Request $request)
 }
 
 // Function to calculate distance between two points using their latitude and longitude
-private function calculateDistance($latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo, $earthRadius = 6371)
+private function calculateDistance($latitudeFrom, $longtitudeFrom, $latitudeTo, $longtitudeTo, $earthRadius = 6371)
 {
     // Convert latitude and longitude from degrees to radians
     $latFrom = deg2rad($latitudeFrom);
-    $lonFrom = deg2rad($longitudeFrom);
+    $lonFrom = deg2rad($longtitudeFrom);
     $latTo = deg2rad($latitudeTo);
-    $lonTo = deg2rad($longitudeTo);
+    $lonTo = deg2rad($longtitudeTo);
 
     // Calculate differences in latitude and longitude
     $latDiff = $latTo - $latFrom;
