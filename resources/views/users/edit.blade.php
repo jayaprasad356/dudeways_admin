@@ -145,6 +145,30 @@
                 </div>
 
                 <div class="form-group">
+                    <label for="points">Points</label>
+                    <input type="number" name="points" class="form-control @error('points') is-invalid @enderror"
+                           id="points"
+                           placeholder="points" value="{{ old('points', $users->points) }}">
+                    @error('points')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                    @enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="total_points">Total Points</label>
+                    <input type="number" name="total_points" class="form-control @error('total_points') is-invalid @enderror"
+                           id="total_points"
+                           placeholder="Total Points" value="{{ old('total_points', $users->total_points) }}">
+                    @error('total_points')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                    @enderror
+                </div>
+
+                <div class="form-group">
                     <span>Current Profile:</span>
                     <img src="{{ asset('storage/app/public/users/' . $users->profile) }}" alt="{{ $users->name }}" style="max-width: 100px; max-height: 100px;">
                     <br>
