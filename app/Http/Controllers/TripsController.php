@@ -155,6 +155,17 @@ class TripsController extends Controller
     public function update(Request $request, Trips $trips)
 
     {
+
+        $request->validate([
+            'from_date' => 'required|date',
+            'to_date' => 'required|date',
+            'trip_type' => 'required|string',
+            'location' => 'required|string',
+            'trip_title' => 'required|string',
+            'trip_description' => 'required|string',
+            'user_id' => 'required|exists:users,id',
+        ]);
+        
         $trips->trip_type = $request->trip_type;
         $trips->location = $request->location;
         $trips->from_date = $request->from_date;
