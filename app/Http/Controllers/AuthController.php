@@ -1194,6 +1194,12 @@ public function trip_list(Request $request)
 
         foreach ($trips as $trip) {
             $tripUser = Users::find($trip->user_id);
+
+            // Check if user exists
+            if (!$tripUser) {
+                continue; // Skip this trip if user does not exist
+            }
+
             // Calculate the distance for each trip
             $distance = $this->calculateDistance($userLatitude, $userLongtitude, (float)$tripUser->latitude, (float)$tripUser->longtitude);
             
@@ -1211,6 +1217,11 @@ public function trip_list(Request $request)
 
         foreach ($trips as $trip) {
             $tripUser = Users::find($trip->user_id);
+
+            // Check if user exists
+            if (!$tripUser) {
+                continue; // Skip this trip if user does not exist
+            }
 
             // Calculate the distance between the users using their latitude and longitude
             $distance = $this->calculateDistance($userLatitude, $userLongtitude, (float)$tripUser->latitude, (float)$tripUser->longtitude);
@@ -1241,6 +1252,12 @@ public function trip_list(Request $request)
 
         foreach ($trips as $trip) {
             $tripUser = Users::find($trip->user_id);
+
+            // Check if user exists
+            if (!$tripUser) {
+                continue; // Skip this trip if user does not exist
+            }
+
             // Calculate the distance for each trip
             $distance = $this->calculateDistance($userLatitude, $userLongtitude, (float)$tripUser->latitude, (float)$tripUser->longtitude);
             
@@ -1349,7 +1366,6 @@ public function trip_list(Request $request)
     ], 200);
 }
 
-// Function to calculate distance between two points using their latitude and longitude
 private function calculateDistance($latitudeFrom, $longtitudeFrom, $latitudeTo, $longtitudeTo, $earthRadius = 6371)
 {
     // Convert latitude and longitude from degrees to radians
