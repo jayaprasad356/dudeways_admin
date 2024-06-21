@@ -1177,16 +1177,16 @@ public function trip_list(Request $request)
 
     // Fetch the user's latitude and longitude
     $userLatitude = (float)$userExists->latitude;
-    $userLongitude = (float)$userExists->longitude;
+    $userLongtitude = (float)$userExists->longtitude;
 
     // Initialize trip details array
     $tripDetails = [];
 
     $currentDate = Carbon::now()->toDateString();
     if ($type == 'latest') {
-        // Fetch the latest 20 trips with trip_status 1 and from_date >= current date
+        // Fetch the latest 20 trips with trip_status 1
         $trips = Trips::where('trip_status', 1)
-            ->whereDate('from_date', '>=', $currentDate)
+        ->whereDate('from_date', '>=', $currentDate)
             ->orderBy('trip_datetime', 'desc')
             ->limit($limit)
             ->get();
@@ -1213,16 +1213,16 @@ public function trip_list(Request $request)
         // Limit the number of trips
         $tripDetails = array_slice($tripDetails, 0, $limit);
     } elseif ($type == 'nearby') {
-        // Fetch trips with trip_status 1 and from_date >= current date
+        // Fetch trips with trip_status 1
         $trips = Trips::where('trip_status', 1)
-            ->whereDate('from_date', '>=', $currentDate)
+        ->whereDate('from_date', '>=', $currentDate)
             ->get();
 
         foreach ($trips as $trip) {
             $tripUser = Users::find($trip->user_id);
 
             // Calculate the distance between the users using their latitude and longitude
-            $distance = $this->calculateDistance($userLatitude, $userLongitude, (float)$tripUser->latitude, (float)$tripUser->longitude);
+            $distance = $this->calculateDistance($userLatitude, $userLongtitude, (float)$tripUser->latitude, (float)$tripUser->longtitude);
 
             $tripDetails[] = [
                 'trip' => $trip,
@@ -1256,12 +1256,13 @@ public function trip_list(Request $request)
 
         $fromDate = $request->input('date');
 
-        // Fetch trips with the specified from_date, trip_status 1, and from_date >= current date
+        // Fetch trips with the specified from_date and trip_status 1
         $trips = Trips::where('trip_status', 1)
-        ->whereDate('from_date', $fromDate)
-        ->orderBy('created_at', 'desc')
-        ->limit($limit)
-        ->get();
+            ->whereDate('from_date', $fromDate)
+            ->orderBy('created_at', 'desc')
+            ->limit($limit)
+            ->get();
+
         foreach ($trips as $trip) {
             $tripDetails[] = [
                 'trip' => $trip,
@@ -1352,7 +1353,6 @@ public function trip_list(Request $request)
         'data' => $tripDetailsFormatted,
     ], 200);
 }
-
 
 // Function to calculate distance between two points using their latitude and longitude
 private function calculateDistance($latitudeFrom, $longtitudeFrom, $latitudeTo, $longtitudeTo, $earthRadius = 6371)
