@@ -1757,99 +1757,117 @@ public function delete_trip(Request $request)
     ], 200);
 }
 
-public function add_chat(Request $request)
-{
-    $user_id = $request->input('user_id'); 
-    $chat_user_id = $request->input('chat_user_id');
-    $message = $request->input('message');
+    public function add_chat(Request $request)
+    {
+        $user_id = $request->input('user_id'); 
+        $chat_user_id = $request->input('chat_user_id');
+        $message = $request->input('message');
 
-    // Validate user_id
-    if (empty($user_id)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'user_id is empty.',
-        ], 400);
+        // Validate user_id
+        if (empty($user_id)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'user_id is empty.',
+            ], 400);
+        }
+
+        // Validate chat_user_id
+        if (empty($chat_user_id)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'chat_user_id is empty.',
+            ], 400);
+        }
+
+        // Validate message
+        if (empty($message)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Message is empty.',
+            ], 400);
+        }
+
+        // Check if user is trying to chat with themselves
+        if ($user_id == $chat_user_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You cannot chat with yourself.',
+            ], 400);
+        }
+
+        // Check if user and chat_user exist
+        $user = Users::find($user_id);
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found.',
+            ], 404);
+        }
+
+        $chat_user = Users::find($chat_user_id);
+        if (!$chat_user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Chat user not found.',
+            ], 404);
+        }
+
+        // Check if there's an existing chat between the user and chat_user
+        $existingChat = Chats::where(function($query) use ($user_id, $chat_user_id) {
+            $query->where('user_id', $user_id)
+                ->where('chat_user_id', $chat_user_id);
+        })
+        ->orWhere(function($query) use ($user_id, $chat_user_id) {
+            $query->where('user_id', $chat_user_id)
+                ->where('chat_user_id', $user_id);
+        })
+        ->first();
+
+    // Check if the chat is blocked
+    if ($existingChat && $existingChat->chat_blocked == 1) {
+    if ($existingChat->user_id == $user_id) {
+    return response()->json([
+    'success' => false,
+    'message' => 'You have blocked this user.',
+    ], 403);
+    } else {
+    return response()->json([
+    'success' => false,
+    'message' => 'You are blocked by this user.',
+    ], 403);
+    }
     }
 
-    // Validate chat_user_id
-    if (empty($chat_user_id)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'chat_user_id is empty.',
-        ], 400);
-    }
+    // Retrieve the gender of the chat user
+    $chatUserGender = $chat_user->gender; // Assuming the gender field exists in the Users model
 
-    // Validate message
-    if (empty($message)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Message is empty.',
-        ], 400);
-    }
+    // Check if chat_user's gender is not female
+    if ($chatUserGender !== 'female') {
+        // If there's an existing chat, check the last update time
+        if ($existingChat) {
+            $lastUpdateTime = Carbon::parse($existingChat->datetime);
+            $currentTime = Carbon::now();
 
-    // Check if user is trying to chat with themselves
-    if ($user_id == $chat_user_id) {
-        return response()->json([
-            'success' => false,
-            'message' => 'You cannot chat with yourself.',
-        ], 400);
-    }
-
-    // Check if user and chat_user exist
-    $user = Users::find($user_id);
-    if (!$user) {
-        return response()->json([
-            'success' => false,
-            'message' => 'User not found.',
-        ], 404);
-    }
-
-    $chat_user = Users::find($chat_user_id);
-    if (!$chat_user) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Chat user not found.',
-        ], 404);
-    }
-
-     // Check if there's an existing chat between the user and chat_user
-     $existingChat = Chats::where(function($query) use ($user_id, $chat_user_id) {
-        $query->where('user_id', $user_id)
-              ->where('chat_user_id', $chat_user_id);
-    })
-    ->orWhere(function($query) use ($user_id, $chat_user_id) {
-        $query->where('user_id', $chat_user_id)
-              ->where('chat_user_id', $user_id);
-    })
-    ->first();
-
-// Check if the chat is blocked
-if ($existingChat && $existingChat->chat_blocked == 1) {
-if ($existingChat->user_id == $user_id) {
-return response()->json([
-'success' => false,
-'message' => 'You have blocked this user.',
-], 403);
-} else {
-return response()->json([
-'success' => false,
-'message' => 'You are blocked by this user.',
-], 403);
-}
-}
-
-// Retrieve the gender of the chat user
-$chatUserGender = $chat_user->gender; // Assuming the gender field exists in the Users model
-
-// Check if chat_user's gender is not female
-if ($chatUserGender !== 'female') {
-    // If there's an existing chat, check the last update time
-    if ($existingChat) {
-        $lastUpdateTime = Carbon::parse($existingChat->datetime);
-        $currentTime = Carbon::now();
-
-        // If it's been more than an hour since the last update, deduct points
-        if ($lastUpdateTime->diffInHours($currentTime) >= 1) {
+            // If it's been more than an hour since the last update, deduct points
+            if ($lastUpdateTime->diffInHours($currentTime) >= 1) {
+                if ($user->points >= 10) {
+                    $user->points -= 10;
+                    if (!$user->save()) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Failed to update user points.',
+                        ], 500);
+                    }
+                } else {
+                    // User doesn't have sufficient points to chat
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'You don\'t have sufficient points to chat.',
+                    ], 400);
+                }
+            }
+        } else {
+            // It's a new chat, deduct points
             if ($user->points >= 10) {
                 $user->points -= 10;
                 if (!$user->save()) {
@@ -1866,122 +1884,117 @@ if ($chatUserGender !== 'female') {
                 ], 400);
             }
         }
-    } else {
-        // It's a new chat, deduct points
-        if ($user->points >= 10) {
-            $user->points -= 10;
-            if (!$user->save()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Failed to update user points.',
-                ], 500);
-            }
-        } else {
-            // User doesn't have sufficient points to chat
+    }
+
+    // If there's no existing chat, create new entries for both directions
+    if (!$existingChat) {
+        $currentTime = now();
+
+        // Create first chat entry: user_id -> chat_user_id
+        $newChat1 = new Chats();
+        $newChat1->user_id = $user_id;
+        $newChat1->chat_user_id = $chat_user_id;
+        $newChat1->latest_message = $message;
+        $newChat1->latest_msg_time = $currentTime;
+        $newChat1->datetime = $currentTime;
+
+        // Create second chat entry: chat_user_id -> user_id
+        $newChat2 = new Chats();
+        $newChat2->user_id = $chat_user_id;
+        $newChat2->chat_user_id = $user_id;
+        $newChat2->latest_message = $message;
+        $newChat2->latest_msg_time = $currentTime;
+        $newChat2->datetime = $currentTime;
+
+        // Save both chat entries
+        if (!$newChat1->save() || !$newChat2->save()) {
             return response()->json([
                 'success' => false,
-                'message' => 'You don\'t have sufficient points to chat.',
-            ], 400);
+                'message' => 'Failed to save Chat entries.',
+            ], 500);
         }
+
+            // Add notification entry
+            $notification = new Notifications();
+            $notification->user_id = $chat_user_id;
+            $notification->notify_user_id = $user_id;
+            $notification->message = 'New message arrived';
+            $notification->save();
+
+        // Return success response with new chat data
+        return response()->json([
+            'success' => true,
+            'message' => 'Chat added successfully.',
+            'data' => [
+                'chat1' => [
+                    'id' => $newChat1->id,
+                    'user_id' => $newChat1->user_id,
+                    'chat_user_id' => $newChat1->chat_user_id,
+                    'name' => $chat_user->name, 
+                    'profile' => $chat_user->profile_verified == 1 ? asset('storage/app/public/users/' . $chat_user->profile) : '',
+                    'cover_image' => $chat_user->cover_img_verified == 1 ? asset('storage/app/public/users/' . $chat_user->cover_image) : '',
+                    'latest_message' => $newChat1->latest_message,
+                    'latest_msg_time' => Carbon::parse($newChat1->latest_msg_time)->format('Y-m-d H:i:s'),
+                    'msg_seen' => '0',
+                    'datetime' => Carbon::parse($newChat1->datetime)->format('Y-m-d H:i:s'),
+                    'updated_at' => Carbon::parse($newChat1->updated_at)->format('Y-m-d H:i:s'),
+                    'created_at' => Carbon::parse($newChat1->created_at)->format('Y-m-d H:i:s'),
+                ],
+                'chat2' => [
+                    'id' => $newChat2->id,
+                    'user_id' => $newChat2->user_id,
+                    'chat_user_id' => $newChat2->chat_user_id,
+                    'name' => $user->name,
+                    'profile' => $user->profile_verified == 1 ? asset('storage/app/public/users/' . $user->profile) : '',
+                    'cover_image' => $user->cover_img_verified == 1 ? asset('storage/app/public/users/' . $user->cover_image) : '',
+                    'latest_message' => $newChat2->latest_message,
+                    'latest_msg_time' => Carbon::parse($newChat2->latest_msg_time)->format('Y-m-d H:i:s'),
+                    'msg_seen' => '0',
+                    'datetime' => Carbon::parse($newChat2->datetime)->format('Y-m-d H:i:s'),
+                    'updated_at' => Carbon::parse($newChat2->updated_at)->format('Y-m-d H:i:s'),
+                    'created_at' => Carbon::parse($newChat2->created_at)->format('Y-m-d H:i:s'),
+                ],
+            ],
+        ], 201);
     }
-}
 
-   // If there's no existing chat, create new entries for both directions
-   if (!$existingChat) {
-    $currentTime = now();
-
-    // Create first chat entry: user_id -> chat_user_id
-    $newChat1 = new Chats();
-    $newChat1->user_id = $user_id;
-    $newChat1->chat_user_id = $chat_user_id;
-    $newChat1->latest_message = $message;
-    $newChat1->latest_msg_time = $currentTime;
-    $newChat1->datetime = $currentTime;
-
-    // Create second chat entry: chat_user_id -> user_id
-    $newChat2 = new Chats();
-    $newChat2->user_id = $chat_user_id;
-    $newChat2->chat_user_id = $user_id;
-    $newChat2->latest_message = $message;
-    $newChat2->latest_msg_time = $currentTime;
-    $newChat2->datetime = $currentTime;
-
-    // Save both chat entries
-    if (!$newChat1->save() || !$newChat2->save()) {
+    // If an existing chat exists, update it
+    $existingChat->latest_message = $message;
+    $existingChat->latest_msg_time = now();
+    $existingChat->datetime = now();
+    if (!$existingChat->save()) {
         return response()->json([
             'success' => false,
-            'message' => 'Failed to save Chat entries.',
+            'message' => 'Failed to update Chat.',
         ], 500);
     }
-
-    // Return success response with new chat data
+    // Add notification entry for existing chat
+    $notification = new Notifications();
+    $notification->user_id = $chat_user_id;
+    $notification->notify_user_id = $user_id;
+    $notification->message = 'New message arrived';
+    $notification->save();
+    
+    // Return success response with updated chat data
     return response()->json([
         'success' => true,
-        'message' => 'Chat added successfully.',
+        'message' => 'Chat updated successfully.',
         'data' => [
-            'chat1' => [
-                'id' => $newChat1->id,
-                'user_id' => $newChat1->user_id,
-                'chat_user_id' => $newChat1->chat_user_id,
-                'name' => $chat_user->name, 
-                'profile' => $chat_user->profile_verified == 1 ? asset('storage/app/public/users/' . $chat_user->profile) : '',
-                'cover_image' => $chat_user->cover_img_verified == 1 ? asset('storage/app/public/users/' . $chat_user->cover_image) : '',
-                'latest_message' => $newChat1->latest_message,
-                'latest_msg_time' => Carbon::parse($newChat1->latest_msg_time)->format('Y-m-d H:i:s'),
-                'msg_seen' => '0',
-                'datetime' => Carbon::parse($newChat1->datetime)->format('Y-m-d H:i:s'),
-                'updated_at' => Carbon::parse($newChat1->updated_at)->format('Y-m-d H:i:s'),
-                'created_at' => Carbon::parse($newChat1->created_at)->format('Y-m-d H:i:s'),
-            ],
-            'chat2' => [
-                'id' => $newChat2->id,
-                'user_id' => $newChat2->user_id,
-                'chat_user_id' => $newChat2->chat_user_id,
-                'name' => $user->name,
-                'profile' => $user->profile_verified == 1 ? asset('storage/app/public/users/' . $user->profile) : '',
-                'cover_image' => $user->cover_img_verified == 1 ? asset('storage/app/public/users/' . $user->cover_image) : '',
-                'latest_message' => $newChat2->latest_message,
-                'latest_msg_time' => Carbon::parse($newChat2->latest_msg_time)->format('Y-m-d H:i:s'),
-                'msg_seen' => '0',
-                'datetime' => Carbon::parse($newChat2->datetime)->format('Y-m-d H:i:s'),
-                'updated_at' => Carbon::parse($newChat2->updated_at)->format('Y-m-d H:i:s'),
-                'created_at' => Carbon::parse($newChat2->created_at)->format('Y-m-d H:i:s'),
-            ],
+            'id' => $existingChat->id,
+            'user_id' => $existingChat->user_id,
+            'chat_user_id' => $existingChat->chat_user_id,
+            'name' => $chat_user->name,
+            'profile' => $chat_user->profile_verified == 1 ? asset('storage/app/public/users/' . $chat_user->profile) : '',
+            'cover_image' => $chat_user->cover_img_verified == 1 ? asset('storage/app/public/users/' . $chat_user->cover_image) : '',
+            'latest_message' => $existingChat->latest_message,
+            'latest_msg_time' => Carbon::parse($existingChat->latest_msg_time)->format('Y-m-d H:i:s'),
+            'msg_seen' => '0',
+            'datetime' => Carbon::parse($existingChat->datetime)->format('Y-m-d H:i:s'),
+            'updated_at' => Carbon::parse($existingChat->updated_at)->format('Y-m-d H:i:s'),
+            'created_at' => Carbon::parse($existingChat->created_at)->format('Y-m-d H:i:s'),
         ],
-    ], 201);
-}
-
-// If an existing chat exists, update it
-$existingChat->latest_message = $message;
-$existingChat->latest_msg_time = now();
-$existingChat->datetime = now();
-if (!$existingChat->save()) {
-    return response()->json([
-        'success' => false,
-        'message' => 'Failed to update Chat.',
-    ], 500);
-}
-
-// Return success response with updated chat data
-return response()->json([
-    'success' => true,
-    'message' => 'Chat updated successfully.',
-    'data' => [
-        'id' => $existingChat->id,
-        'user_id' => $existingChat->user_id,
-        'chat_user_id' => $existingChat->chat_user_id,
-        'name' => $chat_user->name,
-        'profile' => $chat_user->profile_verified == 1 ? asset('storage/app/public/users/' . $chat_user->profile) : '',
-        'cover_image' => $chat_user->cover_img_verified == 1 ? asset('storage/app/public/users/' . $chat_user->cover_image) : '',
-        'latest_message' => $existingChat->latest_message,
-        'latest_msg_time' => Carbon::parse($existingChat->latest_msg_time)->format('Y-m-d H:i:s'),
-        'msg_seen' => '0',
-        'datetime' => Carbon::parse($existingChat->datetime)->format('Y-m-d H:i:s'),
-        'updated_at' => Carbon::parse($existingChat->updated_at)->format('Y-m-d H:i:s'),
-        'created_at' => Carbon::parse($existingChat->created_at)->format('Y-m-d H:i:s'),
-    ],
-], 200);
-}
+    ], 200);
+    }
 
 public function chat_list(Request $request)
 {
