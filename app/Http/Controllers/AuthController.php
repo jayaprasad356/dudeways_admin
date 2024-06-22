@@ -891,17 +891,17 @@ public function add_trip(Request $request)
     }
 
 
-    // Create a new user instance
-    $trip = new trips();
-    $trip->user_id = $user_id; 
-    $trip->trip_type = $trip_type;
-    $trip->from_date = $from_date;
-    $trip->to_date = $to_date;
-    $trip->trip_title = $trip_title;
-    $trip->trip_description = $trip_description;
-    $trip->location = $location;
-    $trip->trip_datetime = now(); 
-    $trip->save();
+   // Create a new trip instance
+   $trip = new trips();
+   $trip->user_id = $user_id;
+   $trip->trip_type = $trip_type;
+   $trip->from_date = Carbon::parse($from_date)->format('Y-m-d');
+   $trip->to_date = Carbon::parse($to_date)->format('Y-m-d');
+   $trip->trip_title = $trip_title;
+   $trip->trip_description = $trip_description;
+   $trip->location = $location;
+   $trip->trip_datetime = now();
+   $trip->save();
 
         // Image URL
         $imageUrl = asset('storage/app/public/trips/' . $trip->trip_image);
@@ -1047,7 +1047,7 @@ public function update_trip(Request $request)
                 'message' => 'From Date is empty.',
             ], 400);
         }
-        $trip->from_date = $from_date;
+        $trip->from_date = Carbon::parse($from_date)->format('Y-m-d');
     }
     if ($to_date !== null) {
         if (empty($to_date)) {
@@ -1056,7 +1056,7 @@ public function update_trip(Request $request)
                 'message' => 'To Date is empty.',
             ], 400);
         }
-        $trip->to_date = $to_date;
+        $trip->to_date = Carbon::parse($to_date)->format('Y-m-d');
     }
     if ($trip_title !== null) {
         if (empty($trip_title)) {
