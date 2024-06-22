@@ -842,12 +842,26 @@ public function add_trip(Request $request)
             'message' => 'From Date is empty.',
         ], 400);
     }
+             // Check if the date is in a valid format (YYYY-MM-DD)
+             if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $from_date)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid date format. Expected format: YYYY-MM-DD.',
+                ], 400);
+            }   
     if (empty($to_date)) {
         return response()->json([
             'success' => false,
             'message' => 'To Date is empty.',
         ], 400);
     }
+                // Check if the date is in a valid format (YYYY-MM-DD)
+                if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $to_date)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Invalid date format. Expected format: YYYY-MM-DD.',
+                    ], 400);
+                }
     if (empty($trip_title)) {
         return response()->json([
             'success' => false,
