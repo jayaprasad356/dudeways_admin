@@ -1827,10 +1827,9 @@ public function delete_trip(Request $request)
     }
 
     // Retrieve the gender of the chat user
-    $chatUserGender = $chat_user->gender; // Assuming the gender field exists in the Users model
-
+    $userGender = $user->gender; // Assuming the gender field exists in the Users model
     // Check if chat_user's gender is not female
-    if ($chatUserGender !== 'female') {
+    if ($userGender !== 'female') {
         // If there's an existing chat, check the last update time
         if ($existingChat) {
             $lastUpdateTime = Carbon::parse($existingChat->datetime);
@@ -1851,6 +1850,7 @@ public function delete_trip(Request $request)
                     return response()->json([
                         'success' => false,
                         'message' => 'You don\'t have sufficient points to chat.',
+                        'chat_status' => '0',
                     ], 400);
                 }
             }
@@ -1869,6 +1869,7 @@ public function delete_trip(Request $request)
                 return response()->json([
                     'success' => false,
                     'message' => 'You don\'t have sufficient points to chat.',
+                    'chat_status' => '0',
                 ], 400);
             }
         }
