@@ -1243,6 +1243,14 @@ public function trip_list(Request $request)
 
         $fromDate = $request->input('date');
 
+                  // Check if the date is in a valid format (YYYY-MM-DD)
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $fromDate)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid date format. Expected format: YYYY-MM-DD.',
+        ], 400);
+    }
+
         // Fetch trips with the specified from_date and trip_status 1
         $trips = Trips::where('trip_status', 1)
             ->whereDate('from_date', $fromDate)
