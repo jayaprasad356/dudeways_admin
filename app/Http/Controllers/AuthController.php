@@ -1913,7 +1913,8 @@ public function delete_trip(Request $request)
         return response()->json([
             'success' => true,
             'message' => 'Chat added successfully.',
-            'data' => [
+            'chat_status' => '1',
+            'data' => [[
                 'chat1' => [
                     'id' => $newChat1->id,
                     'user_id' => $newChat1->user_id,
@@ -1941,8 +1942,8 @@ public function delete_trip(Request $request)
                     'datetime' => Carbon::parse($newChat2->datetime)->format('Y-m-d H:i:s'),
                     'updated_at' => Carbon::parse($newChat2->updated_at)->format('Y-m-d H:i:s'),
                     'created_at' => Carbon::parse($newChat2->created_at)->format('Y-m-d H:i:s'),
-                ],
             ],
+            ]],
         ], 201);
     }
 
@@ -1967,7 +1968,8 @@ public function delete_trip(Request $request)
     return response()->json([
         'success' => true,
         'message' => 'Chat updated successfully.',
-        'data' => [
+        'chat_status' => '1',
+        'data'=> [[
             'id' => $existingChat->id,
             'user_id' => $existingChat->user_id,
             'chat_user_id' => $existingChat->chat_user_id,
@@ -1980,7 +1982,7 @@ public function delete_trip(Request $request)
             'datetime' => Carbon::parse($existingChat->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($existingChat->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($existingChat->created_at)->format('Y-m-d H:i:s'),
-        ],
+        ]],
     ], 200);
     }
 
