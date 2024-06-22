@@ -2197,12 +2197,12 @@ public function add_friends(Request $request)
 
             return response()->json([
                 'success' => true,
-                'message' => 'Friend deleted successfully.',
+                'message' => 'Friend Removed successfully.',
             ], 200);
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'Friend relationship not found.',
+                'message' => 'You Already Removed as Friend.',
             ], 404);
         }
     } else if ($friend == 1) {
