@@ -1191,8 +1191,7 @@ public function trip_list(Request $request)
         $trips = Trips::where('trip_status', 1)
             ->whereDate('from_date', '>=', $currentDate)
             ->orderBy('trip_datetime', 'desc')
-            ->limit($limit)
-            ->get();
+            ->paginate($limit);
 
         foreach ($trips as $trip) {
             $tripUser = Users::find($trip->user_id);
@@ -1204,7 +1203,7 @@ public function trip_list(Request $request)
 
             // Calculate the distance for each trip
             $distance = $this->calculateDistance($userLatitude, $userLongtitude, (float)$tripUser->latitude, (float)$tripUser->longtitude);
-            
+
             $tripDetails[] = [
                 'trip' => $trip,
                 'user' => $tripUser,
@@ -1212,28 +1211,110 @@ public function trip_list(Request $request)
             ];
         }
     } elseif ($type == 'nearby') {
-        // Fetch trips with trip_status 1
+        // Fetch trips with trip_status 1 and paginate the results
         $trips = Trips::where('trip_status', 1)
             ->whereDate('from_date', '>=', $currentDate)
-            ->get();
-
+            ->paginate($limit);  // Use paginate instead of get()
+    
+        // Array to hold trips with calculated distances
+        $tripsWithDistance = [];
+    
         foreach ($trips as $trip) {
             $tripUser = Users::find($trip->user_id);
-
+    
             // Check if user exists
             if (!$tripUser) {
                 continue; // Skip this trip if user does not exist
             }
-
+    
             // Calculate the distance between the users using their latitude and longitude
             $distance = $this->calculateDistance($userLatitude, $userLongtitude, (float)$tripUser->latitude, (float)$tripUser->longtitude);
-
-            $tripDetails[] = [
+    
+            // Store trip details along with distance
+            $tripsWithDistance[] = [
                 'trip' => $trip,
                 'user' => $tripUser,
                 'distance' => $distance
             ];
         }
+    
+        // Sort trips by distance (ascending order)
+        usort($tripsWithDistance, function ($a, $b) {
+            return $a['distance'] <=> $b['distance'];
+        });
+    
+        // Prepare formatted trip details
+        $tripDetailsFormatted = [];
+    
+        foreach ($tripsWithDistance as $detail) {
+            $trip = $detail['trip'];
+            $user = $detail['user'];
+            $distance = $detail['distance'];
+    
+            $imageUrl = $user->profile_verified == 1 ? asset('storage/app/public/users/' . $user->profile) : '';
+            $coverImageUrl = $user->cover_img_verified == 1 ? asset('storage/app/public/users/' . $user->cover_img) : '';
+    
+            // Check if the user is a friend
+            $isFriend = Friends::where('user_id', $userId)
+                ->where('friend_user_id', $user->id)
+                ->exists();
+    
+            $friendStatus = $isFriend ? '1' : '0';
+    
+            // Calculate time difference in hours
+            $tripTime = Carbon::parse($trip->trip_datetime);
+            $currentTime = Carbon::now();
+            $hoursDifference = $tripTime->diffInHours($currentTime);
+    
+            // Determine the time display string
+            if ($hoursDifference == 0) {
+                $timeDifference = 'now';
+            } elseif ($hoursDifference < 24) {
+                $timeDifference = $hoursDifference . 'h';
+            } else {
+                $daysDifference = floor($hoursDifference / 24);
+                $timeDifference = $daysDifference . 'd';
+            }
+    
+            $tripImageUrl = asset('storage/app/public/trips/' . $trip->trip_image);
+    
+            $tripDetailsFormatted[] = [
+                'id' => $trip->id,
+                'user_id' => $trip->user_id,
+                'name' => $user->name,
+                'unique_name' => $user->unique_name,
+                'verified' => $user->verified,
+                'profile' => $imageUrl,
+                'cover_image' => $coverImageUrl,
+                'trip_type' => $trip->trip_type,
+                'from_date' => date('F j, Y', strtotime($trip->from_date)),
+                'to_date' => date('F j, Y', strtotime($trip->to_date)),
+                'time' => $timeDifference,
+                'friend' => $friendStatus,
+                'trip_title' => $trip->trip_title,
+                'trip_description' => $trip->trip_description,
+                'location' => $trip->location,
+                'trip_status' => $trip->trip_status,
+                'trip_image' => $tripImageUrl,
+                'trip_datetime' => Carbon::parse($trip->trip_datetime)->format('Y-m-d H:i:s'),
+                'updated_at' => Carbon::parse($trip->updated_at)->format('Y-m-d H:i:s'),
+                'created_at' => Carbon::parse($trip->created_at)->format('Y-m-d H:i:s'),
+                'distance' => number_format($distance, 2) . ' km'
+            ];
+        }
+    
+        return response()->json([
+            'success' => true,
+            'message' => 'Trip details retrieved successfully.',
+            'data' => $tripDetailsFormatted,
+            'pagination' => [
+                'current_page' => $trips->currentPage(),
+                'per_page' => $trips->perPage(),
+                'total' => $trips->total(),
+                'last_page' => $trips->lastPage(),
+            ]
+        ], 200);
+    
     } elseif ($type == 'date') {
         // Check if the date parameter is provided
         if (!$request->has('date')) {
@@ -1245,20 +1326,19 @@ public function trip_list(Request $request)
 
         $fromDate = $request->input('date');
 
-                  // Check if the date is in a valid format (YYYY-MM-DD)
-    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $fromDate)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Invalid date format. Expected format: YYYY-MM-DD.',
-        ], 400);
-    }
+        // Check if the date is in a valid format (YYYY-MM-DD)
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $fromDate)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid date format. Expected format: YYYY-MM-DD.',
+            ], 400);
+        }
 
         // Fetch trips with the specified from_date and trip_status 1
         $trips = Trips::where('trip_status', 1)
             ->whereDate('from_date', $fromDate)
             ->orderBy('created_at', 'desc')
-            ->limit($limit)
-            ->get();
+            ->paginate($limit);
 
         foreach ($trips as $trip) {
             $tripUser = Users::find($trip->user_id);
@@ -1270,7 +1350,7 @@ public function trip_list(Request $request)
 
             // Calculate the distance for each trip
             $distance = $this->calculateDistance($userLatitude, $userLongtitude, (float)$tripUser->latitude, (float)$tripUser->longtitude);
-            
+
             $tripDetails[] = [
                 'trip' => $trip,
                 'user' => $tripUser,
@@ -1291,11 +1371,7 @@ public function trip_list(Request $request)
         ], 404);
     }
 
-
-
-    // Limit the number of trips
-    $tripDetails = array_slice($tripDetails, 0, $limit);
-
+    // Format trip details for response
     $tripDetailsFormatted = [];
 
     foreach ($tripDetails as $detail) {
@@ -1304,7 +1380,7 @@ public function trip_list(Request $request)
         $distance = $detail['distance'];
 
         $imageUrl = $user->profile_verified == 1 ? asset('storage/app/public/users/' . $user->profile) : '';
-        $coverimageUrl = $user->cover_img_verified == 1 ? asset('storage/app/public/users/' . $user->cover_img) : '';
+        $coverImageUrl = $user->cover_img_verified == 1 ? asset('storage/app/public/users/' . $user->cover_img) : '';
 
         // Check if the user is a friend
         $isFriend = Friends::where('user_id', $userId)
@@ -1312,7 +1388,6 @@ public function trip_list(Request $request)
             ->exists();
 
         $friendStatus = $isFriend ? '1' : '0';
-        
 
         // Calculate time difference in hours
         $tripTime = Carbon::parse($trip->trip_datetime);
@@ -1329,7 +1404,7 @@ public function trip_list(Request $request)
             $timeDifference = $daysDifference . 'd';
         }
 
-        $tripimageUrl = asset('storage/app/public/trips/' . $trip->trip_image);
+        $tripImageUrl = asset('storage/app/public/trips/' . $trip->trip_image);
 
         $tripDetailsFormatted[] = [
             'id' => $trip->id,
@@ -1338,7 +1413,7 @@ public function trip_list(Request $request)
             'unique_name' => $user->unique_name,
             'verified' => $user->verified,
             'profile' => $imageUrl,
-            'cover_image' => $coverimageUrl,
+            'cover_image' => $coverImageUrl,
             'trip_type' => $trip->trip_type,
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
             'to_date' => date('F j, Y', strtotime($trip->to_date)),
@@ -1348,11 +1423,11 @@ public function trip_list(Request $request)
             'trip_description' => $trip->trip_description,
             'location' => $trip->location,
             'trip_status' => $trip->trip_status,
-            'trip_image' => $tripimageUrl,
+            'trip_image' => $tripImageUrl,
             'trip_datetime' => Carbon::parse($trip->trip_datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($trip->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($trip->created_at)->format('Y-m-d H:i:s'),
-            'distance' => $distance !== null ? number_format($distance, 2) . ' km' : null
+            'distance' => number_format($distance, 2) . ' km'
         ];
     }
 
@@ -1360,8 +1435,16 @@ public function trip_list(Request $request)
         'success' => true,
         'message' => 'Trip details retrieved successfully.',
         'data' => $tripDetailsFormatted,
+        'pagination' => [
+            'current_page' => $trips->currentPage(),
+            'per_page' => $trips->perPage(),
+            'total' => $trips->total(),
+            'last_page' => $trips->lastPage(),
+        ]
     ], 200);
 }
+
+
 
 private function calculateDistance($latitudeFrom, $longtitudeFrom, $latitudeTo, $longtitudeTo, $earthRadius = 6371)
 {
@@ -3083,7 +3166,7 @@ public function profile_view(Request $request)
         if (!$user) {
             return response()->json([
                 'success' => false,
-                'message' => 'Profile user not found.',
+                'message' => 'profile_user_id not found.',
             ], 404);
         }
 
