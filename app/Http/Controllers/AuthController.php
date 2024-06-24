@@ -1291,17 +1291,7 @@ public function trip_list(Request $request)
         ], 404);
     }
 
-    // Sort trips: show authenticated user's trips first, then sort others by distance
-    usort($tripDetails, function ($a, $b) use ($userId) {
-        if ($a['user']->id == $userId && $b['user']->id != $userId) {
-            return -1; // $a (authenticated user's trip) should come before $b (other user's trip)
-        } elseif ($a['user']->id != $userId && $b['user']->id == $userId) {
-            return 1; // $b (authenticated user's trip) should come before $a (other user's trip)
-        } else {
-            // Sort by distance for trips from other users
-            return $a['distance'] <=> $b['distance'];
-        }
-    });
+
 
     // Limit the number of trips
     $tripDetails = array_slice($tripDetails, 0, $limit);
