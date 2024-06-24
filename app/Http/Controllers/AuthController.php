@@ -435,6 +435,68 @@ public function userdetails(Request $request)
     ], 200);
 }
 
+public function other_userdetails(Request $request)
+{
+    $user_id = $request->input('user_id');
+
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 400);
+    }
+
+    // Fetch the user details from the database based on the provided user_id
+    $user = Users::find($user_id);
+
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User not found.',
+        ], 404);
+    }
+
+    // Image URLs
+
+    $imageUrl = $user->profile_verified == 1 ? asset('storage/app/public/users/' . $user->profile) : '';
+    $coverImageUrl = $user->cover_img_verified == 1 ? asset('storage/app/public/users/' . $user->cover_img) : '';
+    
+
+    return response()->json([
+        'success' => true,
+        'message' => 'User details retrieved successfully.',
+        'data' => [
+            'id' => $user->id,
+            'name' => $user->name,
+            'unique_name' => $user->unique_name,
+            'email' => $user->email,
+            'mobile' => $user->mobile,
+            'age' => $user->age,
+            'gender' => $user->gender,
+            'state' => $user->state,
+            'city' => $user->city,
+            'profession' => $user->profession,
+            'refer_code' => $user->refer_code,
+            'referred_by' => $user->referred_by,
+            'profile' => $imageUrl,
+            'cover_img' => $coverImageUrl,
+            'points' => $user->points,
+            'verified' => $user->verified,
+            'online_status' => $user->online_status,
+            'introduction' => $user->introduction,
+            'message_notify' => $user->message_notify,
+            'add_friend_notify' => $user->add_friend_notify,
+            'view_notify' => $user->view_notify,
+            'profile_verified' => $user->profile_verified,
+            'cover_img_verified' => $user->cover_img_verified,
+            'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
+            'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
+            'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
+            'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
+        ],
+    ], 200);
+}
+
 public function update_image(Request $request)
 {
     $user_id = $request->input('user_id');

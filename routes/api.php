@@ -8,6 +8,7 @@ Route::post('check_mobile', [AuthController::class, 'check_mobile']);
 Route::post('check_email', [AuthController::class, 'check_email']);
 Route::post('register', [AuthController::class, 'register']);
 Route::post('userdetails', [AuthController::class, 'userdetails']);
+Route::post('other_userdetails', [AuthController::class, 'other_userdetails']);
 Route::post('update_image', [AuthController::class, 'update_image']);
 Route::post('update_cover_img', [AuthController::class, 'update_cover_img']);
 Route::post('update_users', [AuthController::class, 'update_users']);
