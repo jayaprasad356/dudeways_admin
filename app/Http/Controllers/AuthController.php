@@ -3049,6 +3049,66 @@ public function settings_list(Request $request)
 }
 
 
+public function profile_view(Request $request)
+{
+    $user_id = $request->input('user_id'); 
+    $profile_user_id = $request->input('profile_user_id'); // Renamed the variable to avoid conflict
+
+    // Validate user_id and feedbackContent
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 400);
+    }
+
+    if (empty($profile_user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'profile_user_id is empty.',
+        ], 400);
+    }
+
+    // Check if user exists
+    $user = Users::find($user_id);
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user not found.',
+        ], 404);
+    }
+
+        // Check if user exists
+        $user = Users::find($profile_user_id);
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Profile user not found.',
+            ], 404);
+        }
+
+        // Add notification entry
+        $notification = new Notifications();
+        $notification->user_id = $profile_user_id;
+        $notification->notify_user_id = $user_id;
+        $notification->message = 'Profile Viewed Successfully';
+        $notification->save();
+
+    // Save the feedback
+    if (!$notification->save()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to save notification.',
+        ], 500);
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Notification added successfully.',
+    ], 201);
+}
+
+
 }
 
 
