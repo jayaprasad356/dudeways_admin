@@ -1317,15 +1317,12 @@ public function trip_list(Request $request)
         $coverimageUrl = $user->cover_img_verified == 1 ? asset('storage/app/public/users/' . $user->cover_img) : '';
 
         // Check if the user is a friend
-        $isFriend = Friends::where(function ($query) use ($userId, $user) {
-            $query->where('user_id', $userId)
-                ->where('friend_user_id', $user->id);
-        })->orWhere(function ($query) use ($userId, $user) {
-            $query->where('user_id', $user->id)
-                ->where('friend_user_id', $userId);
-        })->exists();
+        $isFriend = Friends::where('user_id', $userId)
+            ->where('friend_user_id', $user->id)
+            ->exists();
 
         $friendStatus = $isFriend ? '1' : '0';
+        
 
         // Calculate time difference in hours
         $tripTime = Carbon::parse($trip->trip_datetime);
