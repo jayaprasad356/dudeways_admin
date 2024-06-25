@@ -2461,7 +2461,7 @@ public function friends_list(Request $request)
 
           // Check if the user is a friend
           $isFriend = Friends::where('user_id', $user_id)
-          ->where('friend_user_id', $user->id)
+          ->where('friend_user_id', $friendUser->id)
           ->exists();
 
       $friendStatus = $isFriend ? '1' : '0';  // Check if the user is a friend
