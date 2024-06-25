@@ -2152,6 +2152,7 @@ public function chat_list(Request $request)
         $imageUrl = $chat_user->profile_verified == 1 ? asset('storage/app/public/users/' . $chat_user->profile) : '';
         $coverImageUrl = $chat_user->cover_img_verified == 1 ? asset('storage/app/public/users/' . $chat_user->cover_img) : '';
 
+              
         // Determine the format of last_seen
         $lastSeen = Carbon::parse($chat->latest_msg_time);
         $now = Carbon::now();
@@ -2172,6 +2173,7 @@ public function chat_list(Request $request)
         } else {
             $lastSeenFormatted = $lastSeen->format('M jS, Y'); // Older than current year, show month, day, and year
         }
+         
 
         return [
             'id' => $chat->id,
@@ -2457,6 +2459,14 @@ public function friends_list(Request $request)
             $lastSeenFormatted = $lastSeen->format('M jS, Y'); // Older than current year, show month, day, and year
         }
 
+          // Check if the user is a friend
+          $isFriend = Friends::where('user_id', $user_id)
+          ->where('friend_user_id', $user->id)
+          ->exists();
+
+      $friendStatus = $isFriend ? '1' : '0';  // Check if the user is a friend
+      
+
         return [
             'id' => $friend->id,
             'user_id' => $friend->user_id,
@@ -2466,6 +2476,7 @@ public function friends_list(Request $request)
             'gender' => $friendUser->gender,
             'age' => $friendUser->age,
             'online_status' => $friendUser->online_status,
+            'friend' => $friendStatus,
             'profile' => $imageUrl,
             'cover_img' => $coverImageUrl,
             'last_seen' => $lastSeenFormatted,
