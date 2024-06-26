@@ -2176,7 +2176,7 @@ public function chat_list(Request $request)
 
            // Check if the user is a friend
            $isFriend = Friends::where('user_id', $user_id)
-           ->where('friend_user_id', $chat_user->chat_user_id) // Check against notify_user_id
+           ->where('friend_user_id', $chat->chat_user_id) // Check against notify_user_id
            ->exists();
 
        $friendStatus = $isFriend ? '1' : '0';  // Check if the user is a friend
