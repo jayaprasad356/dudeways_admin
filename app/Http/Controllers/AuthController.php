@@ -2141,7 +2141,7 @@ public function chat_list(Request $request)
         ], 404);
     }
 
-    $chatDetails = $chats->map(function ($chat) {
+    $chatDetails = $chats->map(function ($chat) use ($user_id) {
         $chat_user = Users::find($chat->chat_user_id); // Fetch the chat_user details
 
         // Check if chat_user exists
@@ -2173,7 +2173,13 @@ public function chat_list(Request $request)
         } else {
             $lastSeenFormatted = $lastSeen->format('M jS, Y'); // Older than current year, show month, day, and year
         }
-         
+
+           // Check if the user is a friend
+           $isFriend = Friends::where('user_id', $user_id)
+           ->where('friend_user_id', $chat_user->chat_user_id) // Check against notify_user_id
+           ->exists();
+
+       $friendStatus = $isFriend ? '1' : '0';  // Check if the user is a friend
 
         return [
             'id' => $chat->id,
@@ -2183,6 +2189,7 @@ public function chat_list(Request $request)
             'profile' => $imageUrl, // Display chat_user profile
             'cover_img' => $coverImageUrl, // Display chat_user profile
             'online_status' => $chat_user->online_status, // Display chat_user online status
+            'friend' => $friendStatus,
             'latest_message' => $chat->latest_message,
             'latest_msg_time' => $lastSeenFormatted,
             'msg_seen' => $chat->msg_seen,
@@ -2606,7 +2613,7 @@ public function notification_list(Request $request)
     }
 
     // Prepare notification details
-    $notificationDetails = $notifications->map(function ($notification) {
+    $notificationDetails = $notifications->map(function ($notification) use ($user_id) {
         $user = Users::find($notification->user_id);
         $notify_user = Users::find($notification->notify_user_id);
 
@@ -2624,7 +2631,14 @@ public function notification_list(Request $request)
          } else {
              $timeDifference = $hoursDifference . 'h';
          }
- 
+        // Check if the user is a friend
+        $isFriend = Friends::where('user_id', $user_id)
+            ->where('friend_user_id', $notification->notify_user_id) // Check against notify_user_id
+            ->exists();
+
+        $friendStatus = $isFriend ? '1' : '0';  // Check if the user is a friend
+
+         
          return [
              'id' => $notification->id,
              'user_id' => $notification->user_id,
@@ -2633,6 +2647,7 @@ public function notification_list(Request $request)
             'profile' => $imageUrl,
             'cover_img' => $coverImageUrl,
              'message' => $notification->message,
+             'friend' => $friendStatus,
              'datetime' => $notificationTime->format('Y-m-d H:i:s'),
              'time' => $timeDifference,  // Add this line to include the time difference in hours
              'updated_at' => Carbon::parse($notification->updated_at)->format('Y-m-d H:i:s'),
