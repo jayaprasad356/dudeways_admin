@@ -19,11 +19,11 @@ $data = [
     'trip_description' => 'Enjoying summer vacation',
     'user_id' => 1, // Replace with the actual user ID
     'trip_datetime' => now(),
-    'trip_status' => 0,
+    'trip_status' => 1,
     'trip_image' => 'SnXxFLBKoQslEfdyXjAzVvfoHHtT61C6bcJNnXhb.jpg',
 ];
 
-$numberOfInserts = 41;
+$numberOfInserts = 50;
 
 for ($i = 0; $i < $numberOfInserts; $i++) {
     Trips::create($data);
