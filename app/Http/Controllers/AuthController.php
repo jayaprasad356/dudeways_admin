@@ -1237,7 +1237,24 @@ public function trip_list(Request $request)
 
     $type = $request->input('type');
 
-  
+    if (!$request->has('offset')) {
+        return response()->json([
+            'success' => false,
+            'message' => 'offset is empty.',
+        ], 400);
+    }
+
+    $offset = $request->input('offset');
+
+    if (!$request->has('limit')) {
+        return response()->json([
+            'success' => false,
+            'message' => 'limit is empty.',
+        ], 400);
+    }
+
+    $limit = $request->input('limit');
+
 
     // Fetch the user's latitude and longitude
     $userLatitude = (float)$userExists->latitude;
@@ -1251,8 +1268,11 @@ public function trip_list(Request $request)
     if ($type == 'latest') {
         // Fetch the latest trips with trip_status 1
         $trips = Trips::where('trip_status', 1)
-            ->whereDate('from_date', '>=', $currentDate)
-            ->orderBy('trip_datetime', 'desc');
+        ->whereDate('from_date', '>=', $currentDate)
+        ->orderBy('trip_datetime', 'desc')
+        ->skip($offset)
+        ->take($limit)
+        ->get();
 
         foreach ($trips as $trip) {
             $tripUser = Users::find($trip->user_id);
