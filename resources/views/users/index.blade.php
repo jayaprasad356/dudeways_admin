@@ -180,16 +180,50 @@
 </div>
 
 @endsection
+
 @section('js')
     <script src="{{ asset('plugins/sweetalert2/sweetalert2.min.js') }}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
     <script>
         $(document).ready(function () {
 
+            // Function to handle filtering and pagination
+            function applyFiltersAndPagination(pageUrl) {
+                var profileVerified = $('#profile-filter').val();
+                var coverVerified = $('#cover-filter').val();
+
+                // Check if filters are applied
+                if (profileVerified !== '' || coverVerified !== '') {
+                    // Append filter parameters to the page URL
+                    var separator = pageUrl.includes('?') ? '&' : '?';
+                    pageUrl += separator;
+
+                    if (profileVerified !== '') {
+                        pageUrl += 'profile_verified=' + profileVerified + '&';
+                    }
+                    if (coverVerified !== '') {
+                        pageUrl += 'cover_img_verified=' + coverVerified + '&';
+                    }
+
+                    // Remove trailing '&' if it exists
+                    pageUrl = pageUrl.replace(/&$/, '');
+                }
+
+                // Navigate to the constructed URL
+                window.location.href = pageUrl;
+            }
+
+            // Handle filter change
             $('#profile-filter, #cover-filter').change(function () {
-                $('#user-filter-form').submit();
+                applyFiltersAndPagination('{{ request()->fullUrl() }}');
             });
 
+            // Handle pagination link click
+            $('.pagination a').click(function (e) {
+                e.preventDefault();
+                var pageUrl = $(this).attr('href');
+                applyFiltersAndPagination(pageUrl);
+            });
 
             $(document).on('click', '.btn-delete', function () {
                 $this = $(this);
@@ -218,81 +252,102 @@
                         })
                     }
                 })
-            })
-        })
-    </script>
-
-<script>
-    $(document).ready(function () {
-        $('.table th').click(function () {
-            var table = $(this).parents('table').eq(0);
-            var index = $(this).index();
-            var rows = table.find('tr:gt(0)').toArray().sort(comparer(index));
-            this.asc = !this.asc;
-            if (!this.asc) {
-                rows = rows.reverse();
-            }
-            for (var i = 0; i < rows.length; i++) {
-                table.append(rows[i]);
-            }
-            // Update arrows after sorting
-            updateArrows(table, index, this.asc);
-        });
-
-        function comparer(index) {
-            return function (a, b) {
-                var valA = getCellValue(a, index),
-                    valB = getCellValue(b, index);
-                return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.localeCompare(valB);
-            };
-        }
-
-        function getCellValue(row, index) {
-            return $(row).children('td').eq(index).text();
-        }
-
-        function updateArrows(table, index, asc) {
-            table.find('.arrow').remove();
-            var arrow = asc ? '<i class="fas fa-arrow-up arrow"></i>' : '<i class="fas fa-arrow-down arrow"></i>';
-            table.find('th').eq(index).append(arrow);
-        }
-    });
-</script>
-
-
-<script>
-    $(document).ready(function () {
-        // Function to perform filtering
-        function filterUsers(searchValue) {
-            var rows = $('.table tbody tr');
-
-            // Loop through each row and hide/show based on search value
-            rows.each(function () {
-                var name = $(this).find('td:eq(4)').text().toLowerCase(); // Name column
-                var uniqueName = $(this).find('td:eq(5)').text().toLowerCase(); // Unique Name column
-                var email = $(this).find('td:eq(6)').text().toLowerCase(); // Email column
-
-                // Check if search value exists in any of the columns
-                if (name.includes(searchValue.toLowerCase()) || 
-                    uniqueName.includes(searchValue.toLowerCase()) || 
-                    email.includes(searchValue.toLowerCase())) {
-                    $(this).show();
-                } else {
-                    $(this).hide();
-                }
             });
-        }
 
-        // Perform filtering when input value changes
-        $('#user-search').on('input', function () {
-            var searchValue = $(this).val().trim();
-            filterUsers(searchValue);
+            $('.table th').click(function () {
+                var table = $(this).parents('table').eq(0);
+                var index = $(this).index();
+                var rows = table.find('tr:gt(0)').toArray().sort(comparer(index));
+                this.asc = !this.asc;
+                if (!this.asc) {
+                    rows = rows.reverse();
+                }
+                for (var i = 0; i < rows.length; i++) {
+                    table.append(rows[i]);
+                }
+                // Update arrows after sorting
+                updateArrows(table, index, this.asc);
+            });
+
+            function comparer(index) {
+                return function (a, b) {
+                    var valA = getCellValue(a, index),
+                        valB = getCellValue(b, index);
+                    return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.localeCompare(valB);
+                };
+            }
+
+            function getCellValue(row, index) {
+                return $(row).children('td').eq(index).text();
+            }
+
+            function updateArrows(table, index, asc) {
+                table.find('.arrow').remove();
+                var arrow = asc ? '<i class="fas fa-arrow-up arrow"></i>' : '<i class="fas fa-arrow-down arrow"></i>';
+                table.find('th').eq(index).append(arrow);
+            }
+
+            // Function to perform filtering
+            function filterUsers(searchValue, profileVerified, coverVerified) {
+                var rows = $('.table tbody tr');
+
+                // Loop through each row and hide/show based on search value and filters
+                rows.each(function () {
+                    var profileVerifiedText = $(this).find('td:eq(7)').text().toLowerCase(); // Profile Verified column (adjust index as per your actual table structure)
+                    var coverVerifiedText = $(this).find('td:eq(8)').text().toLowerCase(); // Cover Verified column (adjust index as per your actual table structure)
+
+                    var showRow = true;
+
+                    // Apply search filter
+                    var name = $(this).find('td:eq(4)').text().toLowerCase(); // Name column
+                    var uniqueName = $(this).find('td:eq(5)').text().toLowerCase(); // Unique Name column
+                    var email = $(this).find('td:eq(6)').text().toLowerCase(); // Email column
+
+                    if (!(name.includes(searchValue.toLowerCase()) ||
+                        uniqueName.includes(searchValue.toLowerCase()) ||
+                        email.includes(searchValue.toLowerCase()))) {
+                        showRow = false;
+                    }
+
+                    // Apply profile verified filter
+                    if (profileVerified !== '' && profileVerified !== 'all' && !profileVerifiedText.includes(profileVerified.toLowerCase())) {
+                        showRow = false;
+                    }
+
+                    // Apply cover verified filter
+                    if (coverVerified !== '' && coverVerified !== 'all' && !coverVerifiedText.includes(coverVerified.toLowerCase())) {
+                        showRow = false;
+                    }
+
+                    // Show or hide row based on filters
+                    if (showRow) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+            }
+
+            // Perform filtering when input or filter value changes
+            $('#user-search, #profile-filter, #cover-filter').on('input change', function () {
+                var searchValue = $('#user-search').val().trim();
+                var profileVerified = $('#profile-filter').val().trim();
+                var coverVerified = $('#cover-filter').val().trim();
+
+                // Adjust 'all' option handling
+                if (profileVerified === 'all') {
+                    profileVerified = '';
+                }
+                if (coverVerified === 'all') {
+                    coverVerified = '';
+                }
+
+                filterUsers(searchValue, profileVerified, coverVerified);
+            });
+
+            // Display all data when page is loaded or refreshed
+            filterUsers('', '', '');
+            
         });
-
-        // Display all data when page is loaded or refreshed
-        filterUsers('');
-    });
-</script>
-
-
+    </script>
 @endsection

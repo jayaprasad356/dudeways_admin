@@ -16,6 +16,7 @@ use App\Models\Feedback;
 use App\Models\Professions; 
 use App\Models\News; 
 use Carbon\Carbon;
+use Berkayk\OneSignal\OneSignalClient;
 
 class AuthController extends Controller
 {
@@ -3279,7 +3280,28 @@ public function profile_view(Request $request)
     ], 201);
 }
 
+protected $oneSignalClient;
 
+public function __construct(OneSignalClient $oneSignalClient)
+{
+    $this->oneSignalClient = $oneSignalClient;
+}
+
+public function send_notification(Request $request)
+{
+    $response = $this->oneSignalClient->sendNotificationToAll(
+        "Some Message", 
+        $url = null, 
+        $data = null, 
+        $buttons = null, 
+        $schedule = null
+    );
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Notification sent successfully.',
+    ], 201);
+}
 }
 
 

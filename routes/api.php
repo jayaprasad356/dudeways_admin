@@ -42,6 +42,7 @@ Route::post('update_location', [AuthController::class, 'update_location']);
 Route::post('profession_list', [AuthController::class, 'profession_list']);
 Route::post('settings_list', [AuthController::class, 'settings_list']);
 Route::post('profile_view', [AuthController::class, 'profile_view']);
+Route::post('send_notification', [AuthController::class, 'send_notification']);
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();

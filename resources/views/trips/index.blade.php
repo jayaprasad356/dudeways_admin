@@ -148,41 +148,23 @@
                 $('#filter-form').submit();
             }
         });
+
+        // Handle pagination clicks to maintain trip_status parameter
+        $('.pagination a').click(function (e) {
+            e.preventDefault();
+            var pageUrl = $(this).attr('href');
+            var statusFilterValue = $('#status-filter').val();
+            
+            if (statusFilterValue !== '') {
+                var separator = pageUrl.includes('?') ? '&' : '?';
+                pageUrl += separator + 'trip_status=' + statusFilterValue;
+            }
+
+            window.location.href = pageUrl;
+        });
     });
-</script>
-
-    <script>
-        $(document).ready(function () {
-            $(document).on('click', '.btn-delete', function () {
-                $this = $(this);
-                const swalWithBootstrapButtons = Swal.mixin({
-                    customClass: {
-                        confirmButton: 'btn btn-success',
-                        cancelButton: 'btn btn-danger'
-                    },
-                    buttonsStyling: false
-                })
-
-                swalWithBootstrapButtons.fire({
-                    title: 'Are you sure?',
-                    text: "Do you really want to delete this trip?",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Yes, delete it!',
-                    cancelButtonText: 'No',
-                    reverseButtons: true
-                }).then((result) => {
-                    if (result.value) {
-                        $.post($this.data('url'), {_method: 'DELETE', _token: '{{ csrf_token() }}'}, function (res) {
-                            $this.closest('tr').fadeOut(500, function () {
-                                $(this).remove();
-                            })
-                        })
-                    }
-                })
-            })
-        })
     </script>
+
     <script>
         $(document).ready(function() {
             $('.table th').click(function() {
@@ -219,60 +201,62 @@
             }
         });
     </script>
+
     <script>
-$(document).ready(function () {
-    // Handle "Select All" checkbox
-    $('#checkAll').change(function () {
-        $('.checkbox').prop('checked', $(this).prop('checked'));
-    });
-
-    // Handle Pending Button click
-    $('#pendingButton').click(function () {
-        updateStatus(0);
-    });
-
-    // Handle Approve Button click
-    $('#verifyButton').click(function () {
-        updateStatus(1);
-    });
-
-    // Handle Cancel Button click
-    $('#cancelButton').click(function () {
-        updateStatus(2);
-    });
-
-    // Update Status function
-    function updateStatus(status) {
-        var tripIds = [];
-        $('.checkbox:checked').each(function () {
-            tripIds.push($(this).data('id'));
+    $(document).ready(function () {
+        // Handle "Select All" checkbox
+        $('#checkAll').change(function () {
+            $('.checkbox').prop('checked', $(this).prop('checked'));
         });
 
-        if (tripIds.length > 0) {
-            $.ajax({
-                url: "{{ route('trips.updateStatus') }}",
-                method: 'POST',
-                data: {
-                    _token: '{{ csrf_token() }}',
-                    trip_ids: tripIds,
-                    status: status
-                },
-                success: function (response) {
-                    if (response.success) {
-                        location.reload();
-                    } else {
-                        alert('Failed to update status. Please try again.');
-                    }
-                },
-                error: function (xhr, status, error) {
-                    console.error(error);
-                    alert('An error occurred. Please try again.');
-                }
+        // Handle Pending Button click
+        $('#pendingButton').click(function () {
+            updateStatus(0);
+        });
+
+        // Handle Approve Button click
+        $('#verifyButton').click(function () {
+            updateStatus(1);
+        });
+
+        // Handle Cancel Button click
+        $('#cancelButton').click(function () {
+            updateStatus(2);
+        });
+
+        // Update Status function
+        function updateStatus(status) {
+            var tripIds = [];
+            $('.checkbox:checked').each(function () {
+                tripIds.push($(this).data('id'));
             });
-        } else {
-            alert('Please select at least one trip.');
+
+            if (tripIds.length > 0) {
+                $.ajax({
+                    url: "{{ route('trips.updateStatus') }}",
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        trip_ids: tripIds,
+                        status: status
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            location.reload();
+                        } else {
+                            alert('Failed to update status. Please try again.');
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error(error);
+                        alert('An error occurred. Please try again.');
+                    }
+                });
+            } else {
+                alert('Please select at least one trip.');
+            }
         }
-    }
-});
-</script>
+    });
+    </script>
 @endsection
+
