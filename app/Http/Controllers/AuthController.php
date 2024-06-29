@@ -1237,8 +1237,7 @@ public function trip_list(Request $request)
 
     $type = $request->input('type');
 
-    // Set default limit
-    $limit = $request->input('limit', 20);
+  
 
     // Fetch the user's latitude and longitude
     $userLatitude = (float)$userExists->latitude;
@@ -1253,8 +1252,7 @@ public function trip_list(Request $request)
         // Fetch the latest trips with trip_status 1
         $trips = Trips::where('trip_status', 1)
             ->whereDate('from_date', '>=', $currentDate)
-            ->orderBy('trip_datetime', 'desc')
-            ->paginate($limit);
+            ->orderBy('trip_datetime', 'desc');
 
         foreach ($trips as $trip) {
             $tripUser = Users::find($trip->user_id);
@@ -1276,8 +1274,7 @@ public function trip_list(Request $request)
     } elseif ($type == 'nearby') {
         // Fetch trips with trip_status 1 and paginate the results
         $trips = Trips::where('trip_status', 1)
-            ->whereDate('from_date', '>=', $currentDate)
-            ->paginate($limit);  // Use paginate instead of get()
+            ->whereDate('from_date', '>=', $currentDate);
     
         // Array to hold trips with calculated distances
         $tripsWithDistance = [];
@@ -1400,8 +1397,7 @@ public function trip_list(Request $request)
         // Fetch trips with the specified from_date and trip_status 1
         $trips = Trips::where('trip_status', 1)
             ->whereDate('from_date', $fromDate)
-            ->orderBy('created_at', 'desc')
-            ->paginate($limit);
+            ->orderBy('created_at', 'desc');
 
         foreach ($trips as $trip) {
             $tripUser = Users::find($trip->user_id);
