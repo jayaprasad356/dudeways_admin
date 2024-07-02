@@ -1245,24 +1245,23 @@ public function trip_list(Request $request)
                        ->whereDate('from_date', '>=', $currentDate);
 
     if ($type == 'latest') {
-        // Validate offset and limit for 'latest' type only
-        if (!$request->has('offset')) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Offset is empty.',
-            ], 400);
-        }
+       // Validate offset and limit for 'latest' type only
+    if (!$request->has('offset')) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Offset is empty.',
+        ], 400);
+    }
 
-        $offset = $request->input('offset');
+    if (!$request->has('limit')) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Limit is empty.',
+        ], 400);
+    }
 
-        if (!$request->has('limit')) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Limit is empty.',
-            ], 400);
-        }
-
-        $limit = $request->input('limit');
+    $offset = $request->input('offset');
+    $limit = $request->input('limit');
 
         $trips = $tripsQuery->orderBy('trip_datetime', 'desc')
                             ->skip($offset)
@@ -1378,6 +1377,8 @@ public function trip_list(Request $request)
         ];
     }
 
+
+    
     return response()->json([
         'success' => true,
         'message' => 'Trip details retrieved successfully.',
@@ -1564,6 +1565,7 @@ public function trip_date(Request $request)
             'created_at' => Carbon::parse($trip->created_at)->format('Y-m-d H:i:s'),
         ];
     }
+    
 
     return response()->json([
         'success' => true,
