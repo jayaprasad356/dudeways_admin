@@ -1206,7 +1206,6 @@ public function update_trip(Request $request)
         ],
     ], 200);
 }
-
 public function trip_list(Request $request)
 {
     // Validate user_id
@@ -1240,7 +1239,7 @@ public function trip_list(Request $request)
     if (!$request->has('offset')) {
         return response()->json([
             'success' => false,
-            'message' => 'offset is empty.',
+            'message' => 'Offset is empty.',
         ], 400);
     }
 
@@ -1249,37 +1248,28 @@ public function trip_list(Request $request)
     if (!$request->has('limit')) {
         return response()->json([
             'success' => false,
-            'message' => 'limit is empty.',
+            'message' => 'Limit is empty.',
         ], 400);
     }
 
     $limit = $request->input('limit');
 
-
     // Fetch the user's latitude and longitude
     $userLatitude = (float)$userExists->latitude;
-    $userLongtitude = (float)$userExists->longtitude;
-
-    // Initialize trip details array
-    $tripDetails = [];
+    $userLongitude = (float)$userExists->longitude;
 
     $currentDate = Carbon::now()->toDateString();
+    $tripsQuery = Trips::where('trip_status', 1)
+                       ->whereDate('from_date', '>=', $currentDate);
 
     if ($type == 'latest') {
-        // Fetch the latest trips with trip_status 1
-        $trips = Trips::where('trip_status', 1)
-        ->whereDate('from_date', '>=', $currentDate)
-        ->orderBy('trip_datetime', 'desc')
-        ->skip($offset)
-        ->take($limit)
-        ->get();
+        $trips = $tripsQuery->orderBy('trip_datetime', 'desc')
+                            ->skip($offset)
+                            ->take($limit)
+                            ->get();
     } elseif ($type == 'nearby') {
-        // Fetch trips with trip_status 1
-        $trips = Trips::where('trip_status', 1)
-            ->whereDate('from_date', '>=', $currentDate)
-            ->get(); 
+        $trips = $tripsQuery->get(); // Fetch all trips for nearby calculation
     } elseif ($type == 'date') {
-        // Check if the date parameter is provided
         if (!$request->has('date')) {
             return response()->json([
                 'success' => false,
@@ -1288,8 +1278,6 @@ public function trip_list(Request $request)
         }
 
         $fromDate = $request->input('date');
-
-        // Check if the date is in a valid format (YYYY-MM-DD)
         if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $fromDate)) {
             return response()->json([
                 'success' => false,
@@ -1297,11 +1285,11 @@ public function trip_list(Request $request)
             ], 400);
         }
 
-        // Fetch trips with the specified from_date and trip_status 1
-        $trips = Trips::where('trip_status', 1)
-            ->whereDate('from_date', $fromDate)
-            ->orderBy('created_at', 'desc')
-            ->get(); // Remove paginate() to get all results
+        $trips = $tripsQuery->whereDate('from_date', $fromDate)
+                            ->orderBy('created_at', 'desc')
+                            ->skip($offset)
+                            ->take($limit)
+                            ->get();
     } else {
         return response()->json([
             'success' => false,
@@ -1316,36 +1304,31 @@ public function trip_list(Request $request)
         ], 404);
     }
 
-    // Array to hold trips with calculated distances
     $tripsWithDistance = [];
-
     foreach ($trips as $trip) {
         $tripUser = Users::find($trip->user_id);
 
-        // Check if user exists
         if (!$tripUser) {
-            continue; // Skip this trip if user does not exist
+            continue;
         }
 
-        // Calculate the distance between the users using their latitude and longitude
-        $distance = $this->calculateDistance($userLatitude, $userLongtitude, (float)$tripUser->latitude, (float)$tripUser->longtitude);
-
-        // Store trip details along with distance
+        $distance = $this->calculateDistance($userLatitude, $userLongitude, (float)$tripUser->latitude, (float)$tripUser->longitude);
         $tripsWithDistance[] = [
             'trip' => $trip,
             'user' => $tripUser,
-            'distance' => $distance
+            'distance' => round($distance)
         ];
     }
 
-    // Sort trips by distance (ascending order)
-    usort($tripsWithDistance, function ($a, $b) {
-        return $a['distance'] <=> $b['distance'];
-    });
+    if ($type == 'nearby') {
+        usort($tripsWithDistance, function ($a, $b) {
+            return $a['distance'] <=> $b['distance'];
+        });
 
-    // Prepare formatted trip details
+        $tripsWithDistance = array_slice($tripsWithDistance, $offset, $limit);
+    }
+
     $tripDetailsFormatted = [];
-
     foreach ($tripsWithDistance as $detail) {
         $trip = $detail['trip'];
         $user = $detail['user'];
@@ -1354,19 +1337,14 @@ public function trip_list(Request $request)
         $imageUrl = $user->profile_verified == 1 ? asset('storage/app/public/users/' . $user->profile) : '';
         $coverImageUrl = $user->cover_img_verified == 1 ? asset('storage/app/public/users/' . $user->cover_img) : '';
 
-        // Check if the user is a friend
         $isFriend = Friends::where('user_id', $userId)
-            ->where('friend_user_id', $user->id)
-            ->exists();
-
+                          ->where('friend_user_id', $user->id)
+                          ->exists();
         $friendStatus = $isFriend ? '1' : '0';
 
-        // Calculate time difference in hours
         $tripTime = Carbon::parse($trip->trip_datetime);
         $currentTime = Carbon::now();
         $hoursDifference = $tripTime->diffInHours($currentTime);
-
-        // Determine the time display string
         if ($hoursDifference == 0) {
             $timeDifference = 'now';
         } elseif ($hoursDifference < 24) {
@@ -1399,7 +1377,7 @@ public function trip_list(Request $request)
             'trip_datetime' => Carbon::parse($trip->trip_datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($trip->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($trip->created_at)->format('Y-m-d H:i:s'),
-            'distance' => number_format($distance, 2) . ' km'
+              'distance' => round($distance) . ' km'
         ];
     }
 
@@ -1410,29 +1388,21 @@ public function trip_list(Request $request)
     ], 200);
 }
 
-
-private function calculateDistance($latitudeFrom, $longtitudeFrom, $latitudeTo, $longtitudeTo, $earthRadius = 6371)
+private function calculateDistance($latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo, $earthRadius = 6371)
 {
-    // Convert latitude and longitude from degrees to radians
     $latFrom = deg2rad($latitudeFrom);
-    $lonFrom = deg2rad($longtitudeFrom);
+    $lonFrom = deg2rad($longitudeFrom);
     $latTo = deg2rad($latitudeTo);
-    $lonTo = deg2rad($longtitudeTo);
+    $lonTo = deg2rad($longitudeTo);
 
-    // Calculate differences in latitude and longitude
     $latDiff = $latTo - $latFrom;
     $lonDiff = $lonTo - $lonFrom;
 
-    // Calculate using Haversine formula
     $a = sin($latDiff / 2) * sin($latDiff / 2) + cos($latFrom) * cos($latTo) * sin($lonDiff / 2) * sin($lonDiff / 2);
     $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
 
-    // Distance in kilometers
-    $distance = $earthRadius * $c;
-
-    return $distance;
+    return $earthRadius * $c;
 }
-
 
 public function my_trip_list(Request $request)
 {
@@ -2524,16 +2494,30 @@ public function notification_list(Request $request)
         $coverImageUrl = $notify_user->cover_img_verified == 1 ? asset('storage/app/public/users/' . $notify_user->cover_img) : '';
         //$notifyUserImageUrl = asset('storage/app/public/users/' . $notify_user->profile);
          // Calculate time difference in hours
-         $notificationTime = Carbon::parse($notification->datetime);
-         $currentTime = Carbon::now();
-         $hoursDifference = $notificationTime->diffInHours($currentTime);
-         
-         // Determine the time display string
-         if ($hoursDifference == 0) {
-             $timeDifference = 'now';
-         } else {
-             $timeDifference = $hoursDifference . 'h';
-         }
+        
+               // Calculate time difference
+        $notificationTime = Carbon::parse($notification->datetime);
+        $currentTime = Carbon::now();
+        $hoursDifference = $notificationTime->diffInHours($currentTime);
+        $daysDifference = $notificationTime->diffInDays($currentTime);
+
+        // Determine the time display string
+        if ($daysDifference == 0) {
+            $timeDifference = $notificationTime->format('H:i'); // Today, show time
+        } elseif ($daysDifference == 1) {
+            $timeDifference = 'Yesterday'; // Yesterday
+        } elseif ($daysDifference <= 7) {
+            $timeDifference = $notificationTime->format('l'); // Last week, show day name
+        } elseif ($daysDifference <= 14 && $notificationTime->isSameMonth($currentTime)) {
+            $timeDifference = 'Last week'; // Within 14 days and same month, show "Last week"
+        } elseif ($notificationTime->month == $currentTime->subMonth()->month) {
+            $timeDifference = 'Last month'; // Last month
+        } elseif ($notificationTime->isSameYear($currentTime)) {
+            $timeDifference = $notificationTime->format('M jS'); // This year, show month and day with ordinal indicator
+        } else {
+            $timeDifference = $notificationTime->format('M jS, Y'); // Older than current year, show month, day, and year
+        }
+
         // Check if the user is a friend
         $isFriend = Friends::where('user_id', $user_id)
             ->where('friend_user_id', $notification->notify_user_id) // Check against notify_user_id
