@@ -1236,24 +1236,6 @@ public function trip_list(Request $request)
 
     $type = $request->input('type');
 
-    if (!$request->has('offset')) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Offset is empty.',
-        ], 400);
-    }
-
-    $offset = $request->input('offset');
-
-    if (!$request->has('limit')) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Limit is empty.',
-        ], 400);
-    }
-
-    $limit = $request->input('limit');
-
     // Fetch the user's latitude and longitude
     $userLatitude = (float)$userExists->latitude;
     $userLongitude = (float)$userExists->longitude;
@@ -1263,6 +1245,25 @@ public function trip_list(Request $request)
                        ->whereDate('from_date', '>=', $currentDate);
 
     if ($type == 'latest') {
+        // Validate offset and limit for 'latest' type only
+        if (!$request->has('offset')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Offset is empty.',
+            ], 400);
+        }
+
+        $offset = $request->input('offset');
+
+        if (!$request->has('limit')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Limit is empty.',
+            ], 400);
+        }
+
+        $limit = $request->input('limit');
+
         $trips = $tripsQuery->orderBy('trip_datetime', 'desc')
                             ->skip($offset)
                             ->take($limit)
@@ -1287,8 +1288,6 @@ public function trip_list(Request $request)
 
         $trips = $tripsQuery->whereDate('from_date', $fromDate)
                             ->orderBy('created_at', 'desc')
-                            ->skip($offset)
-                            ->take($limit)
                             ->get();
     } else {
         return response()->json([
@@ -1324,8 +1323,6 @@ public function trip_list(Request $request)
         usort($tripsWithDistance, function ($a, $b) {
             return $a['distance'] <=> $b['distance'];
         });
-
-        $tripsWithDistance = array_slice($tripsWithDistance, $offset, $limit);
     }
 
     $tripDetailsFormatted = [];
@@ -1377,7 +1374,7 @@ public function trip_list(Request $request)
             'trip_datetime' => Carbon::parse($trip->trip_datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($trip->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($trip->created_at)->format('Y-m-d H:i:s'),
-              'distance' => round($distance) . ' km'
+            'distance' => round($distance) . ' km'
         ];
     }
 
