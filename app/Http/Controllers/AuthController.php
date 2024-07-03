@@ -1245,26 +1245,26 @@ public function trip_list(Request $request)
                        ->whereDate('from_date', '>=', $currentDate);
 
     if ($type == 'latest') {
-       // Validate offset and limit for 'latest' type only
-    if (!$request->has('offset')) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Offset is empty.',
-        ], 400);
-    }
+        // Validate offset and limit for 'latest' type only
+        if (!$request->has('offset')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Offset is empty.',
+            ], 400);
+        }
 
-    if (!$request->has('limit')) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Limit is empty.',
-        ], 400);
-    }
+        if (!$request->has('limit')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Limit is empty.',
+            ], 400);
+        }
 
-    $offset = $request->input('offset');
-    $limit = $request->input('limit');
+        $offset = (int)$request->input('offset');
+        $limit = (int)$request->input('limit');
 
-        $trips = $tripsQuery->orderBy('trip_datetime', 'desc')
-                            ->skip($offset)
+        $trips = $tripsQuery->where('id', $offset)
+                            ->orderBy('id', 'asc')
                             ->take($limit)
                             ->get();
     } elseif ($type == 'nearby') {
@@ -1377,14 +1377,13 @@ public function trip_list(Request $request)
         ];
     }
 
-
-    
     return response()->json([
         'success' => true,
         'message' => 'Trip details retrieved successfully.',
         'data' => $tripDetailsFormatted,
     ], 200);
 }
+
 
 private function calculateDistance($latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo, $earthRadius = 6371)
 {
