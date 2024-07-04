@@ -1252,7 +1252,7 @@ public function trip_list(Request $request)
         ], 400);
     }
 
-    $offset = max((int)$request->input('offset') - 1, 0);
+    $offset = (int)$request->input('offset');
     $limit = (int)$request->input('limit');
 
     // Fetch the user's latitude and longitude
