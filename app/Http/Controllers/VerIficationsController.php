@@ -16,7 +16,8 @@ class VerificationsController extends Controller
             if ($verification) {
                 $user = Users::find($verification->user_id);
                 if ($user) {
-                    $user->points += 100; // Increment points
+                    $user->points += 100; 
+                    $user->verified = 1;
                     $user->save();
 
                     // Update verification status

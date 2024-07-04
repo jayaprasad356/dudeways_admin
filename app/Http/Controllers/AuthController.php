@@ -1244,25 +1244,25 @@ public function trip_list(Request $request)
     $tripsQuery = Trips::where('trip_status', 1)
                        ->whereDate('from_date', '>=', $currentDate);
 
+    // Validate offset and limit for all types
+    if (!$request->has('offset')) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Offset is empty.',
+        ], 400);
+    }
+
+    if (!$request->has('limit')) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Limit is empty.',
+        ], 400);
+    }
+
+    $offset = (int)$request->input('offset');
+    $limit = (int)$request->input('limit');
+
     if ($type == 'latest') {
-        // Validate offset and limit for 'latest' type only
-        if (!$request->has('offset')) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Offset is empty.',
-            ], 400);
-        }
-
-        if (!$request->has('limit')) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Limit is empty.',
-            ], 400);
-        }
-
-        $offset = (int)$request->input('offset');
-        $limit = (int)$request->input('limit');
-
         $trips = $tripsQuery->where('id', $offset)
                             ->orderBy('id', 'asc')
                             ->take($limit)
@@ -1322,6 +1322,12 @@ public function trip_list(Request $request)
         usort($tripsWithDistance, function ($a, $b) {
             return $a['distance'] <=> $b['distance'];
         });
+
+        // Apply offset and limit after sorting
+        $tripsWithDistance = array_slice($tripsWithDistance, $offset, $limit);
+    } elseif ($type == 'date') {
+        // Apply offset and limit for date type
+        $tripsWithDistance = array_slice($tripsWithDistance, $offset, $limit);
     }
 
     $tripDetailsFormatted = [];
@@ -1384,7 +1390,6 @@ public function trip_list(Request $request)
     ], 200);
 }
 
-
 private function calculateDistance($latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo, $earthRadius = 6371)
 {
     $latFrom = deg2rad($latitudeFrom);
@@ -1400,6 +1405,7 @@ private function calculateDistance($latitudeFrom, $longitudeFrom, $latitudeTo, $
 
     return $earthRadius * $c;
 }
+
 
 public function my_trip_list(Request $request)
 {
@@ -2788,10 +2794,35 @@ public function spin_points(Request $request)
         ], 404);
     }
 
+    // Check if user can add points (once per day)
+    $latestTransaction = Transaction::where('user_id', $user_id)
+                                     ->where('type', 'spin_points')
+                                     ->orderBy('datetime', 'desc')
+                                     ->first();
+    $currentTimestamp = Carbon::now();
+
+    if ($latestTransaction) {
+        $lastSpinTime = Carbon::parse($latestTransaction->datetime);
+        $diffInSeconds = $currentTimestamp->diffInSeconds($lastSpinTime);
+
+        // Check if less than 24 hours have passed
+        if ($diffInSeconds < 86400) { // 86400 seconds = 24 hours
+            $remainingSeconds = 86400 - $diffInSeconds;
+            $hoursLeft = floor($remainingSeconds / 3600);
+            $minutesLeft = floor(($remainingSeconds % 3600) / 60);
+            
+            $timeLeftMessage = "You have $hoursLeft hours and $minutesLeft minutes left to spin the points.";
+            return response()->json([
+                'success' => false,
+                'message' => $timeLeftMessage,
+            ], 400);
+        }
+    }
+
     // Update user points
     $user->points += $points;
     $user->total_points += $points;
-    
+
     if (!$user->save()) {
         return response()->json([
             'success' => false,
@@ -2804,7 +2835,7 @@ public function spin_points(Request $request)
     $transaction->user_id = $user_id;
     $transaction->points = $points;
     $transaction->type = 'spin_points';
-    $transaction->datetime = now();
+    $transaction->datetime = $currentTimestamp;
 
     if (!$transaction->save()) {
         return response()->json([
@@ -2812,12 +2843,14 @@ public function spin_points(Request $request)
             'message' => 'Failed to save transaction.',
         ], 500);    
     }
+
     $user = Users::select('name', 'points', 'total_points')->find($user_id);
+    
     // Return success response
     return response()->json([
         'success' => true,
         'message' => 'Spin Points added successfully.',
-        'data' =>[$user],
+        'data' => [$user],
     ], 201);
 }
 
