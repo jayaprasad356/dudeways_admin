@@ -1322,6 +1322,13 @@ public function trip_list(Request $request)
     }
 
     if ($type == 'nearby') {
+        if (empty($tripsWithDistance)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No trips found.',
+            ], 404);
+        }
+
         usort($tripsWithDistance, function ($a, $b) {
             return $a['distance'] <=> $b['distance'];
         });
