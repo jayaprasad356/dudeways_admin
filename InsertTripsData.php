@@ -13,7 +13,7 @@ use App\Models\Trips;
 $data = [
     'trip_type' => 'Road Trip',
     'location' => 'chennai',
-    'from_date' => '2024-07-11',
+    'from_date' => '2024-07-01',
     'to_date' => '2024-07-15',
     'trip_title' => 'Summer Trip',
     'trip_description' => 'Enjoying summer vacation',
@@ -23,7 +23,7 @@ $data = [
     'trip_image' => 'SnXxFLBKoQslEfdyXjAzVvfoHHtT61C6bcJNnXhb.jpg',
 ];
 
-$numberOfInserts = 50;
+$numberOfInserts = 10;
 
 for ($i = 0; $i < $numberOfInserts; $i++) {
     Trips::create($data);

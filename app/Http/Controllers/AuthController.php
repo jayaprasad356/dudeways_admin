@@ -1206,6 +1206,7 @@ public function update_trip(Request $request)
         ],
     ], 200);
 }
+
 public function trip_list(Request $request)
 {
     // Validate user_id
@@ -1251,7 +1252,6 @@ public function trip_list(Request $request)
         ], 400);
     }
 
-  
     $offset = max((int)$request->input('offset') - 1, 0);
     $limit = (int)$request->input('limit');
 
@@ -1262,7 +1262,6 @@ public function trip_list(Request $request)
     $currentDate = Carbon::now()->toDateString();
     $tripsQuery = Trips::where('trip_status', 1)
                        ->whereDate('from_date', '>=', $currentDate);
-                       
 
     if ($type == 'latest') {
         $trips = $tripsQuery->orderBy('trip_datetime', 'desc')
@@ -1335,6 +1334,13 @@ public function trip_list(Request $request)
 
         // Apply offset and limit after sorting
         $tripsWithDistance = array_slice($tripsWithDistance, $offset, $limit);
+    }
+
+    if (empty($tripsWithDistance)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No trips found.',
+        ], 404);
     }
 
     $tripDetailsFormatted = [];
