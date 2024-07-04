@@ -13,7 +13,7 @@ use App\Models\Trips;
 $data = [
     'trip_type' => 'Road Trip',
     'location' => 'chennai',
-    'from_date' => '2024-07-10',
+    'from_date' => '2024-07-11',
     'to_date' => '2024-07-15',
     'trip_title' => 'Summer Trip',
     'trip_description' => 'Enjoying summer vacation',

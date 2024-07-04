@@ -1230,11 +1230,29 @@ public function trip_list(Request $request)
     if (!$request->has('type')) {
         return response()->json([
             'success' => false,
-            'message' => 'Type is empty.',
+            'message' => 'Type is required.',
         ], 400);
     }
 
     $type = $request->input('type');
+
+    // Validate offset and limit
+    if (!$request->has('offset')) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Offset is required.',
+        ], 400);
+    }
+
+    if (!$request->has('limit')) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Limit is required.',
+        ], 400);
+    }
+
+    $offset = (int)$request->input('offset');
+    $limit = (int)$request->input('limit');
 
     // Fetch the user's latitude and longitude
     $userLatitude = (float)$userExists->latitude;
@@ -1243,28 +1261,11 @@ public function trip_list(Request $request)
     $currentDate = Carbon::now()->toDateString();
     $tripsQuery = Trips::where('trip_status', 1)
                        ->whereDate('from_date', '>=', $currentDate);
-
-    // Validate offset and limit for all types
-    if (!$request->has('offset')) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Offset is empty.',
-        ], 400);
-    }
-
-    if (!$request->has('limit')) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Limit is empty.',
-        ], 400);
-    }
-
-    $offset = (int)$request->input('offset');
-    $limit = (int)$request->input('limit');
+                       
 
     if ($type == 'latest') {
-        $trips = $tripsQuery->where('id', $offset)
-                            ->orderBy('id', 'asc')
+        $trips = $tripsQuery->orderBy('trip_datetime', 'desc')
+                            ->skip($offset)
                             ->take($limit)
                             ->get();
     } elseif ($type == 'nearby') {
@@ -1273,7 +1274,7 @@ public function trip_list(Request $request)
         if (!$request->has('date')) {
             return response()->json([
                 'success' => false,
-                'message' => 'Date is empty.',
+                'message' => 'Date is required.',
             ], 400);
         }
 
@@ -1286,7 +1287,8 @@ public function trip_list(Request $request)
         }
 
         $trips = $tripsQuery->whereDate('from_date', $fromDate)
-                            ->orderBy('created_at', 'desc')
+                            ->skip($offset)
+                            ->take($limit)
                             ->get();
     } else {
         return response()->json([
@@ -1324,9 +1326,6 @@ public function trip_list(Request $request)
         });
 
         // Apply offset and limit after sorting
-        $tripsWithDistance = array_slice($tripsWithDistance, $offset, $limit);
-    } elseif ($type == 'date') {
-        // Apply offset and limit for date type
         $tripsWithDistance = array_slice($tripsWithDistance, $offset, $limit);
     }
 
@@ -1389,6 +1388,8 @@ public function trip_list(Request $request)
         'data' => $tripDetailsFormatted,
     ], 200);
 }
+
+
 
 private function calculateDistance($latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo, $earthRadius = 6371)
 {
