@@ -1237,23 +1237,9 @@ public function trip_list(Request $request)
 
     $type = $request->input('type');
 
-    // Validate offset and limit
-    if (!$request->has('offset')) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Offset is required.',
-        ], 400);
-    }
-
-    if (!$request->has('limit')) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Limit is required.',
-        ], 400);
-    }
-
-    $offset = (int)$request->input('offset');
-    $limit = (int)$request->input('limit');
+    // Set default offset and limit if not provided
+    $offset = $request->input('offset', 0);
+    $limit = $request->input('limit', 10);
 
     // Fetch the user's latitude and longitude
     $userLatitude = (float)$userExists->latitude;
@@ -1263,13 +1249,17 @@ public function trip_list(Request $request)
     $tripsQuery = Trips::where('trip_status', 1)
                        ->whereDate('from_date', '>=', $currentDate);
 
+    $totalTrips = 0;
     if ($type == 'latest') {
+        $totalTrips = $tripsQuery->count();
         $trips = $tripsQuery->orderBy('trip_datetime', 'desc')
                             ->skip($offset)
                             ->take($limit)
                             ->get();
     } elseif ($type == 'nearby') {
-        $trips = $tripsQuery->get(); // Fetch all trips for nearby calculation
+        $allTrips = $tripsQuery->get(); // Fetch all trips for nearby calculation
+        $totalTrips = count($allTrips);
+        $trips = $allTrips;
     } elseif ($type == 'date') {
         if (!$request->has('date')) {
             return response()->json([
@@ -1286,6 +1276,7 @@ public function trip_list(Request $request)
             ], 400);
         }
 
+        $totalTrips = $tripsQuery->whereDate('from_date', $fromDate)->count();
         $trips = $tripsQuery->whereDate('from_date', $fromDate)
                             ->skip($offset)
                             ->take($limit)
@@ -1399,10 +1390,10 @@ public function trip_list(Request $request)
     return response()->json([
         'success' => true,
         'message' => 'Trip details retrieved successfully.',
+        'total' => $totalTrips,
         'data' => $tripDetailsFormatted,
     ], 200);
 }
-
 
 
 private function calculateDistance($latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo, $earthRadius = 6371)
