@@ -14,8 +14,10 @@ use App\Models\Verifications;
 use App\Models\Transaction; 
 use App\Models\Feedback; 
 use App\Models\Professions; 
+use App\Models\RechargeTrans; 
 use App\Models\News; 
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Http;
 use Berkayk\OneSignal\OneSignalClient;
 
 class AuthController extends Controller
@@ -3226,7 +3228,115 @@ public function send_notification(Request $request)
         'message' => 'Notification sent successfully.',
     ], 201);
 }
+
+public function create_recharge(Request $request)
+{
+    // Set default timezone
+    date_default_timezone_set('Asia/Kolkata');
+
+    // Extract request inputs
+    $user_id = $request->input('user_id');
+    $txn_id = $request->input('txn_id');
+    $amount = $request->input('amount');
+    $key = $request->input('key');
+
+    // Validate required inputs
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 400);
+    }
+
+    if (empty($txn_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'txn_id is empty.',
+        ], 400);
+    }
+
+    if (empty($amount)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'amount is empty.',
+        ], 400);
+    }
+
+    if (empty($key)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'key is empty.',
+        ], 400);
+    }
+
+    // Check if user exists
+    $user = Users::find($user_id);
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User not found.',
+        ], 404);
+    }
+
+    // Prepare data for external API call
+    $name = $user->name;
+    $email = $user->email;
+    $mobile = $user->mobile;
+    $p_info = 'Recharge';
+    $redirect_url = 'https://www.google.com/';
+    $date = now()->toDateString();
+    $datetime = now();
+
+    $data = [
+        'client_txn_id' => $txn_id,
+        'amount' => $amount,
+        'p_info' => $p_info,
+        'txn_date' => $date,
+        'customer_name' => $name,
+        'customer_email' => $email,
+        'customer_mobile' => $mobile,
+        'redirect_url' => $redirect_url,
+        'key' => $key,
+    ];
+
+    // Make external API call
+    $response = Http::post('https://api.ekqr.in/api/create_order', $data);
+    $responseArray = $response->json();
+
+    // Check for API call success
+    if (!$response->successful() || !isset($responseArray['status']) || !$responseArray['status']) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to create order.',
+        ], 500);
+    }
+
+    $order_id = $responseArray['data']['order_id'];
+
+    // Create and save RechargeTrans instance
+    $rechargeTrans = new RechargeTrans();
+    $rechargeTrans->user_id = $user_id;
+    $rechargeTrans->txn_id = $txn_id;
+    $rechargeTrans->order_id = $order_id;
+    $rechargeTrans->amount = $amount;
+    $rechargeTrans->status = 0;
+    $rechargeTrans->txn_date = $date;
+    $rechargeTrans->datetime = $datetime;
+
+    if (!$rechargeTrans->save()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to save recharge transaction.',
+        ], 500);
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Recharge transaction created successfully.',
+        'data' => $responseArray,
+    ], 201);
 }
 
+}
 
 
