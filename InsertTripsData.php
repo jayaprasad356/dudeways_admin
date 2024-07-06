@@ -10,8 +10,10 @@ $kernel->bootstrap();
 
 use App\Models\Trips;
 
+// Define the available trip types
+$tripTypes = ['Road Trip', 'Adventure Trip', 'Explore Cities', 'Airport Flyover'];
+
 $data = [
-    'trip_type' => 'Road Trip',
     'location' => 'chennai',
     'from_date' => '2024-07-11',
     'to_date' => '2024-07-15',
@@ -23,9 +25,11 @@ $data = [
     'trip_image' => 'SnXxFLBKoQslEfdyXjAzVvfoHHtT61C6bcJNnXhb.jpg',
 ];
 
-$numberOfInserts = 30;
+$numberOfInserts = 50;
 
 for ($i = 0; $i < $numberOfInserts; $i++) {
+    // Randomly select a trip type
+    $data['trip_type'] = $tripTypes[array_rand($tripTypes)];
     Trips::create($data);
 }
 

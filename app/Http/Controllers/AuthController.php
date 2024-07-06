@@ -2705,7 +2705,11 @@ public function add_points(Request $request)
     return response()->json([
         'success' => true,
         'message' => 'Points added successfully.',
-        'data' =>[$user],
+        'data' => [
+            'name' => $user->name,
+            'points' => (string) $user->points,
+            'total_points' => (string) $user->total_points,
+        ],
     ], 201);
 }
 public function reward_points(Request $request)
@@ -2768,7 +2772,11 @@ public function reward_points(Request $request)
     return response()->json([
         'success' => true,
         'message' => 'Reward Points added successfully.',
-        'data' =>[$user],
+        'data' => [
+            'name' => $user->name,
+            'points' => (string) $user->points,
+            'total_points' => (string) $user->total_points,
+        ],
     ], 201);
 }
 
@@ -2858,13 +2866,16 @@ public function spin_points(Request $request)
     return response()->json([
         'success' => true,
         'message' => 'Spin Points added successfully.',
-        'data' => [$user],
+        'data' => [
+            'name' => $user->name,
+            'points' => (string) $user->points,
+            'total_points' => (string) $user->total_points,
+        ],
     ], 201);
 }
 
 public function points_list(Request $request)
 {
-    // Fetch all points details from the database, ordered by price in descending order
     $points = Points::orderBy('points', 'desc')->get();
 
     if ($points->isEmpty()) {
@@ -2876,13 +2887,12 @@ public function points_list(Request $request)
 
     $pointsDetails = [];
 
-    // Iterate through each points record and format the data
     foreach ($points as $point) {
         $pointsDetails[] = [
             'id' => $point->id,
-            'points' => $point->points,
-            'offer_percentage' => $point->offer_percentage,
-            'price' => $point->price,
+            'points' => (string) $point->points,
+            'offer_percentage' => (string) $point->offer_percentage,
+            'price' => (string) $point->price,
             'datetime' => Carbon::parse($point->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($point->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($point->created_at)->format('Y-m-d H:i:s'),
@@ -3335,6 +3345,117 @@ public function create_recharge(Request $request)
         'message' => 'Recharge transaction created successfully.',
         'data' => $responseArray,
     ], 201);
+}
+
+public function check_recharge_status(Request $request)
+{
+    // Set default timezone
+    date_default_timezone_set('Asia/Kolkata');
+
+    // Extract request inputs
+    $user_id = $request->input('user_id');
+    $txn_id = $request->input('txn_id');
+    $date = $request->input('date');
+    $key = $request->input('key');
+
+    // Validate required inputs
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 400);
+    }
+
+    if (empty($txn_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'txn_id is empty.',
+        ], 400);
+    }
+
+    if (empty($date)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'date is empty.',
+        ], 400);
+    }
+
+    if (empty($key)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'key is empty.',
+        ], 400);
+    }
+
+    // Check if user exists
+    $user = Users::find($user_id);
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User not found.',
+        ], 404);
+    }
+
+    // Prepare data for external API call
+    $data = [
+        'client_txn_id' => $txn_id,
+        'txn_date' => $date,
+        'key' => $key,
+    ];
+
+    // Make external API call
+    $response = Http::post('https://api.ekqr.in/api/check_order_status', $data);
+    $responseArray = $response->json();
+
+    // Check for API call success
+    if (!$response->successful() || !isset($responseArray['status']) || !$responseArray['status']) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to check order status.',
+        ], 500);
+    }
+
+    // Process the response data
+    $data = $responseArray['data'];
+    $amount = $data['amount'];
+    $status = $data['status'];
+    $datetime = now();
+
+    if ($status == 'success') {
+        // Fetch recharge transaction
+        $rechargeTrans = RechargeTrans::where('txn_id', $txn_id)->where('status', 0)->first();
+        if ($rechargeTrans) {
+            $rechargeTrans->status = 1;
+            $rechargeTrans->save();
+
+           
+            $user->recharge += $amount;
+            $user->total_recharge += $amount;
+            $user->save();
+
+            $transaction = new Transaction();
+            $transaction->user_id = $user_id;
+            $transaction->amount = $amount;
+            $transaction->datetime = $datetime;
+            $transaction->type = 'recharge';
+            $transaction->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Transaction completed successfully.',
+            ], 200);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Recharge transaction not found or already completed.',
+        ], 404);
+    } else {
+        return response()->json([
+            'success' => false,
+            'message' => 'Transaction failed.',
+        ], 400);
+    }
 }
 
 }
