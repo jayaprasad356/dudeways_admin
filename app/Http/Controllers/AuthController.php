@@ -3325,12 +3325,13 @@ public function create_recharge(Request $request)
     if (!$responseArray['status']) {
         return response()->json([
             'success' => false,
-            'message' => 'client_txn_id already exists',
+            'message' => 'Failed to create order. API response: ' . json_encode($responseArray),
         ]);
     }
 
     $order_id = $responseArray['data']['order_id'];
 
+    // Insert transaction into database
     try {
         $rechargeTrans = new RechargeTrans();
         $rechargeTrans->user_id = $user_id;
@@ -3349,10 +3350,11 @@ public function create_recharge(Request $request)
     } catch (\Exception $e) {
         return response()->json([
             'success' => false,
-            'message' => 'Failed to save recharge transaction',
+            'message' => 'Failed to save recharge transaction. Error: ' . $e->getMessage(),
         ]);
     }
 }
+
 
 public function check_recharge_status(Request $request)
 {
