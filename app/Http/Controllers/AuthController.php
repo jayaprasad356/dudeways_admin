@@ -3337,7 +3337,7 @@ public function create_recharge(Request $request)
     if (!$responseArray['status']) {
         return response()->json([
             'success' => false,
-            'message' => 'Failed to create order. API response: ' . json_encode($responseArray),
+            'message' => 'Client_txn_id already Exits',
         ]);
     }
 
