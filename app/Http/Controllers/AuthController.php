@@ -172,6 +172,7 @@ public function register(Request $request)
     $introduction = $request->input('introduction');
     $points = $request->input('points', 50);
     $total_points = $request->input('total_points', 50);
+    $mobile = $request->input('mobile', '0000000000');
 
     if (empty($state)) {
         return response()->json([
@@ -279,6 +280,7 @@ public function register(Request $request)
     $user->email = $email;
     $user->points = $points;
     $user->total_points = $total_points;
+    $user->mobile = $mobile;
     $user->state = $state;
     $user->city = $city;
     $user->referred_by = $referred_by;
@@ -822,6 +824,8 @@ public function update_location(Request $request)
         'message' => 'User location updated successfully.',
     ], 200);
 }
+
+
 
 public function update_notify(Request $request)
 {
@@ -3289,8 +3293,17 @@ public function create_recharge(Request $request)
 
     $name = $user->name;
     $email = $user->email;
+    $mobile = $user->mobile ? $user->mobile : '0000000000'; // Use default mobile if not available
     $redirect_url = 'https://www.google.com/';
     $datetime = now();
+
+    // Validate mobile number
+    if (!preg_match('/^\d{10}$/', $mobile)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid mobile number',
+        ]);
+    }
 
     // API endpoint
     $url = 'https://api.ekqr.in/api/create_order';
@@ -3303,6 +3316,7 @@ public function create_recharge(Request $request)
         'txn_date' => $datetime->toDateString(),
         'customer_name' => $name,
         'customer_email' => $email,
+        'customer_mobile' => $mobile,
         'redirect_url' => $redirect_url,
         'key' => $key
     ];
@@ -3318,7 +3332,7 @@ public function create_recharge(Request $request)
         ]);
     }
 
-    $responseArray = $response->json();
+    $responseArray = $response->json(); 
 
     if (!$responseArray['status']) {
         return response()->json([
