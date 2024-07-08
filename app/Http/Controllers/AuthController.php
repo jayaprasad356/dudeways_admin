@@ -3241,110 +3241,117 @@ public function send_notification(Request $request)
 
 public function create_recharge(Request $request)
 {
-    // Set default timezone
-    date_default_timezone_set('Asia/Kolkata');
+    // Validate required inputs
+    if (empty($request->input('user_id'))) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User ID is empty',
+        ]);
+    }
 
-    // Extract request inputs
+    if (empty($request->input('txn_id'))) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Transaction ID is empty',
+        ]);
+    }
+
+    if (empty($request->input('amount'))) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Amount is empty',
+        ]);
+    }
+
+    if (empty($request->input('key'))) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Key is empty',
+        ]);
+    }
+
+    // Prepare data for query
     $user_id = $request->input('user_id');
     $txn_id = $request->input('txn_id');
     $amount = $request->input('amount');
     $key = $request->input('key');
+    $p_info = 'Recharge';
 
-    // Validate required inputs
-    if (empty($user_id)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'user_id is empty.',
-        ], 400);
-    }
-
-    if (empty($txn_id)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'txn_id is empty.',
-        ], 400);
-    }
-
-    if (empty($amount)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'amount is empty.',
-        ], 400);
-    }
-
-    if (empty($key)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'key is empty.',
-        ], 400);
-    }
-
-    // Check if user exists
+    // Fetch user information
     $user = Users::find($user_id);
+
     if (!$user) {
         return response()->json([
             'success' => false,
-            'message' => 'User not found.',
-        ], 404);
+            'message' => 'Data Not found',
+        ]);
     }
 
-    // Prepare data for external API call
     $name = $user->name;
     $email = $user->email;
     $mobile = $user->mobile;
-    $p_info = 'Recharge';
     $redirect_url = 'https://www.google.com/';
-    $date = now()->toDateString();
     $datetime = now();
 
+    // API endpoint
+    $url = 'https://api.ekqr.in/api/create_order';
+
+    // Data to be sent
     $data = [
         'client_txn_id' => $txn_id,
         'amount' => $amount,
         'p_info' => $p_info,
-        'txn_date' => $date,
+        'txn_date' => $datetime->toDateString(),
         'customer_name' => $name,
         'customer_email' => $email,
         'customer_mobile' => $mobile,
         'redirect_url' => $redirect_url,
-        'key' => $key,
+        'key' => $key
     ];
 
-    // Make external API call
-    $response = Http::post('https://api.ekqr.in/api/create_order', $data);
-    $responseArray = $response->json();
+    // Initialize HTTP client and send POST request
+    $response = Http::post($url, $data);
 
-    // Check for API call success
-    if (!$response->successful() || !isset($responseArray['status']) || !$responseArray['status']) {
+    // Check for errors in the response
+    if ($response->failed()) {
         return response()->json([
             'success' => false,
-            'message' => 'Failed to create order.',
-        ], 500);
+            'message' => 'Failed to create order. Curl error: ' . $response->body(),
+        ]);
+    }
+
+    $responseArray = $response->json();
+
+    if (!$responseArray['status']) {
+        return response()->json([
+            'success' => false,
+            'message' => 'client_txn_id already exists',
+        ]);
     }
 
     $order_id = $responseArray['data']['order_id'];
 
-    // Create and save RechargeTrans instance
-    $rechargeTrans = new RechargeTrans();
-    $rechargeTrans->user_id = $user_id;
-    $rechargeTrans->txn_id = $txn_id;
-    $rechargeTrans->order_id = $order_id;
-    $rechargeTrans->amount = $amount;
-    $rechargeTrans->status = 0;
-    $rechargeTrans->txn_date = $date;
-    $rechargeTrans->datetime = $datetime;
+    try {
+        $rechargeTrans = new RechargeTrans();
+        $rechargeTrans->user_id = $user_id;
+        $rechargeTrans->txn_id = $txn_id;
+        $rechargeTrans->order_id = $order_id;
+        $rechargeTrans->amount = $amount;
+        $rechargeTrans->status = 0;
+        $rechargeTrans->datetime = $datetime;
+        $rechargeTrans->save();
 
-    if (!$rechargeTrans->save()) {
+        return response()->json([
+            'success' => true,
+            'message' => 'Recharge transaction created successfully.',
+            'data' => $responseArray,
+        ]);
+    } catch (\Exception $e) {
         return response()->json([
             'success' => false,
-            'message' => 'Failed to save recharge transaction.',
-        ], 500);
+            'message' => 'Failed to save recharge transaction',
+        ]);
     }
-
-    return response()->json([
-        'success' => true,
-        'message' => 'Recharge transaction created successfully.',
-        'data' => $responseArray,
-    ], 201);
 }
 
 public function check_recharge_status(Request $request)

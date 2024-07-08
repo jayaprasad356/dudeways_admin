@@ -53,6 +53,7 @@
                         <option value=''>--select--</option>
                         <option value='male' {{ old('gender') == 'male' ? 'selected' : '' }}>male</option>
                         <option value='female' {{ old('gender') == 'female' ? 'selected' : '' }}>female</option>
+                        <option value='others' {{ old('gender') == 'others' ? 'selected' : '' }}>others</option>
                     </select>
                     @error('gender')
                     <span class="invalid-feedback" role="alert">

@@ -68,6 +68,7 @@
                     <select name="gender" class="form-control @error('gender') is-invalid @enderror" id="gender">
                             <option value='male' {{ old('gender', $users->gender) == 'male' ? 'selected' : '' }}>male</option>
                             <option value='female' {{ old('gender', $users->gender) == 'female' ? 'selected' : '' }}>female</option>
+                            <option value='others' {{ old('gender', $users->gender) == 'others' ? 'selected' : '' }}>others</option>
                         </select>
                     @error('gender')
                     <span class="invalid-feedback" role="alert">

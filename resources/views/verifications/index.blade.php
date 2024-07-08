@@ -209,7 +209,7 @@ $(document).ready(function() {
                 },
                 success: function(response) {
                     // Handle success response
-                    alert('Points updated successfully!');
+                    alert('Verfied successfully!');
                     location.reload(); // Reload the page or update UI as needed
                 },
                 error: function(xhr, status, error) {
