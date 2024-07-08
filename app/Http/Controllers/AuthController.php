@@ -3159,7 +3159,59 @@ public function settings_list(Request $request)
     ], 200);
 }
 
+public function privacy_policy(Request $request)
+{
+    // Retrieve all news settings
+    $news = News::all();
 
+    if ($news->isEmpty()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No privacy policy found.',
+        ], 404);
+    }
+
+    $newsData = [];
+    foreach ($news as $item) {
+        $newsData[] = [
+            'id' => $item->id,
+            'privacy_policy' => $item->privacy_policy,
+        ];
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Privacy Policy listed successfully.',
+        'data' => $newsData,
+    ], 200);
+}
+
+public function terms_conditions(Request $request)
+{
+    // Retrieve all news settings
+    $news = News::all();
+
+    if ($news->isEmpty()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No terms conditions found.',
+        ], 404);
+    }
+
+    $newsData = [];
+    foreach ($news as $item) {
+        $newsData[] = [
+            'id' => $item->id,
+            'terms_conditions' => $item->terms_conditions,
+        ];
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Terms Conditions listed successfully.',
+        'data' => $newsData,
+    ], 200);
+}
 public function profile_view(Request $request)
 {
     $user_id = $request->input('user_id'); 
