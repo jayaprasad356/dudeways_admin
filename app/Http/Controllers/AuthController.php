@@ -3406,11 +3406,9 @@ public function create_recharge(Request $request)
         $rechargeTrans->datetime = $datetime;
         $rechargeTrans->save();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Recharge transaction created successfully.',
-            'data' => $responseArray,
-        ]);
+        return response()->json(
+            $responseArray,
+        );
     } catch (\Exception $e) {
         return response()->json([
             'success' => false,
