@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="{{ asset('public/css/app.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Arvo:400,700&display=swap">
+    
     <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async></script>
     <script>
         var OneSignal = window.OneSignal || [];
@@ -91,6 +92,7 @@
         @include('layouts.partials.footer')
         <aside class="control-sidebar control-sidebar-dark"></aside>
     </div>
+    <script src="{{ asset('public/ckeditor/ckeditor5.js') }}"></script>
     <script src="{{ asset('public/js/app.js') }}"></script>
     @yield('js')
 </body>

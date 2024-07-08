@@ -19,11 +19,16 @@ class NewsController extends Controller
         $request->validate([
             'telegram' => 'required|string|max:255',
             'instagram' => 'required|string|max:255',
+            'privacy_policy' => 'required|string',
+            'terms_conditions' => 'required|string',
         ]);
 
         $news = News::findOrFail(1); // Again, assuming ID 1 for simplicity
         $news->telegram = $request->input('telegram');
         $news->instagram = $request->input('instagram');
+        $news->privacy_policy = $request->input('privacy_policy');
+        $news->terms_conditions = $request->input('terms_conditions');
+    
 
         if ($news->save()) {
             return redirect()->route('news.edit')->with('success', 'Success, Settings has been updated.');
