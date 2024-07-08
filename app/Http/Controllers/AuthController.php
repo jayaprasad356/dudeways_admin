@@ -3289,7 +3289,6 @@ public function create_recharge(Request $request)
 
     $name = $user->name;
     $email = $user->email;
-    $mobile = $user->mobile;
     $redirect_url = 'https://www.google.com/';
     $datetime = now();
 
@@ -3304,7 +3303,6 @@ public function create_recharge(Request $request)
         'txn_date' => $datetime->toDateString(),
         'customer_name' => $name,
         'customer_email' => $email,
-        'customer_mobile' => $mobile,
         'redirect_url' => $redirect_url,
         'key' => $key
     ];
