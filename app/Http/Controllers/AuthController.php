@@ -2098,7 +2098,7 @@ public function chat_list(Request $request)
 public function delete_chat(Request $request)
 {
     $user_id = $request->input('user_id');
-    $chat_id = $request->input('chat_id');
+    $chat_user_id = $request->input('chat_user_id');
 
     // Validate user_id
     if (empty($user_id)) {
@@ -2108,48 +2108,41 @@ public function delete_chat(Request $request)
         ], 400);
     }
 
-    // Validate chat_id
-    if (empty($chat_id)) {
+    // Validate chat_user_id
+    if (empty($chat_user_id)) {
         return response()->json([
             'success' => false,
-            'message' => 'chat_id is empty.',
+            'message' => 'chat_user_id is empty.',
         ], 400);
     }
 
-    // Check if chat exists
-    $chat = Chats::find($chat_id);
-    if (!$chat) {
+    // Find the chat entries where user_id and chat_user_id match in either direction
+    $chats = Chats::where(function($query) use ($user_id, $chat_user_id) {
+                    $query->where('user_id', $user_id)
+                          ->where('chat_user_id', $chat_user_id);
+                })
+                ->orWhere(function($query) use ($user_id, $chat_user_id) {
+                    $query->where('user_id', $chat_user_id)
+                          ->where('chat_user_id', $user_id);
+                })
+                ->get();
+
+    // Check if chats exist
+    if ($chats->isEmpty()) {
         return response()->json([
             'success' => false,
             'message' => 'Chat not found.',
         ], 404);
     }
 
-    // Check if the user is part of the chat
-    if ($chat->user_id != $user_id && $chat->chat_user_id != $user_id) {
-        return response()->json([
-            'success' => false,
-            'message' => 'You do not have permission to delete this chat.',
-        ], 403);
-    }
-
-    // Delete the chat
-    if (!$chat->delete()) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to delete Chat.',
-        ], 500);
-    }
-
-    // Optionally, delete the reciprocal chat entry
-    $reciprocalChat = Chats::where('user_id', $chat->chat_user_id)
-                            ->where('chat_user_id', $chat->user_id)
-                            ->first();
-    if ($reciprocalChat && !$reciprocalChat->delete()) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to delete reciprocal Chat.',
-        ], 500);
+    // Delete the chats
+    foreach ($chats as $chat) {
+        if (!$chat->delete()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete Chat.',
+            ], 500);
+        }
     }
 
     // Return success response
@@ -2158,6 +2151,7 @@ public function delete_chat(Request $request)
         'message' => 'Chat deleted successfully.',
     ], 200);
 }
+
 
 public function blocked_chat(Request $request)
 {
