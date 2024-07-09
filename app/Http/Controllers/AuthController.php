@@ -3509,110 +3509,127 @@ public function check_recharge_status(Request $request)
         ]);
     }
 
+    if (empty($input['point_id'])) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Point ID is empty',
+        ]);
+    }
+
     // Escape inputs (if necessary, though not typically needed in Laravel ORM)
     $user_id = htmlspecialchars($input['user_id']);
     $txn_id = htmlspecialchars($input['txn_id']);
     $date = htmlspecialchars($input['date']);
     $key = htmlspecialchars($input['key']);
+    $point_id = htmlspecialchars($input['point_id']);
 
-     // API endpoint
-     $url = 'https://api.ekqr.in/api/check_order_status';
+    // Fetch points using point_id
+    $pointEntry = Points::find($point_id);
+    if (!$pointEntry) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid Point ID',
+        ]);
+    }
+    $points = $pointEntry->points;
 
-     // Data to be sent
-     $data = [
-         'client_txn_id' => $txn_id,
-         'txn_date' => $date,
-         'key' => $key
-     ];
- 
-     // Initialize HTTP client and send POST request
-     try {
-         $response = Http::post($url, $data);
- 
-         // Check for errors in the response
-         $responseArray = $response->json();
-         if (!$response->successful()) {
-             return response()->json([
-                 'success' => false,
-                 'message' => 'Failed to check order status. API error: ' . json_encode($responseArray),
-             ]);
-         }
- 
-         if (!isset($responseArray['status']) || !$responseArray['status']) {
-             return response()->json([
-                 'success' => false,
-                 'message' => 'Transaction failed. Order status check failed.',
-             ]);
-         }
- 
-         $status = $responseArray['status'];
-         $data = $responseArray['data'];
-         $amount = $data['amount'];
-         $status = $data['status'];
- 
-         if ($status == 'created' || $status == 'success') {
-             // Find existing recharge transaction by txn_id
-             $rechargeTrans = RechargeTrans::where('txn_id', $txn_id)->first();
- 
-             if (!$rechargeTrans) {
-                 return response()->json([
-                     'success' => false,
-                     'message' => 'Recharge transaction not found for txn_id: ' . $txn_id,
-                 ]);
-             }
- 
-             // Check if user_id matches
-             if ($rechargeTrans->user_id != $user_id) {
-                 return response()->json([
-                     'success' => false,
-                     'message' => 'User ID does not match the transaction ID',
-                 ]);
-             }
- 
-             // Update fields
-             $rechargeTrans->txn_id = $data['client_txn_id'];
-             $rechargeTrans->status = 1; // Assuming initial status
-             $rechargeTrans->save();
- 
-             // Fetch user information
-             $user = Users::find($user_id);
-             if (!$user) {
-                 return response()->json([
-                     'success' => false,
-                     'message' => 'User not found',
-                 ]);
-             }
- 
-             // Update user's recharge amount
-             $user->recharge += $amount;
-             $user->total_recharge += $amount;
-             $user->save();
- 
-             // Insert into transactions table
-             $transaction = new Transaction();
-             $transaction->user_id = $user_id;
-             $transaction->amount = $amount;
-             $transaction->datetime = now();
-             $transaction->type = 'recharge';
-             $transaction->save();
- 
-             return response()->json([
-                 'success' => true,
-                 'message' => 'Transaction completed successfully',
-             ]);
- 
-         } else {
-             return response()->json([
-                 'success' => false,
-                 'message' => 'Transaction failed. Status: ' . $status,
-             ]);
-         }
- 
-     } catch (\Exception $e) {
-         return response()->json([
-             'success' => false,
-             'message' => 'Failed to check order status. Error: ' . $e->getMessage(),
-         ]);
-     }
- }
+    // API endpoint
+    $url = 'https://api.ekqr.in/api/check_order_status';
+
+    // Data to be sent
+    $data = [
+        'client_txn_id' => $txn_id,
+        'txn_date' => $date,
+        'key' => $key
+    ];
+
+    // Initialize HTTP client and send POST request
+    try {
+        $response = Http::post($url, $data);
+
+        // Check for errors in the response
+        $responseArray = $response->json();
+        if (!$response->successful()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to check order status. API error: ' . json_encode($responseArray),
+            ]);
+        }
+
+        if (!isset($responseArray['status']) || !$responseArray['status']) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Transaction failed. Order status check failed.',
+            ]);
+        }
+
+        $status = $responseArray['status'];
+        $data = $responseArray['data'];
+
+        if ($status == 'created' || $status == 'success') {
+            // Find existing recharge transaction by txn_id
+            $rechargeTrans = RechargeTrans::where('txn_id', $txn_id)->first();
+
+            if (!$rechargeTrans) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Recharge transaction not found for txn_id: ' . $txn_id,
+                ]);
+            }
+
+            // Check if user_id matches
+            if ($rechargeTrans->user_id != $user_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User ID does not match the transaction ID',
+                ]);
+            }
+
+            // Update fields
+            $rechargeTrans->txn_id = $data['client_txn_id'];
+            $rechargeTrans->status = 1; // Assuming initial status
+            $rechargeTrans->save();
+
+            // Fetch user
+            $user = Users::find($user_id);
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User not found',
+                ]);
+            }
+
+            // Update user's points
+            $user->points += $points;
+            $user->total_points += $points;
+            $user->save();
+
+            // Insert into transactions table
+            $transaction = new Transaction();
+            $transaction->user_id = $user_id;
+            $transaction->points = $points;
+            $transaction->datetime = now();
+            $transaction->type = 'recharge';
+            $transaction->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Transaction completed successfully',
+            ]);
+
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Transaction failed. Status: ' . $status,
+            ]);
+        }
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to check order status. Error: ' . $e->getMessage(),
+        ]);
+    }
+}
+
 }    
