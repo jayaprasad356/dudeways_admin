@@ -2095,6 +2095,70 @@ public function chat_list(Request $request)
     ], 200);
 }
 
+public function delete_chat(Request $request)
+{
+    $user_id = $request->input('user_id');
+    $chat_id = $request->input('chat_id');
+
+    // Validate user_id
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 400);
+    }
+
+    // Validate chat_id
+    if (empty($chat_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'chat_id is empty.',
+        ], 400);
+    }
+
+    // Check if chat exists
+    $chat = Chats::find($chat_id);
+    if (!$chat) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Chat not found.',
+        ], 404);
+    }
+
+    // Check if the user is part of the chat
+    if ($chat->user_id != $user_id && $chat->chat_user_id != $user_id) {
+        return response()->json([
+            'success' => false,
+            'message' => 'You do not have permission to delete this chat.',
+        ], 403);
+    }
+
+    // Delete the chat
+    if (!$chat->delete()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to delete Chat.',
+        ], 500);
+    }
+
+    // Optionally, delete the reciprocal chat entry
+    $reciprocalChat = Chats::where('user_id', $chat->chat_user_id)
+                            ->where('chat_user_id', $chat->user_id)
+                            ->first();
+    if ($reciprocalChat && !$reciprocalChat->delete()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to delete reciprocal Chat.',
+        ], 500);
+    }
+
+    // Return success response
+    return response()->json([
+        'success' => true,
+        'message' => 'Chat deleted successfully.',
+    ], 200);
+}
+
 public function blocked_chat(Request $request)
 {
     $user_id = $request->input('user_id');
@@ -3417,118 +3481,144 @@ public function create_recharge(Request $request)
     }
 }
 
-
 public function check_recharge_status(Request $request)
 {
-    // Set default timezone
-    date_default_timezone_set('Asia/Kolkata');
+    // Emulate $_POST handling
+    $input = $request->all();
 
-    // Extract request inputs
-    $user_id = $request->input('user_id');
-    $txn_id = $request->input('txn_id');
-    $date = $request->input('date');
-    $key = $request->input('key');
-
-    // Validate required inputs
-    if (empty($user_id)) {
+    // Check required inputs
+    if (empty($input['user_id'])) {
         return response()->json([
             'success' => false,
-            'message' => 'user_id is empty.',
-        ], 400);
+            'message' => 'User ID is empty',
+        ]);
     }
 
-    if (empty($txn_id)) {
+    if (empty($input['txn_id'])) {
         return response()->json([
             'success' => false,
-            'message' => 'txn_id is empty.',
-        ], 400);
+            'message' => 'Transaction ID is empty',
+        ]);
     }
 
-    if (empty($date)) {
+    if (empty($input['date'])) {
         return response()->json([
             'success' => false,
-            'message' => 'date is empty.',
-        ], 400);
+            'message' => 'Date is empty',
+        ]);
     }
 
-    if (empty($key)) {
+    if (empty($input['key'])) {
         return response()->json([
             'success' => false,
-            'message' => 'key is empty.',
-        ], 400);
+            'message' => 'Key is empty',
+        ]);
     }
 
-    // Check if user exists
-    $user = Users::find($user_id);
-    if (!$user) {
-        return response()->json([
-            'success' => false,
-            'message' => 'User not found.',
-        ], 404);
-    }
+    // Escape inputs (if necessary, though not typically needed in Laravel ORM)
+    $user_id = htmlspecialchars($input['user_id']);
+    $txn_id = htmlspecialchars($input['txn_id']);
+    $date = htmlspecialchars($input['date']);
+    $key = htmlspecialchars($input['key']);
 
-    // Prepare data for external API call
-    $data = [
-        'client_txn_id' => $txn_id,
-        'txn_date' => $date,
-        'key' => $key,
-    ];
+     // API endpoint
+     $url = 'https://api.ekqr.in/api/check_order_status';
 
-    // Make external API call
-    $response = Http::post('https://api.ekqr.in/api/check_order_status', $data);
-    $responseArray = $response->json();
-
-    // Check for API call success
-    if (!$response->successful() || !isset($responseArray['status']) || !$responseArray['status']) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to check order status.',
-        ], 500);
-    }
-
-    // Process the response data
-    $data = $responseArray['data'];
-    $amount = $data['amount'];
-    $status = $data['status'];
-    $datetime = now();
-
-    if ($status == 'success') {
-        // Fetch recharge transaction
-        $rechargeTrans = RechargeTrans::where('txn_id', $txn_id)->where('status', 0)->first();
-        if ($rechargeTrans) {
-            $rechargeTrans->status = 1;
-            $rechargeTrans->save();
-
-           
-            $user->recharge += $amount;
-            $user->total_recharge += $amount;
-            $user->save();
-
-            $transaction = new Transaction();
-            $transaction->user_id = $user_id;
-            $transaction->amount = $amount;
-            $transaction->datetime = $datetime;
-            $transaction->type = 'recharge';
-            $transaction->save();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Transaction completed successfully.',
-            ], 200);
-        }
-
-        return response()->json([
-            'success' => false,
-            'message' => 'Recharge transaction not found or already completed.',
-        ], 404);
-    } else {
-        return response()->json([
-            'success' => false,
-            'message' => 'Transaction failed.',
-        ], 400);
-    }
-}
-
-}
-
-
+     // Data to be sent
+     $data = [
+         'client_txn_id' => $txn_id,
+         'txn_date' => $date,
+         'key' => $key
+     ];
+ 
+     // Initialize HTTP client and send POST request
+     try {
+         $response = Http::post($url, $data);
+ 
+         // Check for errors in the response
+         $responseArray = $response->json();
+         if (!$response->successful()) {
+             return response()->json([
+                 'success' => false,
+                 'message' => 'Failed to check order status. API error: ' . json_encode($responseArray),
+             ]);
+         }
+ 
+         if (!isset($responseArray['status']) || !$responseArray['status']) {
+             return response()->json([
+                 'success' => false,
+                 'message' => 'Transaction failed. Order status check failed.',
+             ]);
+         }
+ 
+         $status = $responseArray['status'];
+         $data = $responseArray['data'];
+         $amount = $data['amount'];
+         $status = $data['status'];
+ 
+         if ($status == 'created' || $status == 'success') {
+             // Find existing recharge transaction by txn_id
+             $rechargeTrans = RechargeTrans::where('txn_id', $txn_id)->first();
+ 
+             if (!$rechargeTrans) {
+                 return response()->json([
+                     'success' => false,
+                     'message' => 'Recharge transaction not found for txn_id: ' . $txn_id,
+                 ]);
+             }
+ 
+             // Check if user_id matches
+             if ($rechargeTrans->user_id != $user_id) {
+                 return response()->json([
+                     'success' => false,
+                     'message' => 'User ID does not match the transaction ID',
+                 ]);
+             }
+ 
+             // Update fields
+             $rechargeTrans->txn_id = $data['client_txn_id'];
+             $rechargeTrans->status = 1; // Assuming initial status
+             $rechargeTrans->save();
+ 
+             // Fetch user information
+             $user = Users::find($user_id);
+             if (!$user) {
+                 return response()->json([
+                     'success' => false,
+                     'message' => 'User not found',
+                 ]);
+             }
+ 
+             // Update user's recharge amount
+             $user->recharge += $amount;
+             $user->total_recharge += $amount;
+             $user->save();
+ 
+             // Insert into transactions table
+             $transaction = new Transaction();
+             $transaction->user_id = $user_id;
+             $transaction->amount = $amount;
+             $transaction->datetime = now();
+             $transaction->type = 'recharge';
+             $transaction->save();
+ 
+             return response()->json([
+                 'success' => true,
+                 'message' => 'Transaction completed successfully',
+             ]);
+ 
+         } else {
+             return response()->json([
+                 'success' => false,
+                 'message' => 'Transaction failed. Status: ' . $status,
+             ]);
+         }
+ 
+     } catch (\Exception $e) {
+         return response()->json([
+             'success' => false,
+             'message' => 'Failed to check order status. Error: ' . $e->getMessage(),
+         ]);
+     }
+ }
+}    
