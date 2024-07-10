@@ -3364,8 +3364,11 @@ public function send_notification(Request $request)
         ], 400);
     }
 
-    // Send notification using OneSignal
-    $response = OneSignalClient::sendNotificationToUser(
+    // Get an instance of OneSignalClient
+    $oneSignalClient = app('OneSignal'); // Replace 'OneSignal' with your actual alias or service name
+
+    // Send notification using the instance
+    $response = $oneSignalClient->sendNotificationToUser(
         $message,
         $user_id,
         $url = null,
