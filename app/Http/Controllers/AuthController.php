@@ -3338,7 +3338,7 @@ public function __construct(OneSignalClient $oneSignalClient)
 
 public function send_notification(Request $request)
 {
-    $user_id = $request->input('user_id');
+    $user_id = $request->input('user_id'); 
     $message = $request->input('message');
     $title = $request->input('title');
 
@@ -3364,67 +3364,35 @@ public function send_notification(Request $request)
         ], 400);
     }
 
-    // Retrieve player_id from the database
-    $user = Users::find($user_id);
-    if (!$user || empty($user->player_id)) {
+    // Attempt to send notification using OneSignal
+    $response = $this->oneSignalClient->sendNotificationToUser(
+        $user_id,
+        $message,
+        $title,
+        $url = null, 
+        $data = null, 
+        $buttons = null, 
+        $schedule = null 
+    );
+
+    // Handle response from OneSignal
+    if ($response['success']) {
+        // Notification successfully sent
+        return response()->json([
+            'success' => true,
+            'message' => 'Notification sent successfully for the specific user.',
+        ], 201);
+    } else {
+        // Failed to send notification
         return response()->json([
             'success' => false,
-            'message' => 'Invalid user_id or player_id not found.',
-        ], 400);
-    }
-
-    $player_id = $user->player_id;
-
-    // Validate player_id format (UUID)
-    if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $player_id)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Invalid format for player_id. Must be a valid UUID.',
-        ], 400);
-    }
-
-    try {
-        // Attempt to send notification using OneSignal
-        $response = $this->oneSignalClient->sendNotificationToUser(
-            $player_id, // Using player_id here
-            $message,
-            $title,
-            $url = null,
-            $data = null,
-            $buttons = null,
-            $schedule = null
-        );
-
-        // Handle response from OneSignal
-        if ($response['success']) {
-            // Notification successfully sent
-            return response()->json([
-                'success' => true,
-                'message' => 'Notification sent successfully for the specific user.',
-            ], 201);
-        } else {
-            // Failed to send notification
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to send notification.',
-            ], 500);
-        }
-    } catch (ClientException $e) {
-        // Handle client error (4xx responses)
-        $responseBody = json_decode($e->getResponse()->getBody()->getContents(), true);
-        return response()->json([
-            'success' => false,
-            'message' => 'Client error: ' . $responseBody['errors'][0],
-        ], 400);
-    } catch (RequestException $e) {
-        // Handle request error (5xx responses or network errors)
-        $responseBody = $e->hasResponse() ? json_decode($e->getResponse()->getBody()->getContents(), true) : [];
-        return response()->json([
-            'success' => false,
-            'message' => 'Request error: ' . ($responseBody['errors'][0] ?? $e->getMessage()),
+            'message' => 'Failed to send notification.',
         ], 500);
-    } 
+    }
 }
+
+
+
 public function create_recharge(Request $request)
 {
     // Validate required inputs
