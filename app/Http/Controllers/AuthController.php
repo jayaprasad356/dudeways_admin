@@ -3364,31 +3364,22 @@ public function send_notification(Request $request)
         ], 400);
     }
 
-    // Fetch player_id associated with user_id
-    $player_id = $this->getPlayerIdFromUserId($user_id);
-
-    // Validate retrieved player_id
-    if (empty($player_id)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to retrieve player_id for the specified user_id.',
-        ], 404);
-    }
-
     try {
-        // Attempt to send notification using OneSignal
-        $response = $this->oneSignalClient->sendNotificationToUser(
-            $player_id,
-            $message,
-            $title,
-            $url = null, 
-            $data = null, 
-            $buttons = null, 
-            $schedule = null 
-        );
+        // Prepare notification data
+        $notificationData = [
+            'app_id' => '4f929ed9-584d-4208-a3e8-7de1ae4f679e',
+            'contents' => ['en' => $message],
+            'headings' => ['en' => $title],
+            'include_external_user_ids' => [$user_id],
+        ];
+
+        // Send notification using OneSignal API
+        $response = $this->oneSignalClient->post('notifications', [
+            'json' => $notificationData,
+        ]);
 
         // Handle response from OneSignal
-        if ($response && isset($response['success'])) {
+        if ($response->getStatusCode() === 200) {
             // Notification successfully sent
             return response()->json([
                 'success' => true,
@@ -3428,20 +3419,6 @@ public function send_notification(Request $request)
         ], 500);
     }
 }
-
-/**
- * Example function to fetch player_id from user_id.
- * Replace this with your actual implementation to fetch player_id associated with user_id.
- */
-private function getPlayerIdFromUserId($user_id)
-{
-    // Example logic to retrieve player_id based on user_id
-    // Replace with your actual implementation (e.g., database query)
-    return Users::where('id', $user_id)->value('player_id');
-}
-
-
-
 
 public function create_recharge(Request $request)
 {
