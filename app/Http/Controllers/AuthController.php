@@ -3337,15 +3337,15 @@ public function __construct(OneSignalClient $oneSignalClient)
 public function send_notification(Request $request)
 {
     // Retrieve inputs from the request
-    $user_id = $request->input('user_id'); 
+    $player_id = $request->input('player_id'); 
     $message = $request->input('message');
     $title = $request->input('title');
 
     // Validate required fields
-    if (empty($user_id)) {
+    if (empty($player_id)) {
         return response()->json([
             'success' => false,
-            'message' => 'user_id is empty.',
+            'message' => 'player_id is empty.',
         ], 400);
     }
 
@@ -3365,7 +3365,7 @@ public function send_notification(Request $request)
 
     // Attempt to send notification using OneSignal
     $response = $this->oneSignalClient->sendNotificationToUser(
-        $user_id,
+        $player_id,
         $message,
         $title,
         $url = null, 
