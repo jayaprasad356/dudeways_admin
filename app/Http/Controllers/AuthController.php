@@ -3363,35 +3363,32 @@ public function send_notification(Request $request)
             'message' => 'title is empty.',
         ], 400);
     }
+    
+        $response = $this->oneSignalClient->sendNotificationToUser(
+            $message,
+            $user_id,
+            $url = null,
+            $data = null,
+            $buttons = null,
+            $schedule = null
+        );
 
-    // Resolve an instance of OneSignalClient
-    $oneSignalClient = app('OneSignal'); // Replace 'OneSignal' with your actual alias or service name
-
-    // Send notification using the instance
-    $response = $oneSignalClient->sendNotificationToUser(
-        $message,
-        $user_id,
-        $url = null,
-        $data = null,
-        $buttons = null,
-        $schedule = null
-    );
-
-    // Handle response from OneSignal
-    if ($response && isset($response['success']) && $response['success']) {
-        // Notification successfully sent
-        return response()->json([
-            'success' => true,
-            'message' => 'Notification sent successfully for the specific user.',
-        ], 201);
-    } else {
-        // Failed to send notification or $response is null
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to send notification.',
-        ], 500);
-    }
+        // Handle response from OneSignal
+        if ($response && isset($response['success']) && $response['success']) {
+            // Notification successfully sent
+            return response()->json([
+                'success' => true,
+                'message' => 'Notification sent successfully for the specific user.',
+            ], 201);
+        } else {
+            // Failed to send notification or $response is null
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to send notification.',
+            ], 500);
+        }
 }
+
 
 
 public function create_recharge(Request $request)
