@@ -88,7 +88,7 @@ class UsersController extends Controller
             'city' => 'required|string|max:255',
             'state' => 'required|string|max:255',
             'age' => 'required|integer|between:18,60',
-            'gender' => 'required|in:male,female,other',
+            'gender' => 'required|in:male,female,others',
             'profile' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ], [
             'email.unique' => 'The email has already been taken.',
@@ -206,7 +206,7 @@ private function generateUniqueName($name, $user_id)
             'name' => 'required|string|max:255',
             'age' => 'required|integer|between:18,60',
             'email' => 'required|email|unique:users,email,' . $users->id,
-            'gender' => 'required|in:male,female,other',
+            'gender' => 'required|in:male,female,others',
             'state' => 'required|string|max:255',
             'city' => 'required|string|max:255',
             'profession' => 'required|string|max:255',
