@@ -3339,14 +3339,14 @@ public function __construct(OneSignalClient $oneSignalClient)
 public function send_notification(Request $request)
 {
     // Validate required fields
-    $user_id = $request->input('user_id');
+    $external_user_id = $request->input('external_user_id');
     $message = $request->input('message');
     $title = $request->input('title');
 
-    if (empty($user_id)) {
+    if (empty($external_user_id)) {
         return response()->json([
             'success' => false,
-            'message' => 'user_id is empty.',
+            'message' => 'external_user_id is empty.',
         ], 400);
     }
 
@@ -3364,19 +3364,17 @@ public function send_notification(Request $request)
         ], 400);
     }
     
-      
-       // Send notification via OneSignal
-    $response = $this->oneSignalClient->sendNotificationToUser(
-        "Some Message",
-        $message,
-        $title,
-        $user_id,
-        $url = null,
-        $data = null,
-        $buttons = null,
-        $schedule = null
-    );
-
+    try {
+        $response = $this->oneSignalClient->sendNotificationToExternalUser(
+            "Some Message",
+            $message,
+            $title,
+            $external_user_id,
+            $url = null,
+            $data = null,
+            $buttons = null,
+            $schedule = null
+        );
 
         // Handle response from OneSignal
         if ($response && isset($response['success']) && $response['success']) {
@@ -3392,7 +3390,15 @@ public function send_notification(Request $request)
                 'message' => 'Failed to send notification.',
             ], 500);
         }
+    } catch (\Exception $e) {
+        // Handle any exceptions that occur during the request
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to send notification: ' . $e->getMessage(),
+        ], 500);
     }
+}
+
 
 public function create_recharge(Request $request)
 {
