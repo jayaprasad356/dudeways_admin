@@ -3352,6 +3352,7 @@ public function send_notification(Request $request)
 
     // Send notification via OneSignal
     $response = $this->oneSignalClient->sendNotificationToExternalUser(
+        "Some Message",
         $message,
         $external_user_id,
         $url = null,
