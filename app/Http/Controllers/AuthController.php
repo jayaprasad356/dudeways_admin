@@ -402,10 +402,14 @@ public function userdetails(Request $request)
         ], 404);
     }
 
+    $online_status = $request->input('online_status', $user->online_status);
+
+    $user->online_status = $online_status;
+    $user->save();
+
     // Image URLs
     $imageUrl = asset('storage/app/public/users/' . $user->profile);
     $coverimageUrl = asset('storage/app/public/users/' . $user->cover_img);
-    
 
     return response()->json([
         'success' => true,
@@ -427,7 +431,7 @@ public function userdetails(Request $request)
             'cover_img' => $coverimageUrl,
             'points' => $user->points,
             'verified' => $user->verified,
-            'online_status' => $user->online_status,
+            'online_status' => $user->online_status, // Updated value
             'introduction' => $user->introduction,
             'message_notify' => $user->message_notify,
             'add_friend_notify' => $user->add_friend_notify,
@@ -441,6 +445,7 @@ public function userdetails(Request $request)
         ],
     ], 200);
 }
+
 
 public function other_userdetails(Request $request)
 {
@@ -1245,9 +1250,30 @@ public function trip_list(Request $request)
 
     $type = $request->input('type');
 
-    // Set default offset and limit if not provided
-    $offset = $request->input('offset', 0);
-    $limit = $request->input('limit', 10);
+    // Get offset and limit from request with default values
+    $offset = $request->has('offset') ? $request->input('offset') : 0; // Default offset is 0 if not provided
+    $limit = $request->has('limit') ? $request->input('limit') : 10; // Default limit is 10 if not provided
+
+    // Validate offset
+    if (!is_numeric($offset)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Offset is empty.',
+        ], 400);
+    }
+
+    // Validate limit
+    if (!is_numeric($limit)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Limit is empty.',
+        ], 400);
+    }
+
+    // Convert offset and limit to integers
+    $offset = (int)$offset;
+    $limit = (int)$limit;
+
 
     // Fetch the user's latitude and longitude
     $userLatitude = (float)$userExists->latitude;
@@ -1420,15 +1446,34 @@ private function calculateDistance($latitudeFrom, $longitudeFrom, $latitudeTo, $
     return $earthRadius * $c;
 }
 
-
 public function my_trip_list(Request $request)
 {
     // Get the user_id from the request
     $user_id = $request->input('user_id');
 
-    // Set default offset and limit if not provided
-    $offset = $request->input('offset', 0);
-    $limit = $request->input('limit', 10);
+    // Get offset and limit from request with default values
+    $offset = $request->has('offset') ? $request->input('offset') : 0; // Default offset is 0 if not provided
+    $limit = $request->has('limit') ? $request->input('limit') : 10; // Default limit is 10 if not provided
+
+    // Validate offset
+    if (!is_numeric($offset)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Offset is empty.',
+        ], 400);
+    }
+
+    // Validate limit
+    if (!is_numeric($limit)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Limit is empty.',
+        ], 400);
+    }
+
+    // Convert offset and limit to integers
+    $offset = (int)$offset;
+    $limit = (int)$limit;
 
     $totalTrips = Trips::where('user_id', $user_id)->count();
 
@@ -1447,35 +1492,30 @@ public function my_trip_list(Request $request)
 
     $tripDetails = [];
 
- 
     foreach ($trips as $trip) {
         $user = Users::find($trip->user_id);
         if ($user) {
-           
-            $imageUrl = asset('storage/app/public/users/' . $user->profile) ;
-            $coverimageUrl = asset('storage/app/public/users/' . $user->cover_img) ;
-            
-          
+            $imageUrl = asset('storage/app/public/users/' . $user->profile);
+            $coverimageUrl = asset('storage/app/public/users/' . $user->cover_img);
         } else {
             $imageUrl = null; // Set default image URL if user not found
             $coverimageUrl = null; // Set default image URL if user not found
         }
 
-      // Calculate time difference in hours
- $tripTime = Carbon::parse($trip->trip_datetime);
- $currentTime = Carbon::now();
- $hoursDifference = $tripTime->diffInHours($currentTime);
- 
- // Determine the time display string
- if ($hoursDifference == 0) {
-     $timeDifference = 'now';
- } elseif ($hoursDifference < 24) {
-     $timeDifference = $hoursDifference . 'h';
- } else {
-     $daysDifference = floor($hoursDifference / 24);
-     $timeDifference = $daysDifference . 'd';
- }
+        // Calculate time difference in hours
+        $tripTime = Carbon::parse($trip->trip_datetime);
+        $currentTime = Carbon::now();
+        $hoursDifference = $tripTime->diffInHours($currentTime);
 
+        // Determine the time display string
+        if ($hoursDifference == 0) {
+            $timeDifference = 'now';
+        } elseif ($hoursDifference < 24) {
+            $timeDifference = $hoursDifference . 'h';
+        } else {
+            $daysDifference = floor($hoursDifference / 24);
+            $timeDifference = $daysDifference . 'd';
+        }
 
         $tripimageUrl = asset('storage/app/public/trips/' . $trip->trip_image);
 
@@ -1490,7 +1530,7 @@ public function my_trip_list(Request $request)
             'trip_type' => $trip->trip_type,
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
             'to_date' => date('F j, Y', strtotime($trip->to_date)),
-            'time' => $timeDifference, 
+            'time' => $timeDifference,
             'trip_title' => $trip->trip_title,
             'trip_description' => $trip->trip_description,
             'location' => $trip->location,
@@ -1505,7 +1545,7 @@ public function my_trip_list(Request $request)
     return response()->json([
         'success' => true,
         'message' => 'Trip details retrieved successfully.',
-        'total' => $totalTrips, 
+        'total' => $totalTrips,
         'data' => $tripDetails,
     ], 200);
 }
@@ -1966,9 +2006,29 @@ public function delete_trip(Request $request)
             ], 400);
         }
     
-        // Set default offset and limit if not provided
-        $offset = $request->input('offset', 0);
-        $limit = $request->input('limit', 10);
+        // Get offset and limit from request with default values
+    $offset = $request->has('offset') ? $request->input('offset') : 0; // Default offset is 0 if not provided
+    $limit = $request->has('limit') ? $request->input('limit') : 10; // Default limit is 10 if not provided
+
+    // Validate offset
+    if (!is_numeric($offset)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Offset is empty.',
+        ], 400);
+    }
+
+    // Validate limit
+    if (!is_numeric($limit)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Limit is empty.',
+        ], 400);
+    }
+
+    // Convert offset and limit to integers
+    $offset = (int)$offset;
+    $limit = (int)$limit;
     
         // Fetch total count of chats for the specific user_id
         $totalChats = Chats::where('user_id', $user_id)->count();
@@ -2323,10 +2383,29 @@ public function friends_list(Request $request)
             'message' => 'user_id is empty.',
         ], 400);
     }
+  // Get offset and limit from request with default values
+  $offset = $request->has('offset') ? $request->input('offset') : 0; // Default offset is 0 if not provided
+  $limit = $request->has('limit') ? $request->input('limit') : 10; // Default limit is 10 if not provided
 
-     // Set default offset and limit if not provided
-     $offset = $request->input('offset', 0);
-     $limit = $request->input('limit', 10);
+  // Validate offset
+  if (!is_numeric($offset)) {
+      return response()->json([
+          'success' => false,
+          'message' => 'Offset is empty.',
+      ], 400);
+  }
+
+  // Validate limit
+  if (!is_numeric($limit)) {
+      return response()->json([
+          'success' => false,
+          'message' => 'Limit is empty.',
+      ], 400);
+  }
+
+  // Convert offset and limit to integers
+  $offset = (int)$offset;
+  $limit = (int)$limit;
  
      // Fetch friends for the specific user_id from the database with pagination
      $friendsQuery = Friends::where('user_id', $user_id);
@@ -2516,10 +2595,29 @@ public function notification_list(Request $request)
         ], 400);
     }
 
-    // Set default offset and limit if not provided
-    $offset = $request->input('offset', 0);
-    $limit = $request->input('limit', 10);
+     // Get offset and limit from request with default values
+  $offset = $request->has('offset') ? $request->input('offset') : 0; // Default offset is 0 if not provided
+  $limit = $request->has('limit') ? $request->input('limit') : 10; // Default limit is 10 if not provided
 
+  // Validate offset
+  if (!is_numeric($offset)) {
+      return response()->json([
+          'success' => false,
+          'message' => 'Offset is empty.',
+      ], 400);
+  }
+
+  // Validate limit
+  if (!is_numeric($limit)) {
+      return response()->json([
+          'success' => false,
+          'message' => 'Limit is empty.',
+      ], 400);
+  }
+
+  // Convert offset and limit to integers
+  $offset = (int)$offset;
+  $limit = (int)$limit;
     $totalNotifications = Notifications::where('user_id', $user_id)->count();
 
     // Fetch notifications for the specific user_id from the database with pagination
