@@ -3338,35 +3338,22 @@ public function __construct(OneSignalClient $oneSignalClient)
 
 public function send_notification(Request $request)
 {
-    $user_id = $request->input('user_id');
+    // Validate required fields
+    $external_user_id = $request->input('external_user_id');
     $message = $request->input('message');
     $title = $request->input('title');
 
-    // Validate required fields
-    if (empty($user_id)) {
+    if (empty($external_user_id) || empty($message) || empty($title)) {
         return response()->json([
             'success' => false,
-            'message' => 'user_id is empty.',
-        ], 400);
+            'message' => 'external_user_id, message, or title is empty.',
+        ], 422);
     }
 
-    if (empty($message)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'message is empty.',
-        ], 400);
-    }
-
-    if (empty($title)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'title is empty.',
-        ], 400);
-    }
-
-    $response = $this->oneSignalClient->sendNotificationToUser(
-        $message, // Message from request
-        $user_id, // User ID from request
+    // Send notification via OneSignal
+    $response = $this->oneSignalClient->sendNotificationToExternalUser(
+        $message,
+        $external_user_id,
         $url = null,
         $data = null,
         $buttons = null,
@@ -3374,7 +3361,7 @@ public function send_notification(Request $request)
     );
 
     // Handle response from OneSignal
-    if (isset($response['success']) && $response['success'] === true) {
+    if ($response['success']) {
         // Notification successfully sent
         return response()->json([
             'success' => true,
@@ -3382,13 +3369,13 @@ public function send_notification(Request $request)
         ], 201);
     } else {
         // Failed to send notification
-        $errorMessage = isset($response['message']) ? $response['message'] : 'Failed to send notification.';
         return response()->json([
             'success' => false,
-            'message' => $errorMessage,
+            'message' => 'Failed to send notification.',
         ], 500);
     }
 }
+
 
 
 
