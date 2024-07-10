@@ -3364,7 +3364,7 @@ public function send_notification(Request $request)
         ], 400);
     }
 
-    // Get an instance of OneSignalClient
+    // Resolve an instance of OneSignalClient
     $oneSignalClient = app('OneSignal'); // Replace 'OneSignal' with your actual alias or service name
 
     // Send notification using the instance
