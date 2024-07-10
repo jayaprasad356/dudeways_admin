@@ -28,9 +28,8 @@
                 <div class="form-group mb-0 d-flex align-items-center">
                     <label for="status-filter" class="mr-2 mb-0">Filter by status:</label>
                     <select name="status" id="status-filter" class="form-control">
-                        <option value="">All</option>
+                    <option value="0" {{ request()->input('status') === '0' ? 'selected' : '' }}>Pending</option>
                         <option value="1" {{ request()->input('status') === '1' ? 'selected' : '' }}>Verified</option>
-                        <option value="0" {{ request()->input('status') === '0' ? 'selected' : '' }}>Pending</option>
                     </select>
                 </div>
             </div>

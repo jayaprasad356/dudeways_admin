@@ -15,15 +15,25 @@ class VerificationsController extends Controller
             $verification = Verifications::find($verificationId);
             if ($verification) {
                 $user = Users::find($verification->user_id);
-                if ($user) {
+                if ($user && $user->verify_bonus_sent !== 1) {
                     $user->points += 100; 
+                    $user->total_points += 100; 
                     $user->verified = 1;
+                    $user->verify_bonus_sent = 1;
                     $user->save();
 
-                    // Update verification status
-                    $verification->status = 1;
-                    $verification->save();
+                    // Create a new transaction
+                    \App\Models\Transaction::create([
+                        'user_id' => $user->id,
+                        'type' => 'verify_points',
+                        'points' => 100, // Assuming the points are 100
+                        'datetime' => now(),
+                    ]);
                 }
+
+                // Update verification status
+                $verification->status = 1;
+                $verification->save();
             }
         }
 
@@ -40,9 +50,12 @@ class VerificationsController extends Controller
             $query->where('user_id', $user_id);
         }
 
-        if ($request->filled('status')) {
+        if ($request->has('status')) {
             $status = $request->input('status');
             $query->where('status', $status);
+        } else {
+            // By default, fetch pending trips
+            $query->where('status', 0);
         }
 
         $verifications = $query->latest()->paginate(10); // Paginate the results
@@ -61,3 +74,4 @@ class VerificationsController extends Controller
         ]);
     }
 }
+

@@ -83,6 +83,13 @@
                         <p>Verifications</p>
                     </a>
                 </li>
+
+                <li class="nav-item has-treeview">
+                    <a href="{{ route('transactions.index') }}" class="nav-link {{ activeSegment('Transactions') }}">
+                    <i class="nav-icon fas fa-exchange-alt"></i>
+                        <p>Transactions</p>
+                    </a>
+                </li>
                
                 <li class="nav-item has-treeview">
                     <a href="{{ route('news.edit') }}" class="nav-link {{ activeSegment('news') }}">

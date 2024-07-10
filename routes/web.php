@@ -16,6 +16,7 @@ use App\Http\Controllers\FriendsController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\VerificationsController;
 use App\Http\Controllers\ProfessionsController;
+use App\Http\Controllers\TransactionsController;
 use App\Http\Controllers\BulkUserController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -124,6 +125,11 @@ Route::prefix('admin')->middleware('auth')->group(function () {
         Route::post('/verifications/verify', [VerificationsController::class, 'verify'])->name('verifications.verify');
 
 
+            //Verifications  
+            Route::get('/transactions', [TransactionsController::class, 'index'])->name('transactions.index');
+            Route::delete('/transactions/{transactions}', [TransactionsController::class, 'destroy'])->name('transactions.destroy');
+            
+    
 
         //Bulk Users
        // web.php
