@@ -3361,23 +3361,23 @@ public function send_notification(Request $request)
         $schedule = null
     );
 
-    // Handle response from OneSignal
-    if ($response['success']) {
-        // Notification successfully sent
-        return response()->json([
-            'success' => true,
-            'message' => 'Notification sent successfully for the specific user.',
-        ], 201);
-    } else {
-        // Failed to send notification
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to send notification.',
-        ], 500);
-    }
+ // Handle response from OneSignal
+if ($response && isset($response['success']) && $response['success']) {
+    // Notification successfully sent
+    return response()->json([
+        'success' => true,
+        'message' => 'Notification sent successfully for the specific user.',
+    ], 201);
+} else {
+    // Failed to send notification or $response is null
+    return response()->json([
+        'success' => false,
+        'message' => 'Failed to send notification.',
+    ], 500);
 }
 
 
+}
 
 
 public function create_recharge(Request $request)
