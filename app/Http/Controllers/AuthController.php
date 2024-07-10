@@ -3280,35 +3280,42 @@ public function profile_view(Request $request)
         ], 404);
     }
 
-        // Check if user exists
-        $user = Users::find($profile_user_id);
-        if (!$user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'profile_user_id not found.',
-            ], 404);
-        }
-
-        // Add notification entry
-        $notification = new Notifications();
-        $notification->user_id = $profile_user_id;
-        $notification->notify_user_id = $user_id;
-        $notification->message = 'Profile Viewed Successfully';
-        $notification->save();
-
-    // Save the feedback
-    if (!$notification->save()) {
+    // Check if profile user exists
+    $profileUser = Users::find($profile_user_id);
+    if (!$profileUser) {
         return response()->json([
             'success' => false,
-            'message' => 'Failed to save notification.',
-        ], 500);
+            'message' => 'profile_user_id not found.',
+        ], 404);
     }
+
+    // Check for existing notification in the last hour
+    $oneHourAgo = now()->subHour();
+    $existingNotification = Notifications::where('user_id', $profile_user_id)
+        ->where('notify_user_id', $user_id)
+        ->where('datetime', '>=', $oneHourAgo)
+        ->first();
+
+    if ($existingNotification) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Notification already sent within the last hour.',
+        ], 200);
+    }
+
+    // Add notification entry
+    $notification = new Notifications();
+    $notification->user_id = $profile_user_id;
+    $notification->notify_user_id = $user_id;
+    $notification->message = 'Profile Viewed Successfully';
+    $notification->save();
 
     return response()->json([
         'success' => true,
         'message' => 'Notification added successfully.',
     ], 201);
 }
+
 
 protected $oneSignalClient;
 
