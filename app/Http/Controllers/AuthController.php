@@ -3338,7 +3338,7 @@ public function __construct(OneSignalClient $oneSignalClient)
 
 public function send_notification(Request $request)
 {
-    $user_id = $request->input('user_id'); 
+    $user_id = $request->input('user_id');
     $message = $request->input('message');
     $title = $request->input('title');
 
@@ -3364,19 +3364,17 @@ public function send_notification(Request $request)
         ], 400);
     }
 
-    // Attempt to send notification using OneSignal
     $response = $this->oneSignalClient->sendNotificationToUser(
-        $user_id,
-        $message,
-        $title,
-        $url = null, 
-        $data = null, 
-        $buttons = null, 
-        $schedule = null 
+        $message, // Message from request
+        $user_id, // User ID from request
+        $url = null,
+        $data = null,
+        $buttons = null,
+        $schedule = null
     );
 
     // Handle response from OneSignal
-    if ($response['success']) {
+    if (isset($response['success']) && $response['success'] === true) {
         // Notification successfully sent
         return response()->json([
             'success' => true,
@@ -3384,9 +3382,10 @@ public function send_notification(Request $request)
         ], 201);
     } else {
         // Failed to send notification
+        $errorMessage = isset($response['message']) ? $response['message'] : 'Failed to send notification.';
         return response()->json([
             'success' => false,
-            'message' => 'Failed to send notification.',
+            'message' => $errorMessage,
         ], 500);
     }
 }
