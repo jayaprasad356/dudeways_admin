@@ -3336,20 +3336,57 @@ public function __construct(OneSignalClient $oneSignalClient)
 
 public function send_notification(Request $request)
 {
+    $user_id = $request->input('user_id'); 
+    $message = $request->input('message');
+    $title = $request->input('title');
 
-    $response = $this->oneSignalClient->sendNotificationToAll(
-        "Some Message", 
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 400);
+    }
+
+    if (empty($message)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'message is empty.',
+        ], 400);
+    }
+
+    if (empty($title)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'title is empty.',
+        ], 400);
+    }
+
+    // Send notification using OneSignal
+    $response = $this->oneSignalClient->sendNotificationToUser(
+        $user_id,
+        $message,
+        $title,
         $url = null, 
         $data = null, 
         $buttons = null, 
-        $schedule = null
+        $schedule = null 
     );
 
-    return response()->json([
-        'success' => true,
-        'message' => 'Notification sent successfully.',
-    ], 201);
+    // Handle response from OneSignal
+    if ($response['success']) {
+        return response()->json([
+            'success' => true,
+            'message' => 'Notification sent successfully.',
+        ], 201);
+    } else {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to send notification.',
+        ], 500);
+    }
 }
+
+
 
 public function create_recharge(Request $request)
 {
