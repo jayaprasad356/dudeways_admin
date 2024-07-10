@@ -1308,7 +1308,6 @@ public function trip_list(Request $request)
                 'message' => 'Date is required.',
             ], 400);
         }
-
         $fromDate = $request->input('date');
         if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $fromDate)) {
             return response()->json([
