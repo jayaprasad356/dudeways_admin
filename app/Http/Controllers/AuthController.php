@@ -3362,7 +3362,7 @@ public function send_notification(Request $request)
     }
 
     // Send notification using OneSignal
-    $response = $this->oneSignalClient->sendNotificationToUser(
+    /*$response = $this->oneSignalClient->sendNotificationToUser(
         $user_id,
         $message,
         $title,
@@ -3370,6 +3370,14 @@ public function send_notification(Request $request)
         $data = null, 
         $buttons = null, 
         $schedule = null 
+    );*/
+
+    $response = $this->oneSignalClient::sendNotificationToAll(
+        "Some Message", 
+        $url = null, 
+        $data = null, 
+        $buttons = null, 
+        $schedule = null
     );
 
     // Handle response from OneSignal
