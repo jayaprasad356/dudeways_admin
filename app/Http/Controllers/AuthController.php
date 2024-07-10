@@ -1424,8 +1424,15 @@ public function my_trip_list(Request $request)
     // Get the user_id from the request
     $user_id = $request->input('user_id');
 
-    // Fetch trips for the specific user_id from the database
-    $trips = Trips::where('user_id', $user_id)->get();
+    // Set default offset and limit if not provided
+    $offset = $request->input('offset', 0);
+    $limit = $request->input('limit', 10);
+
+    // Fetch trips for the specific user_id from the database with pagination
+    $trips = Trips::where('user_id', $user_id)
+        ->skip($offset)
+        ->take($limit)
+        ->get();
 
     if ($trips->isEmpty()) {
         return response()->json([
@@ -1666,72 +1673,6 @@ public function latest_trip(Request $request)
         'success' => true,
         'message' => 'Trip details retrieved successfully.',
         'data' => $tripDetails,
-    ], 200);
-}
-
-public function recommend_trip_list(Request $request)
-{
-    // Get the trip_id from the request
-    $trip_id = $request->input('trip_id');
-
-    // Fetch trip details for the specific trip_id from the database
-    $trip = Trips::find($trip_id);
-
-    // Check if the trip exists
-    if (!$trip) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Trip not found.',
-        ], 404);
-    }
-
-    // Prepare trip details for the specific trip_id
-    $tripDetails[] = [
-        'id' => $trip->id,
-        'user_id' => $trip->user_id,
-        'trip_type' => $trip->trip_type,
-        'from_date' => date('F j, Y', strtotime($trip->from_date)),
-        'to_date' => date('F j, Y', strtotime($trip->to_date)),
-        'time' => '4h',
-        'trip_title' => $trip->trip_title,
-        'trip_description' => $trip->trip_description,
-        'location' => $trip->location,
-        'trip_status' => $trip->trip_status,
-        'trip_image' => asset('storage/app/public/trips/' . $trip->trip_image),
-        'trip_datetime' => Carbon::parse($trip->trip_datetime)->format('Y-m-d H:i:s'),
-        'updated_at' => Carbon::parse($trip->updated_at)->format('Y-m-d H:i:s'),
-        'created_at' => Carbon::parse($trip->created_at)->format('Y-m-d H:i:s'),
-    ];
-
-    // Fetch all trips from the database
-    $allTrips = Trips::all();
-
-    // Prepare trip details for all trips
-    $allTripDetails = [];
-    foreach ($allTrips as $trip) {
-        $allTripDetails[] = [
-            'id' => $trip->id,
-            'user_id' => $trip->user_id,
-            'trip_type' => $trip->trip_type,
-            'from_date' => date('F j, Y', strtotime($trip->from_date)),
-            'to_date' => date('F j, Y', strtotime($trip->to_date)),
-            'time' => '4h',
-            'trip_title' => $trip->trip_title,
-            'trip_description' => $trip->trip_description,
-            'location' => $trip->location,
-            'trip_status' => $trip->trip_status,
-            'trip_image' => asset('storage/app/public/trips/' . $trip->trip_image),
-            'trip_datetime' => Carbon::parse($trip->trip_datetime)->format('Y-m-d H:i:s'),
-            'updated_at' => Carbon::parse($trip->updated_at)->format('Y-m-d H:i:s'),
-            'created_at' => Carbon::parse($trip->created_at)->format('Y-m-d H:i:s'),
-        ];
-    }
-
-    return response()->json([
-        'success' => true,
-        'message' => 'Trip details retrieved successfully.',
-        'specific_trip' => $tripDetails,
-        'all_trips' => $allTripDetails,
     ], 200);
 }
 
@@ -2010,25 +1951,34 @@ public function delete_trip(Request $request)
 
 public function chat_list(Request $request)
 {
-    // Get the user_id from the request
-    $user_id = $request->input('user_id');
+        // Get the user_id from the request
+        $user_id = $request->input('user_id');
 
-    if (empty($user_id)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'user_id is empty.',
-        ], 400);
-    }
-
-      // Fetching chats for the specific user_id, ordered by datetime
-      $chats = Chats::where('user_id', $user_id)->orderBy('datetime', 'desc')->get();
-
-    if ($chats->isEmpty()) {
-        return response()->json([
-            'success' => false,
-            'message' => 'No chats found.',
-        ], 404);
-    }
+        if (empty($user_id)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'user_id is empty.',
+            ], 400);
+        }
+    
+        // Set default offset and limit if not provided
+        $offset = $request->input('offset', 0);
+        $limit = $request->input('limit', 10);
+    
+        // Fetch notifications for the specific user_id from the database with pagination
+        $chats = Chats::where('user_id', $user_id)
+            ->orderBy('datetime', 'desc')
+            ->skip($offset)
+            ->take($limit)
+            ->get();
+    
+        if ($chats->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No chats found.',
+            ], 404);
+        }
+    
 
     $chatDetails = $chats->map(function ($chat) use ($user_id) {
         $chat_user = Users::find($chat->chat_user_id); // Fetch the chat_user details
@@ -2353,7 +2303,6 @@ public function add_friends(Request $request)
     }
 }
 
-
 public function friends_list(Request $request)
 {
     // Get the user_id from the request
@@ -2366,8 +2315,15 @@ public function friends_list(Request $request)
         ], 400);
     }
 
-    // Fetching all friends from the Friends model where user_id matches
-    $friends = Friends::where('user_id', $user_id)->get();
+    // Set default offset and limit if not provided
+    $offset = $request->input('offset', 0);
+    $limit = $request->input('limit', 10);
+
+    // Fetch friends for the specific user_id from the database with pagination
+    $friends = Friends::where('user_id', $user_id)
+        ->skip($offset)
+        ->take($limit)
+        ->get();
 
     if ($friends->isEmpty()) {
         return response()->json([
@@ -2384,7 +2340,7 @@ public function friends_list(Request $request)
         if (!empty($user->latitude) && !empty($user->longtitude) && !empty($friendUser->latitude) && !empty($friendUser->longtitude)) {
             // Calculate distance between user and friendUser
             $distance = $this->calculateDistance((float)$user->latitude, (float)$user->longtitude, (float)$friendUser->latitude, (float)$friendUser->longtitude);
-            $distanceFormatted = round($distance, 2) . ' km'; // Round to 2 decimal places
+            $distanceFormatted = round($distance) . ' km'; // Round to the nearest whole number
         } else {
             $distanceFormatted = null; // Handle case where latitude or longitude is missing
         }
@@ -2413,13 +2369,12 @@ public function friends_list(Request $request)
             $lastSeenFormatted = $lastSeen->format('M jS, Y'); // Older than current year, show month, day, and year
         }
 
-          // Check if the user is a friend
-          $isFriend = Friends::where('user_id', $user_id)
-          ->where('friend_user_id', $friendUser->id)
-          ->exists();
+        // Check if the user is a friend
+        $isFriend = Friends::where('user_id', $user_id)
+            ->where('friend_user_id', $friendUser->id)
+            ->exists();
 
-      $friendStatus = $isFriend ? '1' : '0';  // Check if the user is a friend
-      
+        $friendStatus = $isFriend ? '1' : '0';  // Check if the user is a friend
 
         return [
             'id' => $friend->id,
@@ -2448,6 +2403,7 @@ public function friends_list(Request $request)
         'data' => $friendDetails,
     ], 200);
 }
+
 
 public function add_notifications(Request $request)
 {
@@ -2538,19 +2494,26 @@ public function add_notifications(Request $request)
 
 public function notification_list(Request $request)
 {
-       // Get the user_id from the request
-       $user_id = $request->input('user_id');
+    // Get the user_id from the request
+    $user_id = $request->input('user_id');
 
-       if (empty($user_id)) {
-           return response()->json([
-               'success' => false,
-               'message' => 'user_id is empty.',
-           ], 400);
-       }
-   
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 400);
+    }
 
-    // Fetch notifications for the specific user_id from the database
-    $notifications = Notifications::where('user_id', $user_id)->get();
+    // Set default offset and limit if not provided
+    $offset = $request->input('offset', 0);
+    $limit = $request->input('limit', 10);
+
+    // Fetch notifications for the specific user_id from the database with pagination
+    $notifications = Notifications::where('user_id', $user_id)
+        ->orderBy('datetime', 'desc')
+        ->skip($offset)
+        ->take($limit)
+        ->get();
 
     if ($notifications->isEmpty()) {
         return response()->json([
@@ -2561,15 +2524,12 @@ public function notification_list(Request $request)
 
     // Prepare notification details
     $notificationDetails = $notifications->map(function ($notification) use ($user_id) {
-        $user = Users::find($notification->user_id);
         $notify_user = Users::find($notification->notify_user_id);
 
         $imageUrl = $notify_user->profile_verified == 1 ? asset('storage/app/public/users/' . $notify_user->profile) : '';
         $coverImageUrl = $notify_user->cover_img_verified == 1 ? asset('storage/app/public/users/' . $notify_user->cover_img) : '';
-        //$notifyUserImageUrl = asset('storage/app/public/users/' . $notify_user->profile);
-         // Calculate time difference in hours
-        
-               // Calculate time difference
+
+        // Calculate time difference
         $notificationTime = Carbon::parse($notification->datetime);
         $currentTime = Carbon::now();
         $hoursDifference = $notificationTime->diffInHours($currentTime);
@@ -2599,29 +2559,28 @@ public function notification_list(Request $request)
 
         $friendStatus = $isFriend ? '1' : '0';  // Check if the user is a friend
 
-         
-         return [
-             'id' => $notification->id,
-             'user_id' => $notification->user_id,
-             'notify_user_id' => $notification->notify_user_id,
-             'name' => $notify_user->name,
+        return [
+            'id' => $notification->id,
+            'user_id' => $notification->user_id,
+            'notify_user_id' => $notification->notify_user_id,
+            'name' => $notify_user->name,
             'profile' => $imageUrl,
             'cover_img' => $coverImageUrl,
-             'message' => $notification->message,
-             'friend' => $friendStatus,
-             'datetime' => $notificationTime->format('Y-m-d H:i:s'),
-             'time' => $timeDifference,  // Add this line to include the time difference in hours
-             'updated_at' => Carbon::parse($notification->updated_at)->format('Y-m-d H:i:s'),
-             'created_at' => Carbon::parse($notification->created_at)->format('Y-m-d H:i:s'),
-         ];
-     });
- 
-     return response()->json([
-         'success' => true,
-         'message' => 'Notification details retrieved successfully.',
-         'data' => $notificationDetails,
-     ], 200);
- }
+            'message' => $notification->message,
+            'friend' => $friendStatus,
+            'datetime' => $notificationTime->format('Y-m-d H:i:s'),
+            'time' => $timeDifference,
+            'updated_at' => Carbon::parse($notification->updated_at)->format('Y-m-d H:i:s'),
+            'created_at' => Carbon::parse($notification->created_at)->format('Y-m-d H:i:s'),
+        ];
+    });
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Notification details retrieved successfully.',
+        'data' => $notificationDetails,
+    ], 200);
+}
 
 public function verifications(Request $request)
 {
@@ -2988,6 +2947,13 @@ public function verify_front_image(Request $request)
         ], 404);
     }
 
+    if ($user->verified == 1) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User already verified.',
+        ], 403); 
+    }
+
     $frontImage = $request->file('front_image');
 
     if ($frontImage) {
@@ -3000,7 +2966,7 @@ public function verify_front_image(Request $request)
         } else {
             $message = 'Front image updated successfully.';
         }
-        
+
         $imagePath = $frontImage->store('verification', 'public');
         $verification->front_image = basename($imagePath);
         $verification->save();
@@ -3016,6 +2982,7 @@ public function verify_front_image(Request $request)
         ], 400);
     }
 }
+
 
 public function verify_back_image(Request $request)
 {
@@ -3035,6 +3002,13 @@ public function verify_back_image(Request $request)
             'success' => false,
             'message' => 'User not found.',
         ], 404);
+    }
+
+    if ($user->verified == 1) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User already verified.',
+        ], 403); 
     }
 
     $backImage = $request->file('back_image');
@@ -3083,6 +3057,13 @@ public function verify_selfie_image(Request $request)
             'success' => false,
             'message' => 'User not found.',
         ], 404);
+    }
+
+    if ($user->verified == 1) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User already verified.',
+        ], 403); 
     }
 
     $selfieImage = $request->file('selfie_image');
