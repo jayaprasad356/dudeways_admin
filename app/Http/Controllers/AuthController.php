@@ -3372,7 +3372,7 @@ public function send_notification(Request $request)
         $schedule = null 
     );*/
 
-    $response = $this->oneSignalClient::sendNotificationToAll(
+    $response = $this->oneSignalClient->sendNotificationToAll(
         "Some Message", 
         $url = null, 
         $data = null, 
