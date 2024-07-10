@@ -19,7 +19,6 @@ use App\Models\News;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use Berkayk\OneSignal\OneSignalClient;
-use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -3338,15 +3337,15 @@ public function __construct(OneSignalClient $oneSignalClient)
 public function send_notification(Request $request)
 {
     // Retrieve inputs from the request
-    $player_id = $request->input('player_id'); 
+    $user_id = $request->input('user_id'); 
     $message = $request->input('message');
     $title = $request->input('title');
 
     // Validate required fields
-    if (empty($player_id)) {
+    if (empty($user_id)) {
         return response()->json([
             'success' => false,
-            'message' => 'player_id is empty.',
+            'message' => 'user_id is empty.',
         ], 400);
     }
 
@@ -3364,57 +3363,32 @@ public function send_notification(Request $request)
         ], 400);
     }
 
-    try {
-        // Attempt to send notification using OneSignal
-        $response = $this->oneSignalClient->sendNotificationToUser(
-            $player_id,
-            $message,
-            $title,
-            $url = null, 
-            $data = null, 
-            $buttons = null, 
-            $schedule = null 
-        );
+    // Attempt to send notification using OneSignal
+    $response = $this->oneSignalClient->sendNotificationToUser(
+        $user_id,
+        $message,
+        $title,
+        $url = null, 
+        $data = null, 
+        $buttons = null, 
+        $schedule = null 
+    );
 
-        // Handle response from OneSignal
-        if ($response && isset($response['success'])) {
-            // Notification successfully sent
-            return response()->json([
-                'success' => true,
-                'message' => 'Notification sent successfully for the specific user.',
-            ], 201);
-        } else {
-            // Failed to send notification
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to send notification.',
-            ], 500);
-        }
-    } catch (\GuzzleHttp\Exception\ClientException $e) {
-        // Guzzle HTTP client exception (e.g., 400 Bad Request)
-        $statusCode = $e->getResponse()->getStatusCode();
-        $responseBody = json_decode($e->getResponse()->getBody(), true);
-
-        // Log the error for debugging purposes
-        Log::error('OneSignal API Error: '.$e->getMessage());
-
-        // Return a meaningful error response to the client
+    // Handle response from OneSignal
+    if ($response && isset($response['success'])) {
+        // Notification successfully sent
+        return response()->json([
+            'success' => true,
+            'message' => 'Notification sent successfully for the specific user.',
+        ], 201);
+    } else {
+        // Failed to send notification
         return response()->json([
             'success' => false,
-            'message' => 'OneSignal API error: '.$responseBody['errors'][0], // Provide specific error message
-        ], $statusCode);
-    } catch (\Exception $e) {
-        // Other unexpected exceptions
-        Log::error('Unexpected error: '.$e->getMessage());
-
-        // Return a generic error response to the client
-        return response()->json([
-            'success' => false,
-            'message' => 'Unexpected error occurred while sending notification.',
+            'message' => 'Failed to send notification.',
         ], 500);
     }
 }
-
 
 
 
