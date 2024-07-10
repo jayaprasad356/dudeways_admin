@@ -3296,9 +3296,9 @@ public function profile_view(Request $request)
         ->first();
 
     if ($existingNotification) {
-        $datetime = Carbon::parse($existingNotification->datetime);
+        $created_at = Carbon::parse($existingNotification->created_at);
         $now = Carbon::now();
-        $diffInHours = $now->diffInHours($datetime);
+        $diffInHours = $now->diffInHours($created_at);
 
         if ($diffInHours < 1) {
             return response()->json([
