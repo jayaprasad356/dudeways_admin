@@ -3381,7 +3381,7 @@ public function send_notification(Request $request)
     );
 
     // Handle response from OneSignal
-    if ($response['success']) {
+    if ($response && isset($response['success'])) {
         return response()->json([
             'success' => true,
             'message' => 'Notification sent successfully.',
