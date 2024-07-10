@@ -20,6 +20,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use Berkayk\OneSignal\OneSignalClient;
 use Illuminate\Support\Facades\Log;
+
 class AuthController extends Controller
 {
  
@@ -3363,10 +3364,21 @@ public function send_notification(Request $request)
         ], 400);
     }
 
+    // Fetch player_id associated with user_id
+    $player_id = $this->getPlayerIdFromUserId($user_id);
+
+    // Validate retrieved player_id
+    if (empty($player_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to retrieve player_id for the specified user_id.',
+        ], 404);
+    }
+
     try {
         // Attempt to send notification using OneSignal
         $response = $this->oneSignalClient->sendNotificationToUser(
-            $user_id,
+            $player_id,
             $message,
             $title,
             $url = null, 
@@ -3415,6 +3427,17 @@ public function send_notification(Request $request)
             'message' => 'Unexpected error occurred while sending notification.',
         ], 500);
     }
+}
+
+/**
+ * Example function to fetch player_id from user_id.
+ * Replace this with your actual implementation to fetch player_id associated with user_id.
+ */
+private function getPlayerIdFromUserId($user_id)
+{
+    // Example logic to retrieve player_id based on user_id
+    // Replace with your actual implementation (e.g., database query)
+    return Users::where('id', $user_id)->value('player_id');
 }
 
 
