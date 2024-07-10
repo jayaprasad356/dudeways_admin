@@ -3336,11 +3336,10 @@ public function __construct(OneSignalClient $oneSignalClient)
 
 public function send_notification(Request $request)
 {
-    $user_id = $request->input('user_id');
+    $user_id = $request->input('user_id'); 
     $message = $request->input('message');
     $title = $request->input('title');
 
-    // Check if required fields are empty
     if (empty($user_id)) {
         return response()->json([
             'success' => false,
@@ -3362,45 +3361,39 @@ public function send_notification(Request $request)
         ], 400);
     }
 
-    // Assuming $user_id is a comma-separated string of user IDs
-    $user_ids = explode(',', $user_id);
+    // Send notification using OneSignal
+    $response = $this->oneSignalClient->sendNotificationToUser(
+        $user_id,
+        $message,
+        $title,
+        $url = null, 
+        $data = null, 
+        $buttons = null, 
+        $schedule = null 
+    );
 
-    // Send notification to each user specified by user_id
-    try {
-        foreach ($user_ids as $id) {
-            $response = $this->oneSignalClient->sendNotificationToUser(
-                trim($id),
-                $message,
-                $title,
-                $url = null,
-                $data = null,
-                $buttons = null,
-                $schedule = null
-            );
+   /* $response = $this->oneSignalClient->sendNotificationToAll(
+        "Some Message", 
+        $url = null, 
+        $data = null, 
+        $buttons = null, 
+        $schedule = null
+    );*/
 
-            // Handle the response from OneSignal for each user
-            if (!$response) {
-                // If sending to any user fails, return failure response
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Failed to send notification to user with ID: ' . $id,
-                ], 500);
-            }
-        }
-
-        // If all notifications were sent successfully
+    // Handle response from OneSignal
+    if ($response && isset($response['success'])) {
         return response()->json([
             'success' => true,
-            'message' => 'Notification sent successfully to all specified users.',
+            'message' => 'Notification sent successfully for the specific user.',
         ], 201);
-    } catch (\Exception $e) {
-        // Handle any exceptions that occur during the notification sending process
+    } else {
         return response()->json([
             'success' => false,
-            'message' => 'Failed to send notification: ' . $e->getMessage(),
+            'message' => 'Failed to send notification.',
         ], 500);
     }
 }
+
 
 
 public function create_recharge(Request $request)
