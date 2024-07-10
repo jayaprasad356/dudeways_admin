@@ -1430,6 +1430,8 @@ public function my_trip_list(Request $request)
     $offset = $request->input('offset', 0);
     $limit = $request->input('limit', 10);
 
+    $totalTrips = Trips::where('user_id', $user_id)->count();
+
     // Fetch trips for the specific user_id from the database with pagination
     $trips = Trips::where('user_id', $user_id)
         ->skip($offset)
@@ -1503,6 +1505,7 @@ public function my_trip_list(Request $request)
     return response()->json([
         'success' => true,
         'message' => 'Trip details retrieved successfully.',
+        'total' => $totalTrips, 
         'data' => $tripDetails,
     ], 200);
 }
@@ -1951,11 +1954,11 @@ public function delete_trip(Request $request)
     ], 200);
     }
 
-public function chat_list(Request $request)
-{
+    public function chat_list(Request $request)
+    {
         // Get the user_id from the request
         $user_id = $request->input('user_id');
-
+    
         if (empty($user_id)) {
             return response()->json([
                 'success' => false,
@@ -1967,10 +1970,13 @@ public function chat_list(Request $request)
         $offset = $request->input('offset', 0);
         $limit = $request->input('limit', 10);
     
-        // Fetch notifications for the specific user_id from the database with pagination
-        $chats = Chats::where('user_id', $user_id)
-            ->orderBy('datetime', 'desc')
-            ->skip($offset)
+        // Fetch chats for the specific user_id from the database with pagination
+        $chatsQuery = Chats::where('user_id', $user_id)
+            ->orderBy('datetime', 'desc');
+        
+        $totalChats = $chatsQuery->count(); // Get total count of chats
+        
+        $chats = $chatsQuery->skip($offset)
             ->take($limit)
             ->get();
     
@@ -1978,17 +1984,17 @@ public function chat_list(Request $request)
             return response()->json([
                 'success' => false,
                 'message' => 'No chats found.',
+                'total' => 0,
             ], 404);
         }
     
-
-    $chatDetails = $chats->map(function ($chat) use ($user_id) {
-        $chat_user = Users::find($chat->chat_user_id); // Fetch the chat_user details
-
-        // Check if chat_user exists
-        if (!$chat_user) {
-            return null; // Skip this chat if user not found
-        }
+        $chatDetails = $chats->map(function ($chat) use ($user_id) {
+            $chat_user = Users::find($chat->chat_user_id); // Fetch the chat_user details
+    
+            // Check if chat_user exists
+            if (!$chat_user) {
+                return null; // Skip this chat if user not found
+            }
 
         $imageUrl = $chat_user->profile_verified == 1 ? asset('storage/app/public/users/' . $chat_user->profile) : '';
         $coverImageUrl = $chat_user->cover_img_verified == 1 ? asset('storage/app/public/users/' . $chat_user->cover_img) : '';
@@ -2043,6 +2049,7 @@ public function chat_list(Request $request)
     return response()->json([
         'success' => true,
         'message' => 'Chat details listed successfully.',
+        'total' => $totalChats,
         'data' => $chatDetails->values(), // Reindex the array to prevent gaps
     ], 200);
 }
@@ -2317,15 +2324,17 @@ public function friends_list(Request $request)
         ], 400);
     }
 
-    // Set default offset and limit if not provided
-    $offset = $request->input('offset', 0);
-    $limit = $request->input('limit', 10);
-
-    // Fetch friends for the specific user_id from the database with pagination
-    $friends = Friends::where('user_id', $user_id)
-        ->skip($offset)
-        ->take($limit)
-        ->get();
+     // Set default offset and limit if not provided
+     $offset = $request->input('offset', 0);
+     $limit = $request->input('limit', 10);
+ 
+     // Fetch friends for the specific user_id from the database with pagination
+     $friendsQuery = Friends::where('user_id', $user_id);
+     $totalFriends = $friendsQuery->count(); // Get total count of friends
+     
+     $friends = $friendsQuery->skip($offset)
+         ->take($limit)
+         ->get();
 
     if ($friends->isEmpty()) {
         return response()->json([
@@ -2402,6 +2411,7 @@ public function friends_list(Request $request)
     return response()->json([
         'success' => true,
         'message' => 'Friends details listed successfully.',
+        'total' => $totalFriends,
         'data' => $friendDetails,
     ], 200);
 }
@@ -2510,6 +2520,8 @@ public function notification_list(Request $request)
     $offset = $request->input('offset', 0);
     $limit = $request->input('limit', 10);
 
+    $totalNotifications = Notifications::where('user_id', $user_id)->count();
+
     // Fetch notifications for the specific user_id from the database with pagination
     $notifications = Notifications::where('user_id', $user_id)
         ->orderBy('datetime', 'desc')
@@ -2580,6 +2592,7 @@ public function notification_list(Request $request)
     return response()->json([
         'success' => true,
         'message' => 'Notification details retrieved successfully.',
+        'total' => $totalNotifications, 
         'data' => $notificationDetails,
     ], 200);
 }
