@@ -3251,12 +3251,13 @@ public function terms_conditions(Request $request)
         'data' => $newsData,
     ], 200);
 }
+
 public function profile_view(Request $request)
 {
-    $user_id = $request->input('user_id'); 
+    $user_id = $request->input('user_id');
     $profile_user_id = $request->input('profile_user_id'); // Renamed the variable to avoid conflict
 
-    // Validate user_id and feedbackContent
+    // Validate user_id and profile_user_id
     if (empty($user_id)) {
         return response()->json([
             'success' => false,
@@ -3271,51 +3272,60 @@ public function profile_view(Request $request)
         ], 400);
     }
 
-    // Check if user exists
+    // Check if user and profile_user exist
     $user = Users::find($user_id);
     if (!$user) {
         return response()->json([
             'success' => false,
-            'message' => 'user not found.',
+            'message' => 'User not found.',
         ], 404);
     }
 
-    // Check if profile user exists
-    $profileUser = Users::find($profile_user_id);
-    if (!$profileUser) {
+    $profile_user = Users::find($profile_user_id);
+    if (!$profile_user) {
         return response()->json([
             'success' => false,
-            'message' => 'profile_user_id not found.',
+            'message' => 'Profile user not found.',
         ], 404);
     }
 
-    // Check for existing notification in the last hour
-    $oneHourAgo = now()->subHour();
+    // Check if notification already exists within the last hour
     $existingNotification = Notifications::where('user_id', $profile_user_id)
         ->where('notify_user_id', $user_id)
-        ->where('datetime', '>=', $oneHourAgo)
+        ->latest()
         ->first();
 
     if ($existingNotification) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Notification already sent within the last hour.',
-        ], 200);
+        $datetime = Carbon::parse($existingNotification->datetime);
+        $now = Carbon::now();
+        $diffInHours = $now->diffInHours($datetime);
+
+        if ($diffInHours < 1) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Notification already sent within the last hour.',
+            ], 200);
+        }
     }
 
-    // Add notification entry
+    // Create and save the notification
     $notification = new Notifications();
     $notification->user_id = $profile_user_id;
     $notification->notify_user_id = $user_id;
     $notification->message = 'Profile Viewed Successfully';
-    $notification->save();
+
+    if (!$notification->save()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to save notification.',
+        ], 500);
+    }
 
     return response()->json([
         'success' => true,
         'message' => 'Notification added successfully.',
     ], 201);
 }
-
 
 protected $oneSignalClient;
 
