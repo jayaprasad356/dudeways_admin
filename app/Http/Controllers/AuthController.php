@@ -3336,15 +3336,16 @@ public function __construct(OneSignalClient $oneSignalClient)
 
 public function send_notification(Request $request)
 {
-    $user_ids = $request->input('user_ids');
+    // Retrieve inputs from the request
+    $user_id = $request->input('user_id'); 
     $message = $request->input('message');
     $title = $request->input('title');
 
-    // Check if required fields are empty
-    if (empty($user_ids)) {
+    // Validate required fields
+    if (empty($user_id)) {
         return response()->json([
             'success' => false,
-            'message' => 'user_ids is empty.',
+            'message' => 'user_id is empty.',
         ], 400);
     }
 
@@ -3362,46 +3363,33 @@ public function send_notification(Request $request)
         ], 400);
     }
 
-    // Convert user_ids to an array if it's a comma-separated string
-    $user_ids = explode(',', $user_ids);
+    // Attempt to send notification using OneSignal
+    $response = $this->oneSignalClient->sendNotificationToUser(
+        $user_id,
+        $message,
+        $title,
+        $url = null, 
+        $data = null, 
+        $buttons = null, 
+        $schedule = null 
+    );
 
-    // Send notification to each user specified by user_ids
-    try {
-        foreach ($user_ids as $user_id) {
-            // Assuming $user_id is a valid UUID format
-            $response = $this->oneSignalClient->sendNotificationToUser(
-                $user_id,
-                $message,
-                $title,
-                $url = null,
-                $data = null,
-                $buttons = null,
-                $schedule = null
-            );
-
-            // Handle the response from OneSignal for each user
-            if (!$response) {
-                // If sending to any user fails, return failure response
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Failed to send notification to user with ID: ' . $user_id,
-                ], 500);
-            }
-        }
-
-        // If all notifications were sent successfully
+    // Handle response from OneSignal
+    if ($response && isset($response['success'])) {
+        // Notification successfully sent
         return response()->json([
             'success' => true,
-            'message' => 'Notification sent successfully to all specified users.',
+            'message' => 'Notification sent successfully for the specific user.',
         ], 201);
-    } catch (\Exception $e) {
-        // Handle any exceptions that occur during the notification sending process
+    } else {
+        // Failed to send notification
         return response()->json([
             'success' => false,
-            'message' => 'Failed to send notification: ' . $e->getMessage(),
+            'message' => 'Failed to send notification.',
         ], 500);
     }
 }
+
 
 
 public function create_recharge(Request $request)
