@@ -3336,7 +3336,6 @@ public function __construct(OneSignalClient $oneSignalClient)
 
 public function send_notification(Request $request)
 {
-    // Retrieve inputs from the request
     $user_id = $request->input('user_id'); 
     $message = $request->input('message');
     $title = $request->input('title');
@@ -3375,7 +3374,7 @@ public function send_notification(Request $request)
     );
 
     // Handle response from OneSignal
-    if ($response && isset($response['success'])) {
+    if ($response['success']) {
         // Notification successfully sent
         return response()->json([
             'success' => true,
