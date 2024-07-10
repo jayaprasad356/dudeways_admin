@@ -3338,7 +3338,7 @@ public function __construct(OneSignalClient $oneSignalClient)
 
 public function send_notification(Request $request)
 {
-    $user_id = $request->input('user_id'); 
+    $user_id = $request->input('user_id');
     $message = $request->input('message');
     $title = $request->input('title');
 
@@ -3364,24 +3364,35 @@ public function send_notification(Request $request)
         ], 400);
     }
 
-    // Validate user_id format (UUID)
-    if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $user_id)) {
+    // Retrieve player_id from the database
+    $user = Users::find($user_id);
+    if (!$user || empty($user->player_id)) {
         return response()->json([
             'success' => false,
-            'message' => 'Invalid format for user_id. Must be a valid UUID.',
+            'message' => 'Invalid user_id or player_id not found.',
+        ], 400);
+    }
+
+    $player_id = $user->player_id;
+
+    // Validate player_id format (UUID)
+    if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $player_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid format for player_id. Must be a valid UUID.',
         ], 400);
     }
 
     try {
         // Attempt to send notification using OneSignal
         $response = $this->oneSignalClient->sendNotificationToUser(
-            $user_id,
+            $player_id, // Using player_id here
             $message,
             $title,
-            $url = null, 
-            $data = null, 
-            $buttons = null, 
-            $schedule = null 
+            $url = null,
+            $data = null,
+            $buttons = null,
+            $schedule = null
         );
 
         // Handle response from OneSignal
@@ -3414,9 +3425,6 @@ public function send_notification(Request $request)
         ], 500);
     } 
 }
-
-
-
 public function create_recharge(Request $request)
 {
     // Validate required inputs
