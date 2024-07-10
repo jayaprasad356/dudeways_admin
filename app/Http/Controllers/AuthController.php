@@ -3335,6 +3335,7 @@ public function __construct(OneSignalClient $oneSignalClient)
     $this->oneSignalClient = $oneSignalClient;
 }
 
+
 public function send_notification(Request $request)
 {
     $user_id = $request->input('user_id'); 
@@ -3363,50 +3364,35 @@ public function send_notification(Request $request)
     }
 
     // Send notification using OneSignal
-    /*$response = $this->oneSignalClient->sendNotificationToUser(
-        $user_id,
-        $message,
-        $title,
-        $url = null, 
-        $data = null, 
-        $buttons = null, 
-        $schedule = null 
-    );*/
-
     $response = $this->oneSignalClient->sendNotificationToAll(
-        "Some Message", 
+        $message, 
         $url = null, 
         $data = null, 
         $buttons = null, 
         $schedule = null
     );
 
-  // Send notification using OneSignal
-$response = $this->oneSignalClient->sendNotificationToAll(
-    "Some Message", 
-    $url = null, 
-    $data = null, 
-    $buttons = null, 
-    $schedule = null
-);
+    // Log the request data and response for debugging
+    Log::debug('Notification Request:', [
+        'user_id' => $user_id,
+        'message' => $message,
+        'title' => $title,
+        'response' => $response,
+    ]);
 
-// Log the response for debugging purposes
-Log::info('OneSignal API Response:', $response);
-
-// Handle response from OneSignal
-if ($response && isset($response['success']) && $response['success']) {
-    return response()->json([
-        'success' => true,
-        'message' => 'Notification sent successfully.',
-    ], 201);
-} else {
-    return response()->json([
-        'success' => false,
-        'message' => 'Failed to send notification.',
-        'error' => isset($response['errors']) ? $response['errors'] : 'Unknown error',
-    ], 500);
-}
-
+    // Handle response from OneSignal
+    if ($response && isset($response['success']) && $response['success']) {
+        return response()->json([
+            'success' => true,
+            'message' => 'Notification sent successfully.',
+        ], 201);
+    } else {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to send notification.',
+            'error' => isset($response['errors']) ? $response['errors'] : 'Unknown error',
+        ], 500);
+    }
 }
 
 
