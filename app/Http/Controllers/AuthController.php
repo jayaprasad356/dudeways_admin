@@ -19,7 +19,6 @@ use App\Models\News;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use Berkayk\OneSignal\OneSignalClient;
-use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -3335,13 +3334,13 @@ public function __construct(OneSignalClient $oneSignalClient)
     $this->oneSignalClient = $oneSignalClient;
 }
 
-
 public function send_notification(Request $request)
 {
-    $user_id = $request->input('user_id'); 
+    $user_id = $request->input('user_id');
     $message = $request->input('message');
     $title = $request->input('title');
 
+    // Check if required fields are empty
     if (empty($user_id)) {
         return response()->json([
             'success' => false,
@@ -3363,38 +3362,45 @@ public function send_notification(Request $request)
         ], 400);
     }
 
-    // Send notification using OneSignal
-    $response = $this->oneSignalClient->sendNotificationToAll(
-        $message, 
-        $url = null, 
-        $data = null, 
-        $buttons = null, 
-        $schedule = null
-    );
+    // Assuming $user_id is a comma-separated string of user IDs
+    $user_ids = explode(',', $user_id);
 
-    // Log the request data and response for debugging
-    Log::debug('Notification Request:', [
-        'user_id' => $user_id,
-        'message' => $message,
-        'title' => $title,
-        'response' => $response,
-    ]);
+    // Send notification to each user specified by user_id
+    try {
+        foreach ($user_ids as $id) {
+            $response = $this->oneSignalClient->sendNotificationToUser(
+                trim($id),
+                $message,
+                $title,
+                $url = null,
+                $data = null,
+                $buttons = null,
+                $schedule = null
+            );
 
-    // Handle response from OneSignal
-    if ($response && isset($response['success']) && $response['success']) {
+            // Handle the response from OneSignal for each user
+            if (!$response) {
+                // If sending to any user fails, return failure response
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to send notification to user with ID: ' . $id,
+                ], 500);
+            }
+        }
+
+        // If all notifications were sent successfully
         return response()->json([
             'success' => true,
-            'message' => 'Notification sent successfully.',
+            'message' => 'Notification sent successfully to all specified users.',
         ], 201);
-    } else {
+    } catch (\Exception $e) {
+        // Handle any exceptions that occur during the notification sending process
         return response()->json([
             'success' => false,
-            'message' => 'Failed to send notification.',
-            'error' => isset($response['errors']) ? $response['errors'] : 'Unknown error',
+            'message' => 'Failed to send notification: ' . $e->getMessage(),
         ], 500);
     }
 }
-
 
 
 public function create_recharge(Request $request)
