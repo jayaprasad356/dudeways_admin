@@ -1970,12 +1970,13 @@ public function delete_trip(Request $request)
         $offset = $request->input('offset', 0);
         $limit = $request->input('limit', 10);
     
+        // Fetch total count of chats for the specific user_id
+        $totalChats = Chats::where('user_id', $user_id)->count();
+    
         // Fetch chats for the specific user_id from the database with pagination
         $chatsQuery = Chats::where('user_id', $user_id)
             ->orderBy('datetime', 'desc');
-        
-        $totalChats = $chatsQuery->count(); // Get total count of chats
-        
+    
         $chats = $chatsQuery->skip($offset)
             ->take($limit)
             ->get();
