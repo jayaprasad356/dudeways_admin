@@ -3342,10 +3342,10 @@ public function send_notification(Request $request)
     $title = $request->input('title');
 
     // Validate required fields
-    if (empty($player_id)) {
+    if (empty($user_id)) {
         return response()->json([
             'success' => false,
-            'message' => 'player_id is empty.',
+            'message' => 'user_id is empty.',
         ], 400);
     }
 
