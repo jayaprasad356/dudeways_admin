@@ -19,6 +19,8 @@ use App\Models\News;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use Berkayk\OneSignal\OneSignalClient;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\RequestException;
 
 class AuthController extends Controller
 {
@@ -3362,31 +3364,55 @@ public function send_notification(Request $request)
         ], 400);
     }
 
-    // Attempt to send notification using OneSignal
-    $response = $this->oneSignalClient->sendNotificationToUser(
-        $user_id,
-        $message,
-        $title,
-        $url = null, 
-        $data = null, 
-        $buttons = null, 
-        $schedule = null 
-    );
-
-    // Handle response from OneSignal
-    if ($response['success']) {
-        // Notification successfully sent
-        return response()->json([
-            'success' => true,
-            'message' => 'Notification sent successfully for the specific user.',
-        ], 201);
-    } else {
-        // Failed to send notification
+    // Validate user_id format (UUID)
+    if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $user_id)) {
         return response()->json([
             'success' => false,
-            'message' => 'Failed to send notification.',
-        ], 500);
+            'message' => 'Invalid format for user_id. Must be a valid UUID.',
+        ], 400);
     }
+
+    try {
+        // Attempt to send notification using OneSignal
+        $response = $this->oneSignalClient->sendNotificationToUser(
+            $user_id,
+            $message,
+            $title,
+            $url = null, 
+            $data = null, 
+            $buttons = null, 
+            $schedule = null 
+        );
+
+        // Handle response from OneSignal
+        if ($response['success']) {
+            // Notification successfully sent
+            return response()->json([
+                'success' => true,
+                'message' => 'Notification sent successfully for the specific user.',
+            ], 201);
+        } else {
+            // Failed to send notification
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to send notification.',
+            ], 500);
+        }
+    } catch (ClientException $e) {
+        // Handle client error (4xx responses)
+        $responseBody = json_decode($e->getResponse()->getBody()->getContents(), true);
+        return response()->json([
+            'success' => false,
+            'message' => 'Client error: ' . $responseBody['errors'][0],
+        ], 400);
+    } catch (RequestException $e) {
+        // Handle request error (5xx responses or network errors)
+        $responseBody = $e->hasResponse() ? json_decode($e->getResponse()->getBody()->getContents(), true) : [];
+        return response()->json([
+            'success' => false,
+            'message' => 'Request error: ' . ($responseBody['errors'][0] ?? $e->getMessage()),
+        ], 500);
+    } 
 }
 
 
