@@ -3531,7 +3531,7 @@ public function send_notification(Request $request)
             // Failed to send notification or $response is null
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to send notification.',
+                'message' => $response,
             ], 500);
         }
     }
