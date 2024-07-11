@@ -3487,6 +3487,7 @@ public function send_notification(Request $request)
     $message = $request->input('message');
     $title = $request->input('title');
 
+    // Check for required fields
     if (empty($external_user_id)) {
         return response()->json([
             'success' => false,
@@ -3507,10 +3508,11 @@ public function send_notification(Request $request)
             'message' => 'title is empty.',
         ], 400);
     }
-    
-try{
+
+    try {
+        // Attempt to send notification
         $response = $this->oneSignalClient->sendNotificationToExternalUser(
-            "Some Message",
+            "Some Message",  // Check if this placeholder is necessary
             $message,
             $title,
             $external_user_id,
@@ -3523,16 +3525,16 @@ try{
         return response()->json([
             'success' => true,
             'message' => 'Notification sent successfully.',
-        ], 201);
+        ], 200);  // Consider using 200 OK or 204 No Content here
     } catch (\Exception $e) {
+        // Handle notification sending failure
         return response()->json([
             'success' => false,
             'message' => 'Failed to send notification.',
             'error' => $e->getMessage(),  // Optional: Include error message for debugging
-        ], 500);
+        ], 500);  // 500 Internal Server Error is appropriate for unexpected errors
     }
 }
-
 
 public function create_recharge(Request $request)
 {
