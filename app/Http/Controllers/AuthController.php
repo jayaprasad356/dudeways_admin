@@ -3474,14 +3474,6 @@ public function profile_view(Request $request)
     ], 201);
 }
 
-/*OneSignal::sendNotificationToAll(
-    "Some Message", 
-    $url = null, 
-    $data = null, 
-    $buttons = null, 
-    $schedule = null
-);*/
-
 protected $oneSignalClient;
 
 public function __construct(OneSignalClient $oneSignalClient)
@@ -3495,7 +3487,6 @@ public function send_notification(Request $request)
     $message = $request->input('message');
     $title = $request->input('title');
 
-    // Check for required fields
     if (empty($external_user_id)) {
         return response()->json([
             'success' => false,
@@ -3520,37 +3511,29 @@ public function send_notification(Request $request)
     try {
         // Attempt to send notification
         $response = $this->oneSignalClient->sendNotificationToExternalUser(
-            "Some Message",  // Check if this placeholder is necessary
+            "Some Message", 
+            $external_user_id,
             $message,
             $title,
-            $external_user_id,
-            $url = null,
-            $data = null,
-            $buttons = null,
+            $url = null, 
+            $data = null, 
+            $buttons = null, 
             $schedule = null
         );
 
-        // Check if the response indicates success
-        if ($response) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Notification sent successfully.',
-            ], 200);  // Consider using 200 OK or 204 No Content here
-        } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to send notification.',
-            ], 500);  // 500 Internal Server Error is appropriate for unexpected errors
-        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Notification sent successfully.',
+        ], 201);
     } catch (\Exception $e) {
-        // Handle notification sending failure
         return response()->json([
             'success' => false,
             'message' => 'Failed to send notification.',
             'error' => $e->getMessage(),  // Optional: Include error message for debugging
-        ], 500);  // 500 Internal Server Error is appropriate for unexpected errors
+        ], 500);
     }
 }
+
 
 public function create_recharge(Request $request)
 {
