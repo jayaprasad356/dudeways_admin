@@ -3474,6 +3474,14 @@ public function profile_view(Request $request)
     ], 201);
 }
 
+/*OneSignal::sendNotificationToAll(
+    "Some Message", 
+    $url = null, 
+    $data = null, 
+    $buttons = null, 
+    $schedule = null
+);*/
+
 protected $oneSignalClient;
 
 public function __construct(OneSignalClient $oneSignalClient)
