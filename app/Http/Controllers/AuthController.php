@@ -3522,10 +3522,18 @@ public function send_notification(Request $request)
             $schedule = null
         );
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Notification sent successfully.',
-        ], 200);  // Consider using 200 OK or 204 No Content here
+        // Check if the response indicates success
+        if ($response) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Notification sent successfully.',
+            ], 200);  // Consider using 200 OK or 204 No Content here
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to send notification.',
+            ], 500);  // 500 Internal Server Error is appropriate for unexpected errors
+        }
     } catch (\Exception $e) {
         // Handle notification sending failure
         return response()->json([
