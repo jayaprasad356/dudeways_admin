@@ -402,8 +402,8 @@ class ComposerStaticInitb40973f0ea3c94d6fc1caf95b693b3f4
         ),
         'Psr\\Http\\Message\\' => 
         array (
-            0 => __DIR__ . '/..' . '/psr/http-message/src',
-            1 => __DIR__ . '/..' . '/psr/http-factory/src',
+            0 => __DIR__ . '/..' . '/psr/http-factory/src',
+            1 => __DIR__ . '/..' . '/psr/http-message/src',
         ),
         'Psr\\Http\\Client\\' => 
         array (
@@ -566,8 +566,8 @@ class ComposerStaticInitb40973f0ea3c94d6fc1caf95b693b3f4
         ),
         'Fruitcake\\Cors\\' => 
         array (
-            0 => __DIR__ . '/..' . '/fruitcake/php-cors/src',
-            1 => __DIR__ . '/..' . '/fruitcake/laravel-cors/src',
+            0 => __DIR__ . '/..' . '/fruitcake/laravel-cors/src',
+            1 => __DIR__ . '/..' . '/fruitcake/php-cors/src',
         ),
         'Firebase\\JWT\\' => 
         array (
@@ -713,6 +713,7 @@ class ComposerStaticInitb40973f0ea3c94d6fc1caf95b693b3f4
         'App\\Http\\Controllers\\ProfessionsController' => __DIR__ . '/../..' . '/app/Http/Controllers/ProfessionsController.php',
         'App\\Http\\Controllers\\SettingController' => __DIR__ . '/../..' . '/app/Http/Controllers/SettingController.php',
         'App\\Http\\Controllers\\SlidesController' => __DIR__ . '/../..' . '/app/Http/Controllers/SlidesController.php',
+        'App\\Http\\Controllers\\TransactionsController' => __DIR__ . '/../..' . '/app/Http/Controllers/TransactionsController.php',
         'App\\Http\\Controllers\\TripsController' => __DIR__ . '/../..' . '/app/Http/Controllers/TripsController.php',
         'App\\Http\\Controllers\\UsersController' => __DIR__ . '/../..' . '/app/Http/Controllers/UsersController.php',
         'App\\Http\\Controllers\\VerificationsController' => __DIR__ . '/../..' . '/app/Http/Controllers/VerificationsController.php',
@@ -753,9 +754,11 @@ class ComposerStaticInitb40973f0ea3c94d6fc1caf95b693b3f4
         'App\\Models\\Points' => __DIR__ . '/../..' . '/app/Models/Points.php',
         'App\\Models\\Product' => __DIR__ . '/../..' . '/app/Models/Product.php',
         'App\\Models\\Professions' => __DIR__ . '/../..' . '/app/Models/Professions.php',
+        'App\\Models\\RechargeTrans' => __DIR__ . '/../..' . '/app/Models/RechargeTrans.php',
         'App\\Models\\Setting' => __DIR__ . '/../..' . '/app/Models/Setting.php',
         'App\\Models\\Slides' => __DIR__ . '/../..' . '/app/Models/Slides.php',
         'App\\Models\\Transaction' => __DIR__ . '/../..' . '/app/Models/Transaction.php',
+        'App\\Models\\Transactions' => __DIR__ . '/../..' . '/app/Models/Transactions.php',
         'App\\Models\\Trips' => __DIR__ . '/../..' . '/app/Models/Trips.php',
         'App\\Models\\Users' => __DIR__ . '/../..' . '/app/Models/Users.php',
         'App\\Models\\Verifications' => __DIR__ . '/../..' . '/app/Models/Verifications.php',

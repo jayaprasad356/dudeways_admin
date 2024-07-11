@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Http;
 use Berkayk\OneSignal\OneSignalClient;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Client;
 
 class AuthController extends Controller
 {
@@ -3483,61 +3484,60 @@ public function __construct(OneSignalClient $oneSignalClient)
 
 public function send_notification(Request $request)
 {
-    $external_user_id = $request->input('external_user_id');
+    $user_id = $request->input('user_id');
     $message = $request->input('message');
     $title = $request->input('title');
 
     // Validate inputs
-    if (empty($external_user_id)) {
+    if (empty($user_id) || empty($message) || empty($title)) {
         return response()->json([
             'success' => false,
-            'message' => 'external_user_id is empty.',
+            'message' => 'user_id, message, or title is empty.',
         ], 400);
     }
 
-    if (empty($message)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'message is empty.',
-        ], 400);
-    }
+    // Prepare the data for the request
+    $data = [
+        'app_id' => '4f929ed9-584d-4208-a3e8-7de1ae4f679e', // Replace with your OneSignal app_id
+        'include_player_ids' => [$user_id], // Array of user_ids to send the notification to
+        'contents' => ['en' => $message], // Message content
+        'headings' => ['en' => $title], // Notification title
+        // Add other parameters like URL, data, buttons, schedule as needed
+    ];
 
-    if (empty($title)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'title is empty.',
-        ], 400);
-    }
-    
-    // Attempt to send the notification
-    $response = $this->oneSignalClient->sendNotificationToExternalUser(
-        $message,
-        $title,
-        $external_user_id,
-        $url = null,
-        $data = null,
-        $buttons = null,
-        $schedule = null
-    );
+    // Send the request using Guzzle HTTP client
+    $client = new Client();
+    try {
+        $response = $client->request('POST', 'https://onesignal.com/api/v1/notifications', [
+            'headers' => [
+                'Authorization' => 'Basic ZGZhYWI3NzktNTEzYi00MDNkLWIzNGItZmU0YjAzZmZkZTI3', // Replace with your REST API key
+                'Content-Type' => 'application/json',
+            ],
+            'json' => $data,
+        ]);
 
-    // Handle response from OneSignal
-    if ($response['success']) {
-        // Notification successfully sent
-        return response()->json([
-            'success' => true,
-            'message' => 'Notification sent successfully for the specific user.',
-            'data' => $response['data'], // If you want to return any data from OneSignal
-        ], 201);
-    } else {
-        // Failed to send notification or $response is null
+        // Handle response from OneSignal
+        $statusCode = $response->getStatusCode();
+        if ($statusCode === 200 || $statusCode === 201) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Notification sent successfully.',
+            ], 201);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to send notification.',
+            ], 500);
+        }
+    } catch (\Exception $e) {
         return response()->json([
             'success' => false,
-            'message' => isset($response['error']) ? $response['error'] : 'Failed to send notification.',
+            'message' => $e->getMessage(),
         ], 500);
     }
 }
 
-
+    //  $response = $this->oneSignalClient->sendNotificationToExternalUser(
 public function create_recharge(Request $request)
 {
     // Validate required inputs
