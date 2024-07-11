@@ -1285,6 +1285,7 @@ public function trip_list(Request $request)
 
     $totalTrips = 0;
     
+    
     if ($type == 'latest') {
         $totalTrips = $tripsQuery->count();
         if ($offset >= $totalTrips) {
