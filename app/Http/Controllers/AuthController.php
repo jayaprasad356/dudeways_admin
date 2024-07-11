@@ -3487,6 +3487,7 @@ public function send_notification(Request $request)
     $message = $request->input('message');
     $title = $request->input('title');
 
+    // Validate inputs
     if (empty($external_user_id)) {
         return response()->json([
             'success' => false,
@@ -3507,29 +3508,31 @@ public function send_notification(Request $request)
             'message' => 'title is empty.',
         ], 400);
     }
+    
+    // Attempt to send the notification
+    $response = $this->oneSignalClient->sendNotificationToExternalUser(
+        $message,
+        $title,
+        $external_user_id,
+        $url = null,
+        $data = null,
+        $buttons = null,
+        $schedule = null
+    );
 
-    try {
-        // Attempt to send notification
-        $response = $this->oneSignalClient->sendNotificationToExternalUser(
-            "Some Message", 
-            $external_user_id,
-            $message,
-            $title,
-            $url = null, 
-            $data = null, 
-            $buttons = null, 
-            $schedule = null
-        );
-
+    // Handle response from OneSignal
+    if ($response['success']) {
+        // Notification successfully sent
         return response()->json([
             'success' => true,
-            'message' => 'Notification sent successfully.',
+            'message' => 'Notification sent successfully for the specific user.',
+            'data' => $response['data'], // If you want to return any data from OneSignal
         ], 201);
-    } catch (\Exception $e) {
+    } else {
+        // Failed to send notification or $response is null
         return response()->json([
             'success' => false,
-            'message' => 'Failed to send notification.',
-            'error' => $e->getMessage(),  // Optional: Include error message for debugging
+            'message' => isset($response['error']) ? $response['error'] : 'Failed to send notification.',
         ], 500);
     }
 }
