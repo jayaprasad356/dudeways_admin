@@ -3483,14 +3483,14 @@ public function __construct(OneSignalClient $oneSignalClient)
 
 public function send_notification(Request $request)
 {
-    $external_user_id = $request->input('external_user_id');
+    $user_id = $request->input('user_id');
     $message = $request->input('message');
     $title = $request->input('title');
 
-    if (empty($external_user_id)) {
+    if (empty($user_id)) {
         return response()->json([
             'success' => false,
-            'message' => 'external_user_id is empty.',
+            'message' => 'user_id is empty.',
         ], 400);
     }
 
@@ -3507,34 +3507,33 @@ public function send_notification(Request $request)
             'message' => 'title is empty.',
         ], 400);
     }
-    
-      
-        $response = $this->oneSignalClient->sendNotificationToExternalUser(
-            "Some Message",
+
+    // Attempt to send notification using OneSignal
+    try {
+        // Example: Send notification to a specific user (replace with your actual logic)
+        $response = $this->oneSignalClient->sendNotificationToUser(
+            $user_id,
             $message,
             $title,
-            $external_user_id,
-            $url = null,
-            $data = null,
-            $buttons = null,
+            $url = null, 
+            $data = null, 
+            $buttons = null, 
             $schedule = null
         );
 
-        // Handle response from OneSignal
-        if ($response) {
-            // Notification successfully sent
-            return response()->json([
-                'success' => true,
-                'message' => 'Notification sent successfully for the specific user.',
-            ], 201);
-        } else {
-            // Failed to send notification or $response is null
-            return response()->json([
-                'success' => false,
-                'message' => $response,
-            ], 500);
-        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Notification sent successfully.',
+        ], 201);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to send notification.',
+            'error' => $e->getMessage(),  // Optional: Include error message for debugging
+        ], 500);
     }
+}
+
 
 public function create_recharge(Request $request)
 {
