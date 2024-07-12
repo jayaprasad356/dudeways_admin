@@ -3458,6 +3458,8 @@ public function profile_view(Request $request)
         }
     }
 
+    $currentTime = now();
+    
     // Create and save the notification
     $notification = new Notifications();
     $notification->user_id = $profile_user_id;
@@ -3868,6 +3870,7 @@ public function check_recharge_status(Request $request)
             $transaction->points = $points;
             $transaction->datetime = now();
             $transaction->type = 'recharge';
+            
             $transaction->save();
 
             return response()->json([
