@@ -3484,6 +3484,62 @@ public function __construct(OneSignalClient $oneSignalClient)
 
 public function send_notification(Request $request)
 {
+
+    $user_id = $request->input('user_id');
+    $message = $request->input('message');
+    $title = $request->input('title');
+
+    // Validate inputs
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 400);
+    }
+
+    if (empty($message)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'message is empty.',
+        ], 400);
+    }
+
+    if (empty($title)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'title is empty.',
+        ], 400);
+    }
+    
+    // Attempt to send notification using your OneSignal client
+    $response = $this->oneSignalClient->sendNotificationToExternalUser(
+        "Some Message",
+        $user_id,
+        $url = null,
+        $data = null,
+        $buttons = null,
+        $schedule = null
+    );
+
+    // Handle response from OneSignal
+    if ($response) {
+        // Notification successfully sent
+        return response()->json([
+            'success' => true,
+            'message' => 'Notification sent successfully.',
+        ], 201);
+    } else {
+        // Failed to send notification or $response is null
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to send notification.', // You can customize this message
+        ], 500);
+    }
+}
+
+
+/*public function send_notification(Request $request)
+{
     $user_id = $request->input('user_id');
     $message = $request->input('message');
     $title = $request->input('title');
@@ -3535,7 +3591,7 @@ public function send_notification(Request $request)
             'message' => $e->getMessage(),
         ], 500);
     }
-}
+}*/
 
     //  $response = $this->oneSignalClient->sendNotificationToExternalUser(
 public function create_recharge(Request $request)
