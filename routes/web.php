@@ -71,7 +71,7 @@ Route::prefix('admin')->middleware('auth')->group(function () {
      Route::put('/trips/{trips}', [TripsController::class, 'update'])->name('trips.update');
      Route::post('/trips', [TripsController::class, 'store'])->name('trips.store');
      Route::post('/trips/updateStatus', [TripsController::class, 'updateStatus'])->name('trips.updateStatus');
-
+     Route::post('/trips/sendNotification', [TripsController::class, 'sendNotification'])->name('trips.sendNotification');
 
 
      //Chats  

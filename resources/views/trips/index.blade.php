@@ -202,61 +202,87 @@
         });
     </script>
 
-    <script>
-    $(document).ready(function () {
-        // Handle "Select All" checkbox
-        $('#checkAll').change(function () {
-            $('.checkbox').prop('checked', $(this).prop('checked'));
-        });
-
-        // Handle Pending Button click
-        $('#pendingButton').click(function () {
-            updateStatus(0);
-        });
-
-        // Handle Approve Button click
-        $('#verifyButton').click(function () {
-            updateStatus(1);
-        });
-
-        // Handle Cancel Button click
-        $('#cancelButton').click(function () {
-            updateStatus(2);
-        });
-
-        // Update Status function
-        function updateStatus(status) {
-            var tripIds = [];
-            $('.checkbox:checked').each(function () {
-                tripIds.push($(this).data('id'));
-            });
-
-            if (tripIds.length > 0) {
-                $.ajax({
-                    url: "{{ route('trips.updateStatus') }}",
-                    method: 'POST',
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        trip_ids: tripIds,
-                        status: status
-                    },
-                    success: function (response) {
-                        if (response.success) {
-                            location.reload();
-                        } else {
-                            alert('Failed to update status. Please try again.');
-                        }
-                    },
-                    error: function (xhr, status, error) {
-                        console.error(error);
-                        alert('An error occurred. Please try again.');
-                    }
-                });
-            } else {
-                alert('Please select at least one trip.');
-            }
-        }
+<script>
+$(document).ready(function () {
+    // Handle "Select All" checkbox
+    $('#checkAll').change(function () {
+        $('.checkbox').prop('checked', $(this).prop('checked'));
     });
-    </script>
+
+    // Handle Pending Button click
+    $('#pendingButton').click(function () {
+        updateStatus(0);
+    });
+
+    // Handle Approve Button click
+    $('#verifyButton').click(function () {
+        updateStatus(1);
+    });
+
+    // Handle Cancel Button click
+    $('#cancelButton').click(function () {
+        updateStatus(2);
+    });
+
+    // Update Status function
+    function updateStatus(status) {
+        var tripIds = [];
+        $('.checkbox:checked').each(function () {
+            tripIds.push($(this).data('id'));
+        });
+
+        if (tripIds.length > 0) {
+            $.ajax({
+                url: "{{ route('trips.updateStatus') }}",
+                method: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    trip_ids: tripIds,
+                    status: status
+                },
+                success: function (response) {
+                    if (response.success) {
+                        if (status === 1) {
+                            sendNotification();
+                        }
+                        location.reload();
+                    } else {
+                        alert('Failed to update status. Please try again.');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error(error);
+                    alert('An error occurred. Please try again.');
+                }
+            });
+        } else {
+            alert('Please select at least one trip.');
+        }
+    }
+
+    // Send Notification function
+    function sendNotification() {
+        $.ajax({
+            url: "{{ route('trips.sendNotification') }}",
+            method: 'POST',
+            data: {
+                _token: '{{ csrf_token() }}'
+            },
+            success: function (response) {
+                if (response.success) {
+                    console.log('Notification sent successfully.');
+                } else {
+                    console.error('Failed to send notification.');
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error(error);
+                alert('An error occurred while sending notification. Please try again.');
+            }
+        });
+    }
+});
+</script>
+
 @endsection
 

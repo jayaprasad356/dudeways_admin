@@ -8,6 +8,7 @@ use App\Models\Users;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Berkayk\OneSignal\OneSignalClient;
 
 
 
@@ -15,6 +16,13 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class TripsController extends Controller
 {
+
+    protected $oneSignalClient;
+
+    public function __construct(OneSignalClient $oneSignalClient)
+    {
+        $this->oneSignalClient = $oneSignalClient;
+    }
     /**
      * Display a listing of the resource.
      *
@@ -34,9 +42,30 @@ class TripsController extends Controller
             }
         }
     
+        if ($status == 1) {
+            $response = $this->oneSignalClient->sendNotificationToAll(
+                "Trips have been approved",
+                $url = null,
+                $data = null,
+                $buttons = null,
+                $schedule = null
+            );
+        }
         return response()->json(['success' => true]);
     }
-    
+    public function sendNotification()
+{
+    $response = $this->oneSignalClient->sendNotificationToAll(
+        "Trips have been approved",
+        $url = null,
+        $data = null,
+        $buttons = null,
+        $schedule = null
+    );
+
+    return response()->json(['success' => true]);
+}
+
 
 
 
