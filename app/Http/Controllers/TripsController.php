@@ -10,24 +10,20 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Berkayk\OneSignal\OneSignalClient;
 
-
-
-
-
 class TripsController extends Controller
 {
-
     protected $oneSignalClient;
 
     public function __construct(OneSignalClient $oneSignalClient)
     {
         $this->oneSignalClient = $oneSignalClient;
     }
+
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
-     */  
+     */
     public function updateStatus(Request $request)
     {
         $tripIds = $request->input('trip_ids', []);
@@ -39,35 +35,38 @@ class TripsController extends Controller
                 $trip->trip_status = $status;
                 $trip->trip_datetime = now(); 
                 $trip->save();
+    
+                $user = Users::find($trip->user_id);
+    
+                if ($status == 1 && $user) {
+                    // Send notification to the specific user
+                    $message = "Your Trip Approved Successfully";
+                    $this->oneSignalClient->sendNotificationToExternalUser(
+                        $message,
+                        $user->id, // Assuming $user->id is the OneSignal external user ID
+                        $url = null,
+                        $data = null,
+                        $buttons = null,
+                        $schedule = null
+                    );
+                }
             }
         }
     
-        if ($status == 1) {
-            $response = $this->oneSignalClient->sendNotificationToAll(
-                "Trips have been approved",
-                $url = null,
-                $data = null,
-                $buttons = null,
-                $schedule = null
-            );
-        }
+        // Send notification to all users
+        $user = Users::find($trip->user_id);
+        $allUsersMessage = $user->name . ", Posted a Trip Just now"; // Assuming $user->name is available and represents the user who posted the trip
+        $this->oneSignalClient->sendNotificationToAll(
+            $allUsersMessage,
+            $url = null,
+            $data = null,
+            $buttons = null,
+            $schedule = null
+        );
+    
         return response()->json(['success' => true]);
     }
-    public function sendNotification()
-{
-    $response = $this->oneSignalClient->sendNotificationToAll(
-        "Trips have been approved",
-        $url = null,
-        $data = null,
-        $buttons = null,
-        $schedule = null
-    );
-
-    return response()->json(['success' => true]);
-}
-
-
-
+    
 
      public function index(Request $request)
      {
