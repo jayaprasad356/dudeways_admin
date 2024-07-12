@@ -169,7 +169,7 @@ public function register(Request $request)
     $gender = $request->input('gender');
     $state = $request->input('state');
     $city = $request->input('city');
-    $profession = $request->input('profession');
+    $profession_id = $request->input('profession_id');
     $referred_by = $request->input('referred_by');
     $introduction = $request->input('introduction');
     $points = $request->input('points', 50);
@@ -224,10 +224,10 @@ public function register(Request $request)
             'message' => 'Gender is empty.',
         ], 400);
     } 
-    if (empty($profession)) {
+    if (empty($profession_id)) {
         return response()->json([
             'success' => false,
-            'message' => 'Profession is empty.',
+            'message' => 'profession_id is empty.',
         ], 400);
     }
 
@@ -277,7 +277,7 @@ public function register(Request $request)
     $user->age = $age;
     $user->name = $name;
     $user->gender = $gender;
-    $user->profession = $profession;
+    $user->profession_id = $profession_id;
     $user->refer_code = $this->generateReferCode();
     $user->email = $email;
     $user->points = $points;
@@ -300,6 +300,8 @@ public function register(Request $request)
     $user->unique_name = $unique_name;
     $user->save();
 
+    $user->load('profession');
+
     // Image URL
     $imageUrl = asset('storage/app/public/users/' . $user->profile);
     $coverimageUrl = asset('storage/app/public/users/' . $user->cover_img);
@@ -317,7 +319,7 @@ public function register(Request $request)
             'gender' => $user->gender,
             'state' => $user->state,
             'city' => $user->city,
-            'profession' => $user->profession,
+            'profession' => $user->profession ? $user->profession->profession : null,
             'refer_code' => $refer_code, // Return the generated refer_code
             'referred_by' => $user->referred_by,
             'profile' => $imageUrl,
@@ -1934,8 +1936,12 @@ public function delete_trip(Request $request)
             $notification = new Notifications();
             $notification->user_id = $chat_user_id;
             $notification->notify_user_id = $user_id;
-            $notification->message = 'New message arrived';
+            $notification->message = "{$user->name}, messaged you";
+            $notification->datetime = now();
+            
             $notification->save();
+            
+            $this->sendNotifiToUser(strval($chat_user_id), "{$user->name} messaged you");
 
         // Return success response with new chat data
         return response()->json([
@@ -1989,9 +1995,12 @@ public function delete_trip(Request $request)
     $notification = new Notifications();
     $notification->user_id = $chat_user_id;
     $notification->notify_user_id = $user_id;
-    $notification->message = 'New message arrived';
+    $notification->message = "{$user->name}, messaged you";
+    $notification->datetime = now();
     $notification->save();
     
+   
+    $this->sendNotifiToUser(strval($chat_user_id), "{$user->name} messaged you");
     // Return success response with updated chat data
     return response()->json([
         'success' => true,
@@ -2013,7 +2022,23 @@ public function delete_trip(Request $request)
         ]],
     ], 200);
     }
-
+    protected function sendNotifiToUser($chat_user_id, $message)
+    {
+        // Check the online_status of the user
+        $user = Users::find($chat_user_id); // Assuming User is your model class
+        if ($user && $user->online_status == 0) {
+            // User is offline, send notification via OneSignal
+            $this->oneSignalClient->sendNotificationToExternalUser(
+                $message,
+                $chat_user_id,
+                $url = null,
+                $data = null,
+                $buttons = null,
+                $schedule = null
+            );
+        }
+    }
+    
     public function chat_list(Request $request)
 {
     // Get the user_id from the request
@@ -3783,16 +3808,6 @@ public function check_recharge_status(Request $request)
     $key = htmlspecialchars($input['key']);
     $point_id = htmlspecialchars($input['point_id']);
 
-    // Fetch points using point_id
-    $pointEntry = Points::find($point_id);
-    if (!$pointEntry) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Invalid Point ID',
-        ]);
-    }
-    $points = $pointEntry->points;
-
     // API endpoint
     $url = 'https://api.ekqr.in/api/check_order_status';
 
@@ -3803,8 +3818,38 @@ public function check_recharge_status(Request $request)
         'key' => $key
     ];
 
-    // Initialize HTTP client and send POST request
     try {
+         // Fetch points using point_id
+         $pointEntry = Points::find($point_id);
+         if (!$pointEntry) {
+             return response()->json([
+                 'success' => false,
+                 'message' => 'Invalid Point ID',
+             ]);
+         }
+         $points = $pointEntry->points;
+ 
+         // Fetch user using user_id
+         $user = Users::find($user_id);
+         if (!$user) {
+             return response()->json([
+                 'success' => false,
+                 'message' => 'Invalid user ID',
+             ]);
+         }
+         $referred_by = $user->referred_by;
+
+        // API endpoint
+        $url = 'https://api.ekqr.in/api/check_order_status';
+
+        // Data to be sent
+        $data = [
+            'client_txn_id' => $txn_id,
+            'txn_date' => $date,
+            'key' => $key
+        ];
+
+        // Initialize HTTP client and send POST request
         $response = Http::post($url, $data);
 
         // Check for errors in the response
@@ -3816,42 +3861,35 @@ public function check_recharge_status(Request $request)
             ]);
         }
 
-        if (!isset($responseArray['status']) || !$responseArray['status']) {
+     
+    
+
+        // Find existing recharge transaction by txn_id
+        $rechargeTrans = RechargeTrans::where('txn_id', $txn_id)->first();
+        if (!$rechargeTrans) {
             return response()->json([
                 'success' => false,
-                'message' => 'Transaction failed. Order status check failed.',
+                'message' => 'Recharge transaction not found for txn_id: ' . $txn_id,
             ]);
         }
 
-        $status = $responseArray['status'];
-        $data = $responseArray['data'];
+        // Check if user_id matches
+        if ($rechargeTrans->user_id != $user_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User ID does not match the transaction ID',
+            ]);
+        }
 
-        if ($status == 'created' || $status == 'success') {
-            // Find existing recharge transaction by txn_id
-            $rechargeTrans = RechargeTrans::where('txn_id', $txn_id)->first();
-
-            if (!$rechargeTrans) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Recharge transaction not found for txn_id: ' . $txn_id,
-                ]);
-            }
-
-            // Check if user_id matches
-            if ($rechargeTrans->user_id != $user_id) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'User ID does not match the transaction ID',
-                ]);
-            }
-
+        // Check current status before updating
+        if ($rechargeTrans->status != 1) {
             // Update fields
             $rechargeTrans->txn_id = $data['client_txn_id'];
-            $rechargeTrans->status = 1; // Assuming initial status
+            $rechargeTrans->status = 1;
             $rechargeTrans->save();
 
             // Fetch user
-            $user = Users::find($user_id);
+            $user = Users::find($input['user_id']);
             if (!$user) {
                 return response()->json([
                     'success' => false,
@@ -3866,26 +3904,41 @@ public function check_recharge_status(Request $request)
 
             // Insert into transactions table
             $transaction = new Transaction();
-            $transaction->user_id = $user_id;
+            $transaction->user_id = $input['user_id'];
             $transaction->points = $points;
             $transaction->datetime = now();
             $transaction->type = 'recharge';
-            
             $transaction->save();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Transaction completed successfully',
-            ]);
+             // Find all users whose refer_code matches the referred_by value
+             $referredUsers = Users::where('refer_code', $referred_by)->get();
 
-        } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'Transaction failed. Status: ' . $status,
-            ]);
-        }
+             // Calculate 10% of points as bonus points
+             $bonusPoints = $points * 0.10;
+ 
+             foreach ($referredUsers as $referredUser) {
+                 // Update each referred user's points
+                 $referredUser->points += $bonusPoints;
+                 $referredUser->total_points += $bonusPoints;
+                 $referredUser->save();
+ 
+                 // Insert into transactions table for each referred user
+                 $refTransaction = new Transaction();
+                 $refTransaction->user_id = $referredUser->id;
+                 $refTransaction->points = $bonusPoints;
+                 $refTransaction->datetime = now();
+                 $refTransaction->type = 'bonus';
+                 $refTransaction->save();
+             }
+         }
+        // Return success response
+        return response()->json([
+            'success' => true,
+            'message' => 'Transaction completed successfully',
+        ]);
 
     } catch (\Exception $e) {
+        // Handle any exceptions
         return response()->json([
             'success' => false,
             'message' => 'Failed to check order status. Error: ' . $e->getMessage(),
