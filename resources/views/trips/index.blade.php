@@ -16,8 +16,8 @@
             <div class="col-md-8 d-flex align-items-center">
                 <!-- Checkbox for Select All -->
                 <div class="form-check mr-3">
-                <input type="checkbox" class="form-check-input" id="checkAll">
-                <label class="form-check-label" for="checkAll">Select All</label>
+                    <input type="checkbox" class="form-check-input" id="checkAll">
+                    <label class="form-check-label" for="checkAll">Select All</label>
                 </div>
                 
                 <!-- Verify Button -->
@@ -27,38 +27,46 @@
                 
             </div>
             
-            <div class="col-md-8"><br>
-                <!-- User Filter Dropdown -->
-                <form id="filter-form" action="{{ route('trips.index') }}" method="GET" class="form-inline">
-                    <div class="form-group mr-3">
-                        <label for="user-filter" class="mr-2">Filter by Users:</label>
-                        <select name="user_id" id="user-filter" class="form-control">
-                            <option value="">All Users</option>
-                            @foreach ($users as $user)
-                                <option value="{{ $user->id }}" @if($user->id == request()->input('user_id')) selected @endif>{{ $user->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-    <label for="status-filter" class="mr-2">Filter by Status:</label>
-    <select name="trip_status" id="status-filter" class="form-control">
-        <option value="0" {{ request()->input('trip_status') === '0' ? 'selected' : '' }}>Pending</option>
-        <option value="1" {{ request()->input('trip_status') === '1' ? 'selected' : '' }}>Approved</option>
-        <option value="2" {{ request()->input('trip_status') === '2' ? 'selected' : '' }}>Cancelled</option>
-    </select>
-</div>
-
-
-
-                </form>
-            </div>
-
             <div class="col-md-4 text-right">
                 <!-- Search Form -->
                 <form action="{{ route('trips.index') }}" method="GET">
                     <div class="input-group">
                         <input type="text" name="search" class="form-control" placeholder="Search by....">
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-secondary" type="submit"><i class="fas fa-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <!-- Filter Form -->
+                <form id="filter-form" action="{{ route('trips.index') }}" method="GET">
+                    <div class="form-row">
+                        <div class="form-group col-md-3">
+                            <label for="user-filter">Filter by Users:</label>
+                            <select name="user_id" id="user-filter" class="form-control">
+                                <option value="">All Users</option>
+                                @foreach ($users as $user)
+                                    <option value="{{ $user->id }}" {{ $user->id == request()->input('user_id') ? 'selected' : '' }}>{{ $user->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="form-group col-md-3">
+                            <label for="status-filter">Filter by Status:</label>
+                            <select name="trip_status" id="status-filter" class="form-control">
+                                <option value="0" {{ request()->input('trip_status') === '0' ? 'selected' : '' }}>Pending</option>
+                                <option value="1" {{ request()->input('trip_status') === '1' ? 'selected' : '' }}>Approved</option>
+                                <option value="2" {{ request()->input('trip_status') === '2' ? 'selected' : '' }}>Cancelled</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group col-md-6 text-right">
+                            <button type="submit" class="btn btn-primary">Apply Filters</button>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -68,7 +76,7 @@
             <table class="table table-bordered table-hover">
                 <thead class="thead-dark">
                     <tr>
-                    <th>Checkbox</th>
+                        <th>Checkbox</th>
                         <th>Actions</th>
                         <th>ID <i class="fas fa-sort"></i></th>
                         <th>Trip Image</th>
@@ -86,7 +94,7 @@
                 <tbody>
                     @foreach ($trips as $trip)
                         <tr>
-                        <td><input type="checkbox" class="checkbox" data-id="{{ $trip->id }}"></td>
+                            <td><input type="checkbox" class="checkbox" data-id="{{ $trip->id }}"></td>
                             <td>
                                 <a href="{{ route('trips.edit', $trip) }}" class="btn btn-primary"><i class="fas fa-edit"></i></a>
                                 <button class="btn btn-danger btn-delete" data-url="{{ route('trips.destroy', $trip) }}"><i class="fas fa-trash"></i></button>
@@ -97,7 +105,7 @@
                                     <img class="customer-img img-thumbnail img-fluid" src="{{ asset('storage/app/public/trips/' . $trip->trip_image) }}" alt="Trip Image" style="max-width: 100px; max-height: 100px;">
                                 </a>
                             </td>
-                            <td>{{ optional($trip->users)->name }}</td>
+                            <td>{{ optional($trip->user)->name }}</td>
                             <td>{{ $trip->trip_type }}</td>
                             <td>{{ $trip->location }}</td>
                             <td>{{ $trip->from_date }}</td>
@@ -119,50 +127,48 @@
                 </tbody>
             </table>
         </div>
-        {{ $trips->render() }}
-   
-        </div>
+        {{ $trips->links() }}
+    </div>
 </div>
-
 @endsection
 
 @section('js')
     <script src="{{ asset('plugins/sweetalert2/sweetalert2.min.js') }}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
     <script>
-    $(document).ready(function () {
-        // Submit the form when user or status selection changes
-        $('#user-filter, #status-filter').change(function () {
-            var userFilterValue = $('#user-filter').val();
-            var statusFilterValue = $('#status-filter').val();
-            
-            // Check if both filters are empty or only the status filter is selected
-            if ((userFilterValue === '' && statusFilterValue === '') || (userFilterValue !== '' && statusFilterValue !== '')) {
-                $('#filter-form').submit();
-            } else if (statusFilterValue !== '') {
-                // If only the status filter is selected, construct the URL without the user_id parameter
-                var url = "{{ route('trips.index') }}?trip_status=" + statusFilterValue;
-                window.location.href = url;
-            } else {
-                // If only the user filter is selected, submit the form with both filters
-                $('#filter-form').submit();
-            }
-        });
+        $(document).ready(function () {
+            // Submit the form when user or status selection changes
+            $('#user-filter, #status-filter').change(function () {
+                var userFilterValue = $('#user-filter').val();
+                var statusFilterValue = $('#status-filter').val();
+                
+                // Check if both filters are empty or only the status filter is selected
+                if ((userFilterValue === '' && statusFilterValue === '') || (userFilterValue !== '' && statusFilterValue !== '')) {
+                    $('#filter-form').submit();
+                } else if (statusFilterValue !== '') {
+                    // If only the status filter is selected, construct the URL without the user_id parameter
+                    var url = "{{ route('trips.index') }}?trip_status=" + statusFilterValue;
+                    window.location.href = url;
+                } else {
+                    // If only the user filter is selected, submit the form with both filters
+                    $('#filter-form').submit();
+                }
+            });
 
-        // Handle pagination clicks to maintain trip_status parameter
-        $('.pagination a').click(function (e) {
-            e.preventDefault();
-            var pageUrl = $(this).attr('href');
-            var statusFilterValue = $('#status-filter').val();
-            
-            if (statusFilterValue !== '') {
-                var separator = pageUrl.includes('?') ? '&' : '?';
-                pageUrl += separator + 'trip_status=' + statusFilterValue;
-            }
+            // Handle pagination clicks to maintain trip_status parameter
+            $('.pagination a').click(function (e) {
+                e.preventDefault();
+                var pageUrl = $(this).attr('href');
+                var statusFilterValue = $('#status-filter').val();
+                
+                if (statusFilterValue !== '') {
+                    var separator = pageUrl.includes('?') ? '&' : '?';
+                    pageUrl += separator + 'trip_status=' + statusFilterValue;
+                }
 
-            window.location.href = pageUrl;
+                window.location.href = pageUrl;
+            });
         });
-    });
     </script>
 
     <script>
@@ -203,60 +209,59 @@
     </script>
 
     <script>
-    $(document).ready(function () {
-        // Handle "Select All" checkbox
-        $('#checkAll').change(function () {
-            $('.checkbox').prop('checked', $(this).prop('checked'));
+        $(document).ready(function () {
+            // Handle "Select All" checkbox
+            $('#checkAll').change(function () {
+                $('.checkbox').prop('checked', $(this).prop('checked'));
+            });
+
+            // Handle Pending Button click
+            $('#pendingButton').click(function () {
+                updateStatus(0); // Status 0 for Pending
+            });
+
+            // Handle Approve Button click
+            $('#verifyButton').click(function () {
+                updateStatus(1); // Status 1 for Approved
+            });
+
+            // Handle Cancel Button click
+            $('#cancelButton').click(function () {
+                updateStatus(2); // Status 2 for Cancelled
+            });
         });
 
-        // Handle Pending Button click
-        $('#pendingButton').click(function () {
-            updateStatus(0);
-        });
-
-        // Handle Approve Button click
-        $('#verifyButton').click(function () {
-            updateStatus(1);
-        });
-
-        // Handle Cancel Button click
-        $('#cancelButton').click(function () {
-            updateStatus(2);
-        });
-
-        // Update Status function
+        // Function to update status via AJAX
         function updateStatus(status) {
             var tripIds = [];
             $('.checkbox:checked').each(function () {
                 tripIds.push($(this).data('id'));
             });
 
-            if (tripIds.length > 0) {
-                $.ajax({
-                    url: "{{ route('trips.updateStatus') }}",
-                    method: 'POST',
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        trip_ids: tripIds,
-                        status: status
-                    },
-                    success: function (response) {
-                        if (response.success) {
-                            location.reload();
-                        } else {
-                            alert('Failed to update status. Please try again.');
-                        }
-                    },
-                    error: function (xhr, status, error) {
-                        console.error(error);
-                        alert('An error occurred. Please try again.');
-                    }
-                });
-            } else {
-                alert('Please select at least one trip.');
+            if (tripIds.length === 0) {
+                alert('Please select at least one trip to update status.');
+                return;
             }
+
+            $.ajax({
+                url: '{{ route("trips.updateStatus") }}',
+                type: 'POST',
+                data: {
+                    trip_ids: tripIds,
+                    status: status,
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function (response) {
+                    if (response.success) {
+                        location.reload();
+                    } else {
+                        alert('Failed to update status. Please try again.');
+                    }
+                },
+                error: function () {
+                    alert('Failed to update status. Please try again.');
+                }
+            });
         }
-    });
     </script>
 @endsection
-

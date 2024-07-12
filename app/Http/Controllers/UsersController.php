@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UsersStoreRequest;
 use App\Models\Users;
+use App\Models\Professions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -44,9 +45,14 @@ class UsersController extends Controller
 
         // Retrieve all users if there's no search query
         $users = $query->latest()->paginate(10);
-
-        return view('users.index')->with('users', $users);
+        $professions = Professions::all();
+     
+        return view('users.index', compact('users', 'professions'));
     }
+    public function profession()
+{
+    return $this->belongsTo(Professions::class, 'profession_id');
+}
 
     /**
      * Show the form for creating a new resource.
@@ -55,7 +61,8 @@ class UsersController extends Controller
      */
     public function create()
     {
-        return view('users.create');
+          $professions = Professions::pluck('profession', 'id'); // Pluck only 'profession' field
+        return view('users.create', compact('professions'));
     }
 
     /**
@@ -84,7 +91,7 @@ class UsersController extends Controller
     {
         $validatedData = $request->validate([
             'email' => 'required|email|unique:users',
-            'profession' => 'required|string|max:255',
+           'profession_id' => 'required|integer|exists:professions,id',
             'city' => 'required|string|max:255',
             'state' => 'required|string|max:255',
             'age' => 'required|integer|between:18,60',
@@ -135,7 +142,7 @@ if ($request->hasFile('cover_img')) {
             'gender' => $request->gender,
             'state' => $request->state,
             'city' => $request->city,
-            'profession' => $request->profession,
+            'profession_id' => $request->profession_id,
             'refer_code' => $refer_code,
             'referred_by' => $request->referred_by,
             'dummy' => $request->dummy,
@@ -188,7 +195,8 @@ private function generateUniqueName($name, $user_id)
      */
     public function edit(Users $users)
     {
-        return view('users.edit', compact('users'));
+        $professions = Professions::pluck('profession', 'id'); // Replace 'profession' with the actual field name
+        return view('users.edit', compact('users', 'professions'));
     }
 
     /**
@@ -209,7 +217,7 @@ private function generateUniqueName($name, $user_id)
             'gender' => 'required|in:male,female,others',
             'state' => 'required|string|max:255',
             'city' => 'required|string|max:255',
-            'profession' => 'required|string|max:255',
+            'profession_id' => 'required|integer|exists:professions,id',
             'refer_code' => 'nullable|string|max:255',
             'referred_by' => 'nullable|string|max:255',
             'profile' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
@@ -238,7 +246,7 @@ private function generateUniqueName($name, $user_id)
         $users->gender = $request->gender;
         $users->state = $request->state;
         $users->city = $request->city;
-        $users->profession = $request->profession;
+        $users->profession_id = $request->profession_id;
         $users->refer_code = $request->refer_code;
         $users->referred_by = $request->referred_by;
         $users->verified = $request->verified;

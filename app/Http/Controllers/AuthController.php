@@ -111,7 +111,7 @@ public function check_email(Request $request)
     }
 
     // Check if a customer with the given phone number exists in the database
-    $user = Users::where('email', $email)->first();
+    $user = Users::where('email', $email)->with('profession')->first();
 
     // If customer not found, return failure response
     if (!$user) {
@@ -120,7 +120,6 @@ public function check_email(Request $request)
         $response['message'] = 'Email not registered.';
         return response()->json($response, 404);
     }
-
 // Image URL
 $imageUrl = asset('storage/app/public/users/' . $user->profile);
 $coverimageUrl = asset('storage/app/public/users/' . $user->cover_img);
@@ -139,7 +138,7 @@ return response()->json([
         'gender' => $user->gender,
         'state' => $user->state,
         'city' => $user->city,
-        'profession' => $user->profession,
+        'profession' => $user->profession ? $user->profession->profession : null,
         'refer_code' => $user->refer_code,
         'referred_by' => $user->referred_by,
         'profile' => $imageUrl,
@@ -407,7 +406,7 @@ public function userdetails(Request $request)
 
     $user->online_status = $online_status;
     $user->save();
-
+    $user->load('profession');
     // Image URLs
     $imageUrl = asset('storage/app/public/users/' . $user->profile);
     $coverimageUrl = asset('storage/app/public/users/' . $user->cover_img);
@@ -425,7 +424,7 @@ public function userdetails(Request $request)
             'gender' => $user->gender,
             'state' => $user->state,
             'city' => $user->city,
-            'profession' => $user->profession,
+            'profession' => $user->profession ? $user->profession->profession : null,
             'refer_code' => $user->refer_code,
             'referred_by' => $user->referred_by,
             'profile' => $imageUrl,
@@ -469,6 +468,7 @@ public function other_userdetails(Request $request)
         ], 404);
     }
 
+    $user->load('profession');
     // Image URLs
 
     $imageUrl = $user->profile_verified == 1 ? asset('storage/app/public/users/' . $user->profile) : '';
@@ -488,7 +488,7 @@ public function other_userdetails(Request $request)
             'gender' => $user->gender,
             'state' => $user->state,
             'city' => $user->city,
-            'profession' => $user->profession,
+            'profession' => $user->profession ? $user->profession->profession : null,
             'refer_code' => $user->refer_code,
             'referred_by' => $user->referred_by,
             'profile' => $imageUrl,
@@ -539,6 +539,7 @@ public function update_image(Request $request)
         $user->save();
         // Image URL
 
+        $user->load('profession');
         $imageUrl = asset('storage/app/public/users/' . $user->profile);
         $coverimageUrl = asset('storage/app/public/users/' . $user->cover_img);
       
@@ -556,7 +557,7 @@ public function update_image(Request $request)
                 'gender' => $user->gender,
                 'state' => $user->state,
                 'city' => $user->city,
-                'profession' => $user->profession,
+                'profession' => $user->profession ? $user->profession->profession : null,
                 'refer_code' => $user->refer_code,
                 'referred_by' => $user->referred_by,
                 'profile' => $imageUrl,
@@ -613,6 +614,7 @@ public function update_cover_img(Request $request)
         $user->datetime = now(); 
         $user->save();
         // Image URL
+        $user->load('profession');
         $imageUrl = asset('storage/app/public/users/' . $user->profile);
         $coverimageUrl = asset('storage/app/public/users/' . $user->cover_img);
       
@@ -630,7 +632,7 @@ public function update_cover_img(Request $request)
                 'gender' => $user->gender,
                 'state' => $user->state,
                 'city' => $user->city,
-                'profession' => $user->profession,
+               'profession' => $user->profession ? $user->profession->profession : null,
                 'refer_code' => $user->refer_code,
                 'referred_by' => $user->referred_by,
                 'profile' => $imageUrl,
@@ -3400,6 +3402,7 @@ public function terms_conditions(Request $request)
     ], 200);
 }
 
+
 public function profile_view(Request $request)
 {
     $user_id = $request->input('user_id');
@@ -3460,7 +3463,8 @@ public function profile_view(Request $request)
     $notification = new Notifications();
     $notification->user_id = $profile_user_id;
     $notification->notify_user_id = $user_id;
-    $notification->message = 'Profile Viewed Successfully';
+    $notification->message = "{$user->name}, viewed your profile";
+
 
     if (!$notification->save()) {
         return response()->json([
@@ -3469,12 +3473,25 @@ public function profile_view(Request $request)
         ], 500);
     }
 
-    return response()->json([
-        'success' => true,
-        'message' => 'Notification added successfully.',
-    ], 201);
-}
+     // Send notification to the profile user
+     $this->sendNotificationToUser(strval($profile_user_id), "{$user->name} viewed your profile");
 
+     return response()->json([
+         'success' => true,
+         'message' => 'Notification added successfully.',
+     ], 201);
+ }
+protected function sendNotificationToUser($profile_user_id, $message)
+{
+    $this->oneSignalClient->sendNotificationToExternalUser(
+        $message,
+        $profile_user_id,
+        $url = null,
+        $data = null,
+        $buttons = null,
+        $schedule = null
+    );
+}
 protected $oneSignalClient;
 
 public function __construct(OneSignalClient $oneSignalClient)

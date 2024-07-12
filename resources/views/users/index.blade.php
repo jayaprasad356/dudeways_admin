@@ -119,7 +119,8 @@
                         <td>{{$user->gender}}</td>
                         <td>{{$user->state}}</td>
                         <td>{{$user->city}}</td>
-                        <td>{{$user->profession}}</td>
+                        <td>{{ optional($user->professions)->profession }}</td>
+
                         <td>{{$user->refer_code}}</td>
                         <td>{{$user->referred_by}}</td>
                         <td>{{$user->points}}</td>

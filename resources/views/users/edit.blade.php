@@ -103,22 +103,22 @@
                 </div>
 
                 <div class="form-group">
-    <label for="profession">Profession</label>
-    <select name="profession" class="form-control @error('profession') is-invalid @enderror" id="profession">
+    <label for="profession_id">Profession</label>
+    <select name="profession_id" class="form-control @error('profession_id') is-invalid @enderror" id="profession_id">
         <option value=''>--select--</option>
-        <option value='engineer' {{ old('profession', strtolower($users->profession)) == 'engineer' ? 'selected' : '' }}>Engineer</option>
-        <option value='chef' {{ old('profession', strtolower($users->profession)) == 'chef' ? 'selected' : '' }}>Chef</option>
-        <option value='electrician' {{ old('profession', strtolower($users->profession)) == 'electrician' ? 'selected' : '' }}>Electrician</option>
-        <option value='physician' {{ old('profession', strtolower($users->profession)) == 'physician' ? 'selected' : '' }}>Physician</option>
-        <option value='dentist' {{ old('profession', strtolower($users->profession)) == 'dentist' ? 'selected' : '' }}>Dentist</option>
-        <option value='doctor' {{ old('profession', strtolower($users->profession)) == 'doctor' ? 'selected' : '' }}>Doctor</option>
+        @foreach($professions as $id => $profession)
+            <option value="{{ $id }}" {{ old('profession_id', $users->profession_id) == $id ? 'selected' : '' }}>
+                {{ $profession }}
+            </option>
+        @endforeach
     </select>
-    @error('profession')
+    @error('profession_id')
     <span class="invalid-feedback" role="alert">
         <strong>{{ $message }}</strong>
     </span>
     @enderror
 </div>
+
 
 
                 <div class="form-group">

@@ -24,50 +24,76 @@ class TripsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function updateStatus(Request $request)
-    {
-        $tripIds = $request->input('trip_ids', []);
-        $status = $request->input('status');
-    
-        foreach ($tripIds as $tripId) {
-            $trip = Trips::find($tripId);
-            if ($trip) {
-                $trip->trip_status = $status;
-                $trip->trip_datetime = now(); 
-                $trip->save();
-    
-                $user = Users::find($trip->user_id);
-    
-                if ($status == 1 && $user) {
-                    // Send notification to the specific user
-                    $message = "Your Trip Approved Successfully";
-                    $this->oneSignalClient->sendNotificationToExternalUser(
-                        $message,
-                        $user->id, // Assuming $user->id is the OneSignal external user ID
-                        $url = null,
-                        $data = null,
-                        $buttons = null,
-                        $schedule = null
-                    );
-                }
-            }
-        }
-    
-        // Send notification to all users
-        $user = Users::find($trip->user_id);
-        $allUsersMessage = $user->name . ", Posted a Trip Just now"; // Assuming $user->name is available and represents the user who posted the trip
-        $this->oneSignalClient->sendNotificationToAll(
-            $allUsersMessage,
-            $url = null,
-            $data = null,
-            $buttons = null,
-            $schedule = null
-        );
-    
-        return response()->json(['success' => true]);
-    }
-    
 
+     public function updateStatus(Request $request)
+     {
+         $tripIds = $request->input('trip_ids', []);
+         $status = $request->input('status');
+ 
+         foreach ($tripIds as $tripId) {
+             $trip = Trips::find($tripId);
+             if ($trip) {
+                 $oldStatus = $trip->trip_status;
+                 $trip->trip_status = $status;
+                 $trip->trip_datetime = now();
+                 $trip->save();
+ 
+                 // Only send notifications if the status has changed
+                 if ($oldStatus !== $status) {
+                     if ($status == 1) {
+                        $userId = $trip->user_id;
+
+                         $this->sendNotificationToAllUsers($trip->user_id);
+ 
+                         // Send notification to the user who posted the trip
+                         $this->sendNotificationToUser(strval($userId));
+                     }
+                 }
+             }
+         }
+ 
+         return response()->json(['success' => true]);
+     }
+ 
+     /**
+      * Send notification to all users that a new trip has been posted.
+      *
+      * @param int $userId
+      * @return void
+      */
+     protected function sendNotificationToAllUsers($userId)
+     {
+         $user = Users::find($userId);
+         if ($user) {
+             $message = $user->name . " posted a new trip";
+             $this->oneSignalClient->sendNotificationToAll(
+                 $message,
+                 $url = null,
+                 $data = null,
+                 $buttons = null,
+                 $schedule = null
+             );
+         }
+     }
+ 
+     /**
+      * Send notification to the user that their trip has been approved.
+      *
+      * @param int $userId
+      * @return void
+      */
+     protected function sendNotificationToUser($userId)
+     {
+             $message = "Your trip has been approved successfully";
+             $this->oneSignalClient->sendNotificationToExternalUser(
+                 $message,
+                 $userId,
+                 $url = null,
+                 $data = null,
+                 $buttons = null,
+                 $schedule = null
+             );
+     }
      public function index(Request $request)
      {
          $query = Trips::query()->with('users');

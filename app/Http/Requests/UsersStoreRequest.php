@@ -34,7 +34,7 @@ class UsersStoreRequest extends FormRequest
             'avatar' => 'nullable|profile',
             'refer_code' => 'nullable|string',
             'referred_by' => 'nullable|string',
-            'profession' => 'nullable|string',
+            'profession_id' => 'nullable|integer',
             'points' => 'required|integer',
             'datetime' => 'nullable|datetime',
             'verified' => 'nullable|boolean',

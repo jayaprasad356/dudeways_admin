@@ -85,21 +85,23 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="profession">Profession</label>
-                    <select name="profession" class="form-control @error('profession') is-invalid @enderror" id="profession">
-                        <option value=''>--select--</option>
-                        <option value='engineer' {{ old('profession') == 'engineer' ? 'selected' : '' }}>engineer</option>
-                        <option value='chef' {{ old('profession') == 'chef' ? 'selected' : '' }}>chef</option>
-                        <option value='electrician' {{ old('profession') == 'electrician' ? 'selected' : '' }}>electrician</option>
-                        <option value='physician' {{ old('profession') == 'physician' ? 'selected' : '' }}>physician</option>
-                        <option value='dentist' {{ old('profession') == 'dentist' ? 'selected' : '' }}>dentist</option>
-                    </select>
-                    @error('profession')
-                    <span class="invalid-feedback" role="alert">
-                        <strong>{{ $message }}</strong>
-                    </span>
-                    @enderror
-                </div>
+    <label for="profession_id">Profession</label>
+    <select name="profession_id" class="form-control @error('profession_id') is-invalid @enderror" id="profession_id">
+        <option value=''>--select--</option>
+        @foreach($professions as $id => $profession)
+            <option value="{{ $id }}" {{ old('profession_id') == $id ? 'selected' : '' }}>
+                {{ $profession }}
+            </option>
+        @endforeach
+    </select>
+    @error('profession_id')
+    <span class="invalid-feedback" role="alert">
+        <strong>{{ $message }}</strong>
+    </span>
+    @enderror
+</div>
+
+
 
                 <div class="form-group">
     <label for="referred_by">Referred By</label>

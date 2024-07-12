@@ -15,8 +15,18 @@ class Users extends Authenticatable
 
 
     protected $fillable = [
-        'name', 'email', 'mobile', 'age', 'profile','gender','refer_code','referred_by','profession','datetime','points','total_points','state','city','unique_name','verified','last_seen','online_status','cover_img','dummy','introduction','message_notify','add_friend_notify','view_notify','profile_verified','cover_img_verified', // Add 'mobile' to the fillable fields
+        'name', 'email', 'mobile', 'age', 'profile','gender','refer_code','referred_by','profession_id','datetime','points','total_points','state','city','unique_name','verified','last_seen','online_status','cover_img','dummy','introduction','message_notify','add_friend_notify','view_notify','profile_verified','cover_img_verified', // Add 'mobile' to the fillable fields
     ];
+
+    public function professions()
+    {
+        return $this->belongsTo(Professions::class, 'profession_id');
+    }
+
+    public function profession()
+    {
+        return $this->belongsTo(Professions::class);
+    }
     public $timestamps = true;
 
     protected $hidden = [

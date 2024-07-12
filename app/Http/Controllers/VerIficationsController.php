@@ -4,9 +4,17 @@ namespace App\Http\Controllers;
 use App\Models\Verifications;
 use App\Models\Users;
 use Illuminate\Http\Request;
+use Berkayk\OneSignal\OneSignalClient;
 
 class VerificationsController extends Controller
 {
+    protected $oneSignalClient;
+
+    public function __construct(OneSignalClient $oneSignalClient)
+    {
+        $this->oneSignalClient = $oneSignalClient;
+    }
+
     public function verify(Request $request)
     {
         $verificationIds = $request->input('verification_ids', []);
@@ -22,7 +30,6 @@ class VerificationsController extends Controller
                     $user->verify_bonus_sent = 1;
                     $user->save();
 
-                    // Create a new transaction
                     \App\Models\Transaction::create([
                         'user_id' => $user->id,
                         'type' => 'verify_points',
@@ -31,6 +38,9 @@ class VerificationsController extends Controller
                     ]);
                 }
 
+                  // Send notification to the user who posted the verification
+                  $this->sendNotificationToUser(strval($user->id));
+
                 // Update verification status
                 $verification->status = 1;
                 $verification->save();
@@ -38,6 +48,19 @@ class VerificationsController extends Controller
         }
 
         return response()->json(['success' => true]);
+    }
+
+    protected function sendNotificationToUser($user_id)
+    {
+        $message = "Your Profile Verified Successfully";
+        $this->oneSignalClient->sendNotificationToExternalUser(
+            $message,
+            $user_id,
+            $url = null,
+            $data = null,
+            $buttons = null,
+            $schedule = null
+        );
     }
 
     public function index(Request $request)
