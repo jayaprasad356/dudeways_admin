@@ -3440,7 +3440,6 @@ public function profile_view(Request $request)
         ], 404);
     }
 
-    // Check if notification already exists within the last hour
     $existingNotification = Notifications::where('user_id', $profile_user_id)
         ->where('notify_user_id', $user_id)
         ->latest()
@@ -3464,6 +3463,7 @@ public function profile_view(Request $request)
     $notification->user_id = $profile_user_id;
     $notification->notify_user_id = $user_id;
     $notification->message = "{$user->name}, viewed your profile";
+    $notification->datetime = now();
 
 
     if (!$notification->save()) {
