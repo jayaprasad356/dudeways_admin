@@ -3881,69 +3881,75 @@ public function check_recharge_status(Request $request)
             ]);
         }
 
-        // Check current status before updating
-        if ($rechargeTrans->status != 1) {
-            // Update fields
-            $rechargeTrans->txn_id = $data['client_txn_id'];
-            $rechargeTrans->status = 1;
-            $rechargeTrans->save();
+                // Check current status before updating
+            if ($rechargeTrans->status != 1) {
+                // Update fields
+                $rechargeTrans->txn_id = $data['client_txn_id'];
+                $rechargeTrans->status = 1;
+                $rechargeTrans->save();
 
-            // Fetch user
-            $user = Users::find($input['user_id']);
-            if (!$user) {
+                // Fetch user
+                $user = Users::find($input['user_id']);
+                if (!$user) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'User not found',
+                    ]);
+                }
+
+                // Update user's points
+                $user->points += $points;
+                $user->total_points += $points;
+                $user->save();
+
+                // Insert into transactions table
+                $transaction = new Transaction();
+                $transaction->user_id = $input['user_id'];
+                $transaction->points = $points;
+                $transaction->datetime = now();
+                $transaction->type = 'recharge';
+                $transaction->save();
+
+                // Find all users whose refer_code matches the referred_by value
+                $referredUsers = Users::where('refer_code', $referred_by)->get();
+
+                // Calculate 10% of points as bonus points
+                $bonusPoints = $points * 0.10;
+
+                foreach ($referredUsers as $referredUser) {
+                    // Update each referred user's points
+                    $referredUser->points += $bonusPoints;
+                    $referredUser->total_points += $bonusPoints;
+                    $referredUser->save();
+
+                    // Insert into transactions table for each referred user
+                    $refTransaction = new Transaction();
+                    $refTransaction->user_id = $referredUser->id;
+                    $refTransaction->points = $bonusPoints;
+                    $refTransaction->datetime = now();
+                    $refTransaction->type = 'bonus';
+                    $refTransaction->save();
+                }
+
+                // Return success response
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Transaction completed successfully',
+                ]);
+            } else {
+                // Return error response if status is already 1
                 return response()->json([
                     'success' => false,
-                    'message' => 'User not found',
+                    'message' => 'Points already added',
                 ]);
             }
-
-            // Update user's points
-            $user->points += $points;
-            $user->total_points += $points;
-            $user->save();
-
-            // Insert into transactions table
-            $transaction = new Transaction();
-            $transaction->user_id = $input['user_id'];
-            $transaction->points = $points;
-            $transaction->datetime = now();
-            $transaction->type = 'recharge';
-            $transaction->save();
-
-             // Find all users whose refer_code matches the referred_by value
-             $referredUsers = Users::where('refer_code', $referred_by)->get();
-
-             // Calculate 10% of points as bonus points
-             $bonusPoints = $points * 0.10;
- 
-             foreach ($referredUsers as $referredUser) {
-                 // Update each referred user's points
-                 $referredUser->points += $bonusPoints;
-                 $referredUser->total_points += $bonusPoints;
-                 $referredUser->save();
- 
-                 // Insert into transactions table for each referred user
-                 $refTransaction = new Transaction();
-                 $refTransaction->user_id = $referredUser->id;
-                 $refTransaction->points = $bonusPoints;
-                 $refTransaction->datetime = now();
-                 $refTransaction->type = 'bonus';
-                 $refTransaction->save();
-             }
-         }
-        // Return success response
-        return response()->json([
-            'success' => true,
-            'message' => 'Transaction completed successfully',
-        ]);
-
-    } catch (\Exception $e) {
-        // Handle any exceptions
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to check order status. Error: ' . $e->getMessage(),
-        ]);
-    }
+                } catch (\Exception $e) {
+                    // Handle any exceptions
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Failed to check order status. Error: ' . $e->getMessage(),
+                    ]);
+                }
 }
 
 }    
