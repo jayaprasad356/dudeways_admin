@@ -3343,29 +3343,29 @@ public function add_feedback(Request $request)
 
 public function profession_list(Request $request)
 {
-    $professionId = $request->input('profession_id');
+    // Retrieve all professions
+    $professions = Professions::all();
 
-    if ($professionId) {
-        $profession = Professions::find($professionId);
+    if ($professions->isEmpty()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No profession found.',
+        ], 404);
+    }
 
-        if (!$profession) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Profession not found.',
-            ], 404);
-        }
-
-        $professionData = [[
+    $professionData = [];
+    foreach ($professions as $profession) {
+        $professionData[] = [
             'id' => $profession->id,
             'profession' => $profession->profession,
-        ]];
+        ];
+    }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Profession retrieved successfully.',
-            'data' => $professionData,
-        ], 200);
-    } 
+    return response()->json([
+        'success' => true,
+        'message' => 'Professions listed successfully.',
+        'data' => $professionData,
+    ], 200);
 }
 
 public function settings_list(Request $request)
