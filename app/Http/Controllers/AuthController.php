@@ -250,7 +250,14 @@ public function register(Request $request)
             'message' => 'User already exists with this Unique Name.',
         ], 409);
     }
+    $profession = Professions::find($profession_id);
 
+    if (!$profession) {
+        return response()->json([
+            'success' => false,
+            'message' => 'profession not found.',
+        ], 404);
+    }
     // Check if the user with the given email already exists
     $existingEmail = Users::where('email', $email)->first();
     if ($existingEmail) {
@@ -673,6 +680,7 @@ public function update_users(Request $request)
             'message' => 'user_id is empty.',
         ], 400);
     }
+
     $user = Users::find($user_id);
 
     if (!$user) {
@@ -686,51 +694,64 @@ public function update_users(Request $request)
     $email = $request->input('email');
     $unique_name = $request->input('unique_name');
     $age = $request->input('age');
-    $profession = $request->input('profession');
+    $profession_id = $request->input('profession_id');
     $state = $request->input('state');
     $city = $request->input('city');
     $introduction = $request->input('introduction');
 
-if ($age !== null) {
-    if ($age < 18 || $age > 60) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Age should be between 18 and 60.',
-        ], 400);
+    // Validate age
+    if ($age !== null) {
+        if ($age < 18 || $age > 60) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Age should be between 18 and 60.',
+            ], 400);
+        }
     }
-}
 
-if ($name !== null) {
-    if (strlen($name) < 4 || strlen($name) > 18) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Name should be between 4 and 18 characters.',
-        ], 400);
+    // Validate name
+    if ($name !== null) {
+        if (strlen($name) < 4 || strlen($name) > 18) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Name should be between 4 and 18 characters.',
+            ], 400);
+        }
     }
-}
 
-if ($email !== null) {
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Invalid email format.',
-        ], 400);
+    // Validate email
+    if ($email !== null) {
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid email format.',
+            ], 400);
+        }
     }
-}
-    // Update offer details
+
+    // Validate profession_id
+    if ($profession_id !== null) {
+        $profession = Professions::find($profession_id);
+        if (!$profession) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid profession_id.',
+            ], 400);
+        }
+    }
+
+    // Update user details
     if ($name !== null) {
         $user->name = $name;
     }
     if ($email !== null) {
         $user->email = $email;
     }
-    
     if ($age !== null) {
         $user->age = $age;
     }
-   
-    if ($profession !== null) {
-        $user->profession = $profession;
+    if ($profession_id !== null) {
+        $user->profession_id = $profession_id;
     }
     if ($state !== null) {
         $user->state = $state;
@@ -746,8 +767,9 @@ if ($email !== null) {
     }
 
     $user->datetime = now(); 
-
     $user->save();
+
+    $user->load('profession');
 
     // Image URL
     $imageUrl = asset('storage/app/public/users/' . $user->profile);
@@ -755,7 +777,7 @@ if ($email !== null) {
 
     return response()->json([
         'success' => true,
-        'message' => 'User Details updated successfully.',
+        'message' => 'User details updated successfully.',
         'data' => [
             'id' => $user->id,
             'name' => $user->name,
@@ -766,7 +788,7 @@ if ($email !== null) {
             'gender' => $user->gender,
             'state' => $user->state,
             'city' => $user->city,
-            'profession' => $user->profession,
+            'profession' => $user->profession ? $user->profession->profession : null,
             'refer_code' => $user->refer_code,
             'referred_by' => $user->referred_by,
             'profile' => $imageUrl,
@@ -787,6 +809,7 @@ if ($email !== null) {
         ],
     ], 200);
 }
+
 
 public function update_location(Request $request)
 {
@@ -3320,29 +3343,29 @@ public function add_feedback(Request $request)
 
 public function profession_list(Request $request)
 {
-    // Retrieve all professions
-    $professions = Professions::all();
+    $professionId = $request->input('profession_id');
 
-    if ($professions->isEmpty()) {
-        return response()->json([
-            'success' => false,
-            'message' => 'No profession found.',
-        ], 404);
-    }
+    if ($professionId) {
+        $profession = Professions::find($professionId);
 
-    $professionData = [];
-    foreach ($professions as $profession) {
-        $professionData[] = [
+        if (!$profession) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Profession not found.',
+            ], 404);
+        }
+
+        $professionData = [[
             'id' => $profession->id,
             'profession' => $profession->profession,
-        ];
-    }
+        ]];
 
-    return response()->json([
-        'success' => true,
-        'message' => 'Professions listed successfully.',
-        'data' => $professionData,
-    ], 200);
+        return response()->json([
+            'success' => true,
+            'message' => 'Profession retrieved successfully.',
+            'data' => $professionData,
+        ], 200);
+    } 
 }
 
 public function settings_list(Request $request)
