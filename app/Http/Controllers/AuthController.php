@@ -1268,6 +1268,10 @@ public function trip_list(Request $request)
         ], 400);
     }
 
+    // Get user latitude and longitude
+    $userLatitude = (float)$userExists->latitude;
+    $userLongitude = (float)$userExists->longitude;
+
     // Validate type
     if (!$request->has('type')) {
         return response()->json([
@@ -1302,20 +1306,17 @@ public function trip_list(Request $request)
     $offset = (int)$offset;
     $limit = (int)$limit;
 
-    // Fetch the user's latitude and longitude
-    $userLatitude = (float)$userExists->latitude;
-    $userLongitude = (float)$userExists->longitude;
-
     $currentDate = Carbon::now()->toDateString();
     $tripsQuery = Trips::where('trip_status', 1)
-                       ->whereDate('from_date', '>=', $currentDate);
+                ->whereDate('from_date', '>=', $currentDate)
+                ->join('users', 'trips.user_id', '=', 'users.id')
+                ->select('trips.*');
 
-    $totalTrips = 0;
-    if ($offset >= $totalTrips) {
-        $offset = 0;
-    }
     if ($type == 'latest') {
         $totalTrips = $tripsQuery->count();
+        if ($offset >= $totalTrips) {
+            $offset = 0;
+        }
         $trips = $tripsQuery->orderBy('trip_datetime', 'desc')
                             ->skip($offset)
                             ->take($limit)
