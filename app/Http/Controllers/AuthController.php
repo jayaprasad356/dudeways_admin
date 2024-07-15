@@ -1302,7 +1302,6 @@ public function trip_list(Request $request)
     $offset = (int)$offset;
     $limit = (int)$limit;
 
-
     // Fetch the user's latitude and longitude
     $userLatitude = (float)$userExists->latitude;
     $userLongitude = (float)$userExists->longitude;
@@ -1312,13 +1311,11 @@ public function trip_list(Request $request)
                        ->whereDate('from_date', '>=', $currentDate);
 
     $totalTrips = 0;
-    
-    
+    if ($offset >= $totalTrips) {
+        $offset = 0;
+    }
     if ($type == 'latest') {
         $totalTrips = $tripsQuery->count();
-        if ($offset >= $totalTrips) {
-            $offset = 0;
-        } 
         $trips = $tripsQuery->orderBy('trip_datetime', 'desc')
                             ->skip($offset)
                             ->take($limit)
@@ -1328,7 +1325,7 @@ public function trip_list(Request $request)
         $totalTrips = count($allTrips);
         if ($offset >= $totalTrips) {
             $offset = 0;
-        } 
+        }
         $trips = $allTrips;
     } elseif ($type == 'date') {
         if (!$request->has('date')) {
@@ -1348,7 +1345,7 @@ public function trip_list(Request $request)
         $totalTrips = $tripsQuery->whereDate('from_date', $fromDate)->count();
         if ($offset >= $totalTrips) {
             $offset = 0;
-        } 
+        }
         $trips = $tripsQuery->whereDate('from_date', $fromDate)
                             ->skip($offset)
                             ->take($limit)
@@ -1396,6 +1393,9 @@ public function trip_list(Request $request)
         });
 
         // Apply offset and limit after sorting
+        if ($offset >= count($tripsWithDistance)) {
+            $offset = 0;
+        }
         $tripsWithDistance = array_slice($tripsWithDistance, $offset, $limit);
     }
 
@@ -1466,7 +1466,6 @@ public function trip_list(Request $request)
         'data' => $tripDetailsFormatted,
     ], 200);
 }
-
 
 private function calculateDistance($latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo, $earthRadius = 6371)
 {
