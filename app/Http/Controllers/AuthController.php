@@ -172,8 +172,8 @@ public function register(Request $request)
     $profession_id = $request->input('profession_id');
     $referred_by = $request->input('referred_by');
     $introduction = $request->input('introduction');
-    $points = $request->input('points', 50);
-    $total_points = $request->input('total_points', 50);
+    $points = $request->input('points', 25);
+    $total_points = $request->input('total_points', 25);
     $mobile = $request->input('mobile', '0000000000');
 
     if (empty($state)) {
