@@ -2062,32 +2062,20 @@ public function add_chat(Request $request)
         }
     
         // Get offset and limit from request with default values
-        $offset = $request->has('offset') ? $request->input('offset') : 0; // Default offset is 0 if not provided
-        $limit = $request->has('limit') ? $request->input('limit') : 10; // Default limit is 10 if not provided
+        $offset = $request->has('offset') ? (int)$request->input('offset') : 0; // Default offset is 0 if not provided
+        $limit = $request->has('limit') ? (int)$request->input('limit') : 10; // Default limit is 10 if not provided
     
-        // Validate offset
-        if (!is_numeric($offset)) {
+        // Validate offset and limit
+        if ($offset < 0 || $limit <= 0) {
             return response()->json([
                 'success' => false,
-                'message' => 'Offset is invalid.',
+                'message' => 'Invalid offset or limit.',
             ], 400);
         }
-    
-        // Validate limit
-        if (!is_numeric($limit)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Limit is invalid.',
-            ], 400);
-        }
-    
-        // Convert offset and limit to integers
-        $offset = (int)$offset;
-        $limit = (int)$limit;
     
         // Fetch total count of chats for the specific user_id
         $totalChats = Chats::where('user_id', $user_id)
-            ->orWhere('chat_user_id', $user_id) // Include chats where chat_user_id is the user_id
+            ->orWhere('chat_user_id', $user_id)
             ->count();
     
         // If offset is beyond the total chats, set offset to 0
@@ -2097,7 +2085,7 @@ public function add_chat(Request $request)
     
         // Fetch chats for the specific user_id from the database with pagination
         $chats = Chats::where('user_id', $user_id)
-            ->orWhere('chat_user_id', $user_id) // Include chats where chat_user_id is the user_id
+            ->orWhere('chat_user_id', $user_id)
             ->orderBy('datetime', 'desc')
             ->skip($offset)
             ->take($limit)
@@ -2111,7 +2099,7 @@ public function add_chat(Request $request)
             ], 404);
         }
     
-        // Prepare chat details
+        // Prepare chat details and find the latest message from the second data
         $chatDetails = $chats->map(function ($chat) use ($user_id) {
             $chat_user = Users::find($chat->chat_user_id); // Fetch the chat_user details
     
@@ -2146,7 +2134,7 @@ public function add_chat(Request $request)
     
             // Check if the user is a friend
             $isFriend = Friends::where('user_id', $user_id)
-                ->where('friend_user_id', $chat->chat_user_id) // Check against chat_user_id
+                ->where('friend_user_id', $chat->chat_user_id)
                 ->exists();
     
             $friendStatus = $isFriend ? '1' : '0';  // Check if the user is a friend
@@ -2169,11 +2157,20 @@ public function add_chat(Request $request)
             ];
         })->filter(); // Remove null values from the collection
     
+        // Get the first and second chat
+        $firstChat = $chatDetails->first(); // The chat with the first ID
+        $secondChat = $chatDetails->slice(1, 1)->first(); // The chat with the second ID
+    
+        // Update the latest_message of the first chat with the latest_message from the second chat
+        if ($firstChat && $secondChat) {
+            $firstChat['latest_message'] = $secondChat['latest_message'];
+        }
+    
         return response()->json([
             'success' => true,
             'message' => 'Chat details listed successfully.',
             'total' => $totalChats,
-            'data' => $chatDetails->values()->all(), // Reindex the array to prevent gaps
+            'data' => $firstChat ? [$firstChat] : [], // Return the first chat only
         ], 200);
     }
     
