@@ -49,6 +49,7 @@ Route::post('create_recharge', [AuthController::class, 'create_recharge']);
 Route::post('check_recharge_status', [AuthController::class, 'check_recharge_status']);
 Route::post('privacy_policy', [AuthController::class, 'privacy_policy']);
 Route::post('terms_conditions', [AuthController::class, 'terms_conditions']);
+Route::post('appsettings_list', [AuthController::class, 'appsettings_list']);
 
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
