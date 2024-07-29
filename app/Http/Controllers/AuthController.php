@@ -1767,6 +1767,118 @@ public function latest_trip(Request $request)
 }
 
 
+public function recent_trip(Request $request)
+{
+    // Fetch all recent trips with pagination
+    $offset = $request->input('offset', 0); // Default offset is 0 if not provided
+    $limit = $request->input('limit', 10);  // Default limit is 10 if not provided
+
+    // Validate offset
+    if (!is_numeric($offset) || $offset < 0) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid offset value.',
+        ], 400);
+    }
+
+    // Validate limit
+    if (!is_numeric($limit) || $limit <= 0) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid limit value.',
+        ], 400);
+    }
+
+    $tripsQuery = Trips::orderBy('created_at', 'desc');
+
+    // Get the total count of trips for pagination
+    $totalTrips = $tripsQuery->count();
+
+    // Apply pagination
+    $trips = $tripsQuery->skip($offset)->take($limit)->get();
+
+    if ($trips->isEmpty()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No trips found.',
+        ], 404);
+    }
+
+    // Assuming the current user's latitude and longtitude are available in the request
+    $userLatitude = (float) $request->input('user_latitude', 0); // Replace with actual method to get current user's latitude
+    $userLongtitude = (float) $request->input('user_longtitude', 0); // Replace with actual method to get current user's longtitude
+
+    // Calculate distance function
+    $calculateDistance = function ($lat1, $long1, $lat2, $long2) {
+        $earthRadius = 6371; // Radius of the Earth in kilometers
+
+        $latFrom = deg2rad($lat1);
+        $longFrom = deg2rad($long1);
+        $latTo = deg2rad($lat2);
+        $longTo = deg2rad($long2);
+
+        $latDelta = $latTo - $latFrom;
+        $longDelta = $longTo - $longFrom;
+
+        $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
+                                cos($latFrom) * cos($latTo) *
+                                pow(sin($longDelta / 2), 2)));
+
+        return $earthRadius * $angle;
+    };
+
+    $tripDetails = $trips->map(function ($trip) use ($userLatitude, $userLongtitude, $calculateDistance) {
+        $user = Users::find($trip->user_id);
+
+        // Calculate time difference in hours
+        $tripTime = Carbon::parse($trip->trip_datetime);
+        $currentTime = Carbon::now();
+        $hoursDifference = $tripTime->diffInHours($currentTime);
+
+        // Determine the time display string
+        $timeDifference = $hoursDifference == 0 ? 'now' :
+                          ($hoursDifference < 24 ? $hoursDifference . 'h' :
+                          floor($hoursDifference / 24) . 'd');
+
+        // Calculate distance if user coordinates are available
+        $distance = $user && $user->latitude && $user->longtitude
+                    ? $calculateDistance($userLatitude, $userLongtitude, (float)$user->latitude, (float)$user->longtitude)
+                    : null;
+
+        // Image URLs
+        $userProfileUrl = $user ? asset('storage/app/public/users/' . $user->profile) : null;
+        $tripImageUrl = $trip ? asset('storage/app/public/trips/' . $trip->trip_image) : null;
+
+        return [
+            'id' => $trip->id,
+            'user_id' => $trip->user_id,
+            'name' => $user ? $user->name : 'Unknown',
+            'verified' => $user ? $user->verified : false,
+            'unique_name' => $user ? $user->unique_name : 'Unknown',
+            'profile' => $userProfileUrl,
+            'trip_type' => $trip->trip_type,
+            'from_date' => Carbon::parse($trip->from_date)->format('F j, Y'),
+            'to_date' => Carbon::parse($trip->to_date)->format('F j, Y'),
+            'time' => $timeDifference,
+            'trip_title' => $trip->trip_title,
+            'trip_description' => $trip->trip_description,
+            'location' => $trip->location,
+            'trip_status' => $trip->trip_status,
+            'trip_image' => $tripImageUrl,
+            'trip_datetime' => Carbon::parse($trip->trip_datetime)->format('Y-m-d H:i:s'),
+            'updated_at' => Carbon::parse($trip->updated_at)->format('Y-m-d H:i:s'),
+            'created_at' => Carbon::parse($trip->created_at)->format('Y-m-d H:i:s'),
+            'distance' => $distance ? round($distance) . ' km' : null
+        ];
+    });
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Trip details retrieved successfully.',
+        'total' => $totalTrips,
+        'data' => $tripDetails,
+    ], 200);
+}
 public function delete_trip(Request $request)
 {
     $trip_id = $request->input('trip_id');

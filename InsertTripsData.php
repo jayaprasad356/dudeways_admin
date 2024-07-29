@@ -15,8 +15,8 @@ $tripTypes = ['Road Trip', 'Adventure Trip', 'Explore Cities', 'Airport Flyover'
 
 $data = [
     'location' => 'chennai',
-    'from_date' => '2024-07-11',
-    'to_date' => '2024-07-15',
+    'from_date' => '2024-07-30',
+    'to_date' => '2024-08-10',
     'trip_title' => 'Summer Trip',
     'trip_description' => 'Enjoying summer vacation',
     'user_id' => 1, // Replace with the actual user ID
@@ -25,7 +25,7 @@ $data = [
     'trip_image' => 'SnXxFLBKoQslEfdyXjAzVvfoHHtT61C6bcJNnXhb.jpg',
 ];
 
-$numberOfInserts = 50;
+$numberOfInserts = 10;
 
 for ($i = 0; $i < $numberOfInserts; $i++) {
     // Randomly select a trip type
