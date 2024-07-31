@@ -16,6 +16,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\FriendsController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\VerificationsController;
+use App\Http\Controllers\FakechatsController;
 use App\Http\Controllers\ProfessionsController;
 use App\Http\Controllers\TransactionsController;
 use App\Http\Controllers\BulkUserController;
@@ -128,6 +129,11 @@ Route::prefix('admin')->middleware('auth')->group(function () {
         Route::delete('/verifications/{verifications}', [VerificationsController::class, 'destroy'])->name('verifications.destroy');
         Route::post('/verifications/verify', [VerificationsController::class, 'verify'])->name('verifications.verify');
 
+           //fakechats  
+           Route::get('/fakechats', [FakechatsController::class, 'index'])->name('fakechats.index');
+           Route::delete('/fakechats/{fakechats}', [FakechatsController::class, 'destroy'])->name('fakechats.destroy');
+           Route::post('/fakechats/verify', [FakechatsController::class, 'verify'])->name('fakechats.verify');
+   
 
             //Verifications  
             Route::get('/transactions', [TransactionsController::class, 'index'])->name('transactions.index');

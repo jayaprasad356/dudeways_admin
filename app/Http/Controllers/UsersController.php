@@ -154,6 +154,12 @@ if ($request->hasFile('cover_img')) {
             'datetime' => now(),
             'last_seen' => now(),
         ]);
+
+             // Create a new transaction in Fakechats table
+             \App\Models\Fakechats::create([
+                'user_id' => $users->id,
+                'status' => '0',
+            ]);
     
         if (!$users) {
             return redirect()->back()->with('error', 'Sorry, Something went wrong while creating user.');

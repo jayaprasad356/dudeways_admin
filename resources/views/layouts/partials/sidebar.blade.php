@@ -77,6 +77,7 @@
                         <p>Notifications</p>
                     </a>
                 </li>
+
                 <li class="nav-item has-treeview">
                     <a href="{{ route('verifications.index') }}" class="nav-link {{ activeSegment('verifications') }}">
                     <i class="nav-icon fas fa-check-circle"></i>
@@ -84,10 +85,18 @@
                     </a>
                 </li>
 
+
                 <li class="nav-item has-treeview">
                     <a href="{{ route('transactions.index') }}" class="nav-link {{ activeSegment('Transactions') }}">
                     <i class="nav-icon fas fa-exchange-alt"></i>
                         <p>Transactions</p>
+                    </a>
+                </li>
+
+                <li class="nav-item has-treeview">
+                    <a href="{{ route('fakechats.index') }}" class="nav-link {{ activeSegment('fakechats') }}">
+                    <i class="nav-icon fas fa-comment"></i>
+                        <p>Fakechats</p>
                     </a>
                 </li>
                

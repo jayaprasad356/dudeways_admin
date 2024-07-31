@@ -12,7 +12,8 @@ use App\Models\Points;
 use App\Models\Notifications; 
 use App\Models\Verifications; 
 use App\Models\Transaction; 
-use App\Models\Feedback; 
+use App\Models\Feedback;
+use App\Models\Fakechats; 
 use App\Models\Professions; 
 use App\Models\RechargeTrans;
 use App\Models\Appsettings; 
@@ -307,6 +308,11 @@ public function register(Request $request)
     $unique_name = $this->generateUniqueName($name, $user_id);
     $user->unique_name = $unique_name;
     $user->save();
+
+    Fakechats::create([
+        'user_id' => $user->id,
+        'status' => '0',
+    ]);
 
     $user->load('profession');
 
@@ -4109,5 +4115,45 @@ public function check_recharge_status(Request $request)
                     ]);
                 }
 }
+public function fakechat_list(Request $request)
+{
+    // Retrieve offset and limit from the request, with default values
+    $offset = $request->input('offset', 0);
+    $limit = $request->input('limit', 10); // Default limit to 10 if not provided
+
+    // Count total records with status 1
+    $totalCount = Fakechats::where('status', 1)->count();
+
+    // Retrieve paginated fakechats with status 1
+    $fakechats = Fakechats::where('status', 1)
+        ->skip($offset)
+        ->take($limit)
+        ->get();
+
+    if ($fakechats->isEmpty()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No fakechat found.',
+            'total' => $totalCount, // Include total count even if no data found
+        ], 404);
+    }
+
+    $fakechatData = [];
+    foreach ($fakechats as $fakechat) {
+        $fakechatData[] = [
+            'id' => $fakechat->id,
+            'user_id' => $fakechat->user_id,
+            'status' => $fakechat->status,
+        ];
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Fake Chats listed successfully.',
+        'total' => $totalCount, // Include total count in the response
+        'data' => $fakechatData,
+    ], 200);
+}
+
 
 }    
