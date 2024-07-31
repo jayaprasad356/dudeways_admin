@@ -4145,9 +4145,9 @@ public function fakechat_list(Request $request)
         $fakechatData[] = [
             'id' => $fakechat->id,
             'user_id' => $fakechat->user_id,
-            'status' => $fakechat->status,
             'name' => $user ? $user->name :"", // Include user name
             'profile' => $user ? asset('storage/app/public/users/' . $user->profile) : null, // Include user profile URL
+            'status' => $fakechat->status,
         ];
     }
 
