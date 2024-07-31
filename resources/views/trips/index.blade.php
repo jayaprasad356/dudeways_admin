@@ -105,7 +105,7 @@
                                     <img class="customer-img img-thumbnail img-fluid" src="{{ asset('storage/app/public/trips/' . $trip->trip_image) }}" alt="Trip Image" style="max-width: 100px; max-height: 100px;">
                                 </a>
                             </td>
-                            <td>{{ optional($trip->user)->name }}</td>
+                            <td>{{ optional($trip->users)->name }}</td>
                             <td>{{ $trip->trip_type }}</td>
                             <td>{{ $trip->location }}</td>
                             <td>{{ $trip->from_date }}</td>
