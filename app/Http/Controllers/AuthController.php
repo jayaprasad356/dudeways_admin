@@ -4124,10 +4124,11 @@ public function fakechat_list(Request $request)
     // Count total records with status 1
     $totalCount = Fakechats::where('status', 1)->count();
 
-    // Retrieve paginated fakechats with status 1
+    // Retrieve paginated fakechats with status 1 and include user details
     $fakechats = Fakechats::where('status', 1)
         ->skip($offset)
         ->take($limit)
+        ->with('user') // Ensure the 'user' relationship is defined in the Fakechats model
         ->get();
 
     if ($fakechats->isEmpty()) {
@@ -4140,10 +4141,13 @@ public function fakechat_list(Request $request)
 
     $fakechatData = [];
     foreach ($fakechats as $fakechat) {
+        $user = $fakechat->user; // Eager loaded user data
         $fakechatData[] = [
             'id' => $fakechat->id,
             'user_id' => $fakechat->user_id,
             'status' => $fakechat->status,
+            'name' => $user ? $user->name :"", // Include user name
+            'profile' => $user ? asset('storage/app/public/users/' . $user->profile) : null, // Include user profile URL
         ];
     }
 
@@ -4154,6 +4158,7 @@ public function fakechat_list(Request $request)
         'data' => $fakechatData,
     ], 200);
 }
+
 
 
 }    
