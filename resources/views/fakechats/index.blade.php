@@ -52,7 +52,9 @@
                     <tr>
                         <th>Checkbox</th>
                         <th>ID <i class="fas fa-sort"></i></th>
+                        <th>User Profile <i class="fas fa-sort"></i></th>
                         <th>User Name <i class="fas fa-sort"></i></th>
+                        <th>User Email <i class="fas fa-sort"></i></th>
                         <th>Status <i class="fas fa-sort"></i></th>
                     </tr>
                 </thead>
@@ -61,7 +63,18 @@
                     <tr>
                         <td><input type="checkbox" class="checkbox" data-id="{{ $fakechat->id }}"></td>
                         <td>{{ $fakechat->id }}</td>
+                        <td>
+                            @if($fakechat->user && $fakechat->user->profile)
+                                <a href="{{ asset('storage/app/public/users/' . $fakechat->user->profile) }}" data-lightbox="profile-{{ $fakechat->user->id }}">
+                                    <img class="customer-img img-thumbnail img-fluid" src="{{ asset('storage/app/public/users/' . $fakechat->user->profile) }}" alt=""
+                                        style="max-width: 100px; max-height: 100px;">
+                                </a>
+                            @else
+                                No Image
+                            @endif
+                        </td>
                         <td>{{ optional($fakechat->user)->name }}</td>
+                        <td>{{ optional($fakechat->user)->email }}</td>
                         <td>
                         <span class="{{ $fakechat->status == 1 ? 'text-enable' : 'text-disables' }}">
                                 {{ $fakechat->status == 1 ? 'Fake' : 'Not-Fake' }}
