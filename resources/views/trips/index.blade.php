@@ -45,15 +45,6 @@
                 <!-- Filter Form -->
                 <form id="filter-form" action="{{ route('trips.index') }}" method="GET">
                     <div class="form-row">
-                        <div class="form-group col-md-3">
-                            <label for="user-filter">Filter by Users:</label>
-                            <select name="user_id" id="user-filter" class="form-control">
-                                <option value="">All Users</option>
-                                @foreach ($users as $user)
-                                    <option value="{{ $user->id }}" {{ $user->id == request()->input('user_id') ? 'selected' : '' }}>{{ $user->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
 
                         <div class="form-group col-md-3">
                             <label for="status-filter">Filter by Status:</label>
@@ -64,9 +55,6 @@
                             </select>
                         </div>
 
-                        <div class="form-group col-md-6 text-right">
-                            <button type="submit" class="btn btn-primary">Apply Filters</button>
-                        </div>
                     </div>
                 </form>
             </div>
@@ -139,11 +127,10 @@
         $(document).ready(function () {
             // Submit the form when user or status selection changes
             $('#user-filter, #status-filter').change(function () {
-                var userFilterValue = $('#user-filter').val();
                 var statusFilterValue = $('#status-filter').val();
                 
                 // Check if both filters are empty or only the status filter is selected
-                if ((userFilterValue === '' && statusFilterValue === '') || (userFilterValue !== '' && statusFilterValue !== '')) {
+                if ((statusFilterValue === '') || (statusFilterValue !== '')) {
                     $('#filter-form').submit();
                 } else if (statusFilterValue !== '') {
                     // If only the status filter is selected, construct the URL without the user_id parameter

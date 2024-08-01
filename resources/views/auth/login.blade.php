@@ -19,7 +19,7 @@
 @section('content')
 <form action="{{ route('login') }}" method="post">
     <center>
-<img src="{{ asset('public/images/poslg.png') }}"  alt="Image description" class="rounded-circle" style="max-width: 100px; max-height: 100px;">
+<img src="{{ asset('public/images/dudeways.jpg') }}"  alt="Image description" class="rounded-circle" style="max-width: 100px; max-height: 100px;">
 </center>
 <h5 class="login-box-msg">Dude Ways - Login Page</h5>
 <br>
