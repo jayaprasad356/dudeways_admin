@@ -142,6 +142,15 @@ class TripsController extends Controller
     
     public function store(TripsStoreRequest $request)
     {
+
+          // Validate if the user already has a pending trip
+            $pendingTrip = Trips::where('user_id', $request->user_id)
+            ->where('trip_status', 0) // Assuming 0 means pending
+            ->exists();
+
+        if ($pendingTrip) {
+        return redirect()->back()->with('error', 'You already have a pending trip. Please wait until it is approved before adding a new one.');
+        }
     
         // Check if a file has been uploaded
    if ($request->hasFile('trip_image')) {

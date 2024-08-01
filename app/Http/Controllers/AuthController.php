@@ -551,6 +551,7 @@ public function update_image(Request $request)
     if ($profile !== null) {
         $imagePath = $profile->store('users', 'public');
         $user->profile = basename($imagePath);
+        $user->profile_verified = 1; 
         $user->datetime = now(); 
         $user->save();
         // Image URL
@@ -627,6 +628,7 @@ public function update_cover_img(Request $request)
     if ($cover_img !== null) {
         $imagePath = $cover_img->store('users', 'public');
         $user->cover_img = basename($imagePath);
+        $user->cover_img_verified = 1;
         $user->datetime = now(); 
         $user->save();
         // Image URL
@@ -671,7 +673,7 @@ public function update_cover_img(Request $request)
     } else {
         return response()->json([
             'success' => false,
-            'message' => 'Cover image is empty.',
+            'message' => 'Cover img is empty.',
         ], 400);
     }
 }
@@ -1002,6 +1004,18 @@ public function add_trip(Request $request)
             'message' => $errors,
         ], 400);
     }
+
+        // Check if the user already has a pending trip
+        $existingPendingTrip = Trips::where('user_id', $user_id)
+        ->where('trip_status', 0) 
+        ->exists();
+
+        if ($existingPendingTrip) {
+          return response()->json([
+           'success' => false,
+           'message' => 'You already have a pending trip. Please complete or cancel the existing trip before adding a new one.',
+          ], 400);
+        }
 
 
    // Create a new trip instance

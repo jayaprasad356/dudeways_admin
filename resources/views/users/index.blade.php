@@ -18,23 +18,16 @@
             <div class="col-md-8">
                 <!-- User Filter Dropdowns -->
                 <form id="user-filter-form" action="{{ route('users.index') }}" method="GET" class="form-inline">
-                    <div class="form-group mr-3">
-                        <label for="profile-filter" class="mr-2">Filter by Profile:</label>
-                        <select name="profile_verified" id="profile-filter" class="form-control">
-                            <option value="">All</option>
-                            <option value="1" {{ request()->input('profile_verified') === '1' ? 'selected' : '' }}>Verified</option>
-                            <option value="0" {{ request()->input('profile_verified') === '0' ? 'selected' : '' }}>Not Verified</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="cover-filter" class="mr-2">Filter by Cover Image:</label>
-                        <select name="cover_img_verified" id="cover-filter" class="form-control">
-                            <option value="">All</option>
-                            <option value="1" {{ request()->input('cover_img_verified') === '1' ? 'selected' : '' }}>Verified</option>
-                            <option value="0" {{ request()->input('cover_img_verified') === '0' ? 'selected' : '' }}>Not Verified</option>
-                        </select>
-                    </div>
-                </form>
+                <div class="form-group mr-3">
+                    <label for="verified-filter" class="mr-2">Filter by Verified Status:</label>
+                    <select name="verified" id="verified-filter" class="form-control">
+                        <option value="">All</option>
+                        <option value="1" {{ request()->input('verified') === '1' ? 'selected' : '' }}>Verified</option>
+                        <option value="0" {{ request()->input('verified') === '0' ? 'selected' : '' }}>Not Verified</option>
+                    </select>
+                </div>
+            </form>
+
             </div>
             <div class="col-md-4 text-right">
                 <!-- Search Form -->
@@ -186,46 +179,20 @@
     <script src="{{ asset('plugins/sweetalert2/sweetalert2.min.js') }}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
     <script>
-        $(document).ready(function () {
-
-            // Function to handle filtering and pagination
-            function applyFiltersAndPagination(pageUrl) {
-                var profileVerified = $('#profile-filter').val();
-                var coverVerified = $('#cover-filter').val();
-
-                // Check if filters are applied
-                if (profileVerified !== '' || coverVerified !== '') {
-                    // Append filter parameters to the page URL
-                    var separator = pageUrl.includes('?') ? '&' : '?';
-                    pageUrl += separator;
-
-                    if (profileVerified !== '') {
-                        pageUrl += 'profile_verified=' + profileVerified + '&';
-                    }
-                    if (coverVerified !== '') {
-                        pageUrl += 'cover_img_verified=' + coverVerified + '&';
-                    }
-
-                    // Remove trailing '&' if it exists
-                    pageUrl = pageUrl.replace(/&$/, '');
+  $(document).ready(function () {
+            // Submit the form when user selection changes
+            $('#user-filter').change(function () {
+                if ($(this).val() !== '') {
+                    $('#user-filter-form').submit();
+                } else {
+                    window.location.href = "{{ route('users.index') }}";
                 }
-
-                // Navigate to the constructed URL
-                window.location.href = pageUrl;
-            }
-
-            // Handle filter change
-            $('#profile-filter, #cover-filter').change(function () {
-                applyFiltersAndPagination('{{ request()->fullUrl() }}');
             });
+        });
+            </script>
+            <script>
 
-            // Handle pagination link click
-            $('.pagination a').click(function (e) {
-                e.preventDefault();
-                var pageUrl = $(this).attr('href');
-                applyFiltersAndPagination(pageUrl);
-            });
-
+        $(document).ready(function () {
             $(document).on('click', '.btn-delete', function () {
                 $this = $(this);
                 const swalWithBootstrapButtons = Swal.mixin({
@@ -253,9 +220,13 @@
                         })
                     }
                 })
-            });
+            })
+        })
+    </script>
 
-            $('.table th').click(function () {
+<script>
+        $(document).ready(function() {
+            $('.table th').click(function() {
                 var table = $(this).parents('table').eq(0);
                 var index = $(this).index();
                 var rows = table.find('tr:gt(0)').toArray().sort(comparer(index));
@@ -266,12 +237,12 @@
                 for (var i = 0; i < rows.length; i++) {
                     table.append(rows[i]);
                 }
-                // Update arrows after sorting
+                // Update arrows
                 updateArrows(table, index, this.asc);
             });
 
             function comparer(index) {
-                return function (a, b) {
+                return function(a, b) {
                     var valA = getCellValue(a, index),
                         valB = getCellValue(b, index);
                     return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.localeCompare(valB);
@@ -287,68 +258,18 @@
                 var arrow = asc ? '<i class="fas fa-arrow-up arrow"></i>' : '<i class="fas fa-arrow-down arrow"></i>';
                 table.find('th').eq(index).append(arrow);
             }
-
-            // Function to perform filtering
-            function filterUsers(searchValue, profileVerified, coverVerified) {
-                var rows = $('.table tbody tr');
-
-                // Loop through each row and hide/show based on search value and filters
-                rows.each(function () {
-                    var profileVerifiedText = $(this).find('td:eq(7)').text().toLowerCase(); // Profile Verified column (adjust index as per your actual table structure)
-                    var coverVerifiedText = $(this).find('td:eq(8)').text().toLowerCase(); // Cover Verified column (adjust index as per your actual table structure)
-
-                    var showRow = true;
-
-                    // Apply search filter
-                    var name = $(this).find('td:eq(4)').text().toLowerCase(); // Name column
-                    var uniqueName = $(this).find('td:eq(5)').text().toLowerCase(); // Unique Name column
-                    var email = $(this).find('td:eq(6)').text().toLowerCase(); // Email column
-
-                    if (!(name.includes(searchValue.toLowerCase()) ||
-                        uniqueName.includes(searchValue.toLowerCase()) ||
-                        email.includes(searchValue.toLowerCase()))) {
-                        showRow = false;
-                    }
-
-                    // Apply profile verified filter
-                    if (profileVerified !== '' && profileVerified !== 'all' && !profileVerifiedText.includes(profileVerified.toLowerCase())) {
-                        showRow = false;
-                    }
-
-                    // Apply cover verified filter
-                    if (coverVerified !== '' && coverVerified !== 'all' && !coverVerifiedText.includes(coverVerified.toLowerCase())) {
-                        showRow = false;
-                    }
-
-                    // Show or hide row based on filters
-                    if (showRow) {
-                        $(this).show();
-                    } else {
-                        $(this).hide();
-                    }
-                });
-            }
-
-            // Perform filtering when input or filter value changes
-            $('#user-search, #profile-filter, #cover-filter').on('input change', function () {
-                var searchValue = $('#user-search').val().trim();
-                var profileVerified = $('#profile-filter').val().trim();
-                var coverVerified = $('#cover-filter').val().trim();
-
-                // Adjust 'all' option handling
-                if (profileVerified === 'all') {
-                    profileVerified = '';
-                }
-                if (coverVerified === 'all') {
-                    coverVerified = '';
-                }
-
-                filterUsers(searchValue, profileVerified, coverVerified);
-            });
-
-            // Display all data when page is loaded or refreshed
-            filterUsers('', '', '');
-            
         });
     </script>
+<script>
+
+    // Handle status filter change
+    $('#verified-filter').change(function() {
+        var verified = $(this).val();
+        var url = "{{ route('users.index') }}";
+        if (verified) {
+            url += '?verified=' + verified;
+        }
+        window.location.href = url;
+    });
+</script>
 @endsection

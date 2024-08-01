@@ -28,15 +28,11 @@ class UsersController extends Controller
         }
 
 
-            // Filter by profile verification status
-    if ($request->filled('profile_verified')) {
-        $profile_verified = $request->input('profile_verified');
-        $query->where('profile_verified', $profile_verified);
-    }
-
-    if ($request->filled('cover_img_verified')) {
-        $cover_img_verified = $request->input('cover_img_verified');
-        $query->where('cover_img_verified', $cover_img_verified);
+          
+           // Filter by verified status
+    if ($request->filled('verified')) {
+        $verified = $request->input('verified');
+        $query->where('verified', $verified);
     }
         // Check if the request is AJAX
         if ($request->wantsJson()) {
