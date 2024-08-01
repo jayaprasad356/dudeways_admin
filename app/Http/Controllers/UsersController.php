@@ -19,12 +19,13 @@ class UsersController extends Controller
     {
         $query = Users::query();
 
-        // Check if there's a search query
-        if ($request->filled('search')) {
+        if ($request->has('search') && $request->input('search') !== '') {
             $search = $request->input('search');
-            $query->where('unique_name', 'like', "%$search%")
-                  ->orWhere('name', 'like', "%$search%")
-                  ->orWhere('email', 'like', "%$search%");
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'LIKE', "%$search%")
+                  ->orWhere('email', 'LIKE', "%$search%")
+                  ->orWhere('unique_name', 'LIKE', "%$search%");
+            });
         }
 
 

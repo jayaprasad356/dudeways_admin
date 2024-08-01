@@ -131,9 +131,9 @@ Route::prefix('admin')->middleware('auth')->group(function () {
 
            //fakechats  
            Route::get('/fakechats', [FakechatsController::class, 'index'])->name('fakechats.index');
-           Route::delete('/fakechats/{fakechats}', [FakechatsController::class, 'destroy'])->name('fakechats.destroy');
+           Route::delete('/fakechats/{fakechat}', [FakechatsController::class, 'destroy'])->name('fakechats.destroy');
            Route::post('/fakechats/verify', [FakechatsController::class, 'verify'])->name('fakechats.verify');
-   
+           Route::post('/fakechats/not-fake', [FakechatsController::class, 'notFake'])->name('fakechats.notFake');
 
             //Verifications  
             Route::get('/transactions', [TransactionsController::class, 'index'])->name('transactions.index');

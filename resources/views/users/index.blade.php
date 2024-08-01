@@ -27,15 +27,14 @@
                     </select>
                 </div>
             </form>
-
             </div>
             <div class="col-md-4 text-right">
                 <!-- Search Form -->
-                <form action="{{ route('users.index') }}" method="GET">
+                <form id="search-form" action="{{ route('users.index') }}" method="GET">
                     <div class="input-group">
-                        <input type="text" name="search" class="form-control" placeholder="Search by...">
+                        <input type="text" id="search-input" name="search" class="form-control" placeholder="Search by..." autocomplete="off">
                         <div class="input-group-append">
-                            <button class="btn btn-primary" type="submit">Search</button>
+                            <button class="btn btn-primary" type="submit" style="display: none;">Search</button>
                         </div>
                     </div>
                 </form>
@@ -175,24 +174,41 @@
 
 @endsection
 
+
 @section('js')
     <script src="{{ asset('plugins/sweetalert2/sweetalert2.min.js') }}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
-    <script>
-  $(document).ready(function () {
-            // Submit the form when user selection changes
-            $('#user-filter').change(function () {
-                if ($(this).val() !== '') {
-                    $('#user-filter-form').submit();
-                } else {
-                    window.location.href = "{{ route('users.index') }}";
-                }
-            });
-        });
-            </script>
-            <script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
+    <script>
         $(document).ready(function () {
+            // Handle search input
+            $('#search-input').on('input', function () {
+                filterUsers();
+            });
+
+            // Handle status filter change
+            $('#verified-filter').change(function () {
+                filterUsers();
+            });
+
+            function filterUsers() {
+                let search = $('#search-input').val();
+                let verified = $('#verified-filter').val();
+                $.ajax({
+                    url: "{{ route('users.index') }}",
+                    type: "GET",
+                    data: {
+                        search: search,
+                        verified: verified
+                    },
+                    success: function (response) {
+                        $('#users-table').html(response);
+                    }
+                });
+            }
+
+            // Handle delete button click
             $(document).on('click', '.btn-delete', function () {
                 $this = $(this);
                 const swalWithBootstrapButtons = Swal.mixin({
@@ -220,13 +236,10 @@
                         })
                     }
                 })
-            })
-        })
-    </script>
+            });
 
-<script>
-        $(document).ready(function() {
-            $('.table th').click(function() {
+            // Handle table sorting
+            $('.table th').click(function () {
                 var table = $(this).parents('table').eq(0);
                 var index = $(this).index();
                 var rows = table.find('tr:gt(0)').toArray().sort(comparer(index));
@@ -242,7 +255,7 @@
             });
 
             function comparer(index) {
-                return function(a, b) {
+                return function (a, b) {
                     var valA = getCellValue(a, index),
                         valB = getCellValue(b, index);
                     return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.localeCompare(valB);
@@ -260,16 +273,4 @@
             }
         });
     </script>
-<script>
-
-    // Handle status filter change
-    $('#verified-filter').change(function() {
-        var verified = $(this).val();
-        var url = "{{ route('users.index') }}";
-        if (verified) {
-            url += '?verified=' + verified;
-        }
-        window.location.href = url;
-    });
-</script>
 @endsection

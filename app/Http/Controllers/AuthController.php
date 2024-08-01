@@ -3643,6 +3643,14 @@ public function profile_view(Request $request)
         ], 404);
     }
 
+       // Skip notification if user_id and profile_user_id are the same
+       if ($user_id == $profile_user_id) {
+        return response()->json([
+            'success' => true,
+            'message' => 'User viewed their own profile. No notification sent.',
+        ], 200);
+    }
+
     $existingNotification = Notifications::where('user_id', $profile_user_id)
         ->where('notify_user_id', $user_id)
         ->latest()

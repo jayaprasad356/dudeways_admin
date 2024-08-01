@@ -15,8 +15,22 @@ class FakechatsController extends Controller
         foreach ($fakechatIds as $fakechatId) {
             $fakechat = Fakechats::find($fakechatId);
             if ($fakechat) {
-                $user = Users::find($fakechat->user_id);
-                $fakechat->status = 1;
+                $fakechat->status = 1; // Set status to Fake
+                $fakechat->save();
+            }
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+    public function notFake(Request $request)
+    {
+        $fakechatIds = $request->input('fakechat_ids', []);
+        
+        foreach ($fakechatIds as $fakechatId) {
+            $fakechat = Fakechats::find($fakechatId);
+            if ($fakechat) {
+                $fakechat->status = 0; // Set status to Not-Fake
                 $fakechat->save();
             }
         }

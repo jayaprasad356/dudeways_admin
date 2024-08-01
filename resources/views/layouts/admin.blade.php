@@ -63,6 +63,17 @@
         .text-disables {
             color:  #007bff;
 }
+/* Add these styles to your CSS file or inside a <style> block in the Blade template */
+.status-fake {
+    color: red; /* Red color for "Fake" */
+    font-weight: bold;
+}
+
+.status-not-fake {
+    color: blue; /* Blue color for "Not-Fake" */
+    font-weight: bold;
+}
+
 
     </style>
 </head>
