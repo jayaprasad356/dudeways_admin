@@ -99,6 +99,13 @@
                         <p>Fakechats</p>
                     </a>
                 </li>
+
+                <li class="nav-item has-treeview">
+                    <a href="{{ route('feedbacks.index') }}" class="nav-link {{ activeSegment('feedbacks') }}">
+                    <i class="nav-icon fas fa-comment"></i>
+                        <p>Feedbacks</p>
+                    </a>
+                </li>
                
                 <li class="nav-item has-treeview">
                     <a href="{{ route('appsettings.edit', 1) }}" class="nav-link {{ activeSegment('appsettings') }}">

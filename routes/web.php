@@ -17,6 +17,7 @@ use App\Http\Controllers\FriendsController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\VerificationsController;
 use App\Http\Controllers\FakechatsController;
+use App\Http\Controllers\FeedbacksController;
 use App\Http\Controllers\ProfessionsController;
 use App\Http\Controllers\TransactionsController;
 use App\Http\Controllers\BulkUserController;
@@ -139,6 +140,11 @@ Route::prefix('admin')->middleware('auth')->group(function () {
             Route::get('/transactions', [TransactionsController::class, 'index'])->name('transactions.index');
             Route::delete('/transactions/{transactions}', [TransactionsController::class, 'destroy'])->name('transactions.destroy');
             
+
+               //Feedbacks  
+               Route::get('/feedbacks', [FeedbacksController::class, 'index'])->name('feedbacks.index');
+               Route::delete('/feedbacks/{feedback}', [FeedbacksController::class, 'destroy'])->name('feedbacks.destroy');
+               
     
 
         //Bulk Users
