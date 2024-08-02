@@ -11,7 +11,7 @@ class Chats extends Model
     protected $table = 'chats';
 
     protected $fillable = [
-        'latest_message', 'user_id', 'datetime',
+        'latest_message', 'user_id', 'datetime','unread',
     ];
 
     public function user()

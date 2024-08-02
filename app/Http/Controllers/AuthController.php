@@ -1934,6 +1934,7 @@ public function add_chat(Request $request)
     $user_id = $request->input('user_id'); 
     $chat_user_id = $request->input('chat_user_id');
     $message = $request->input('message');
+    $unread = $request->input('unread');
 
     // Validate inputs
     if (empty($user_id)) {
@@ -1954,6 +1955,13 @@ public function add_chat(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Message is empty.',
+        ], 400);
+    }
+
+    if (!isset($unread)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'unread is not provided.',
         ], 400);
     }
 
@@ -2051,6 +2059,9 @@ public function add_chat(Request $request)
         $existingChat->latest_message = $message;
         $existingChat->latest_msg_time = now();
         $existingChat->datetime = now();
+        
+        // Adjust the unread count based on the provided `unread` value
+        $existingChat->unread = ($unread == 1) ? ($existingChat->unread + 1) : ($unread == 0 ? 1 : $existingChat->unread);
 
         if (!$existingChat->save()) {
             return response()->json([
@@ -2084,6 +2095,7 @@ public function add_chat(Request $request)
                 'latest_message' => $existingChat->latest_message,
                 'latest_msg_time' => Carbon::parse($existingChat->latest_msg_time)->format('Y-m-d H:i:s'),
                 'msg_seen' => '0',
+                'unread' => $existingChat->unread,
                 'datetime' => Carbon::parse($existingChat->datetime)->format('Y-m-d H:i:s'),
                 'updated_at' => Carbon::parse($existingChat->updated_at)->format('Y-m-d H:i:s'),
                 'created_at' => Carbon::parse($existingChat->created_at)->format('Y-m-d H:i:s'),
@@ -2099,6 +2111,7 @@ public function add_chat(Request $request)
     $newChat1->user_id = $user_id;
     $newChat1->chat_user_id = $chat_user_id;
     $newChat1->latest_message = $message;
+    $newChat1->unread = $unread;
     $newChat1->latest_msg_time = $currentTime;
     $newChat1->datetime = $currentTime;
 
@@ -2107,6 +2120,7 @@ public function add_chat(Request $request)
     $newChat2->user_id = $chat_user_id;
     $newChat2->chat_user_id = $user_id;
     $newChat2->latest_message = $message;
+    $newChat2->unread = $unread;
     $newChat2->latest_msg_time = $currentTime;
     $newChat2->datetime = $currentTime;
 
@@ -2143,6 +2157,7 @@ public function add_chat(Request $request)
                 'latest_message' => $newChat1->latest_message,
                 'latest_msg_time' => Carbon::parse($newChat1->latest_msg_time)->format('Y-m-d H:i:s'),
                 'msg_seen' => '0',
+                'unread' => $newChat1->unread,
                 'datetime' => Carbon::parse($newChat1->datetime)->format('Y-m-d H:i:s'),
                 'updated_at' => Carbon::parse($newChat1->updated_at)->format('Y-m-d H:i:s'),
                 'created_at' => Carbon::parse($newChat1->created_at)->format('Y-m-d H:i:s'),
@@ -2157,6 +2172,7 @@ public function add_chat(Request $request)
                 'latest_message' => $newChat2->latest_message,
                 'latest_msg_time' => Carbon::parse($newChat2->latest_msg_time)->format('Y-m-d H:i:s'),
                 'msg_seen' => '0',
+                'unread' => $newChat2->unread,
                 'datetime' => Carbon::parse($newChat2->datetime)->format('Y-m-d H:i:s'),
                 'updated_at' => Carbon::parse($newChat2->updated_at)->format('Y-m-d H:i:s'),
                 'created_at' => Carbon::parse($newChat2->created_at)->format('Y-m-d H:i:s'),
@@ -2164,6 +2180,7 @@ public function add_chat(Request $request)
         ]],
     ], 201);
 }
+
 
     protected function sendNotifiToUser($chat_user_id, $message)
     {
@@ -2300,6 +2317,7 @@ public function add_chat(Request $request)
                 'latest_message' => $latestMessage ? $latestMessage->latest_message : $chat->latest_message, // Use the fetched latest message
                 'latest_msg_time' => $lastSeenFormatted,
                 'msg_seen' => $chat->msg_seen,
+                'unread' => $chat->unread,
                 'datetime' => Carbon::parse($chat->datetime)->format('Y-m-d H:i:s'),
                 'updated_at' => Carbon::parse($chat->updated_at)->format('Y-m-d H:i:s'),
                 'created_at' => Carbon::parse($chat->created_at)->format('Y-m-d H:i:s'),
