@@ -17,6 +17,7 @@ use App\Models\Feedback;
 use App\Models\Fakechats; 
 use App\Models\Professions; 
 use App\Models\RechargeTrans;
+use App\Models\VerificationTrans;
 use App\Models\Appsettings; 
 use App\Models\News; 
 use Carbon\Carbon;
@@ -25,6 +26,8 @@ use Berkayk\OneSignal\OneSignalClient;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Client;
+use Illuminate\Support\Facades\Log;
+
 
 class AuthController extends Controller
 {
@@ -4193,6 +4196,290 @@ public function check_recharge_status(Request $request)
                         'message' => 'Failed to check order status. Error: ' . $e->getMessage(),
                     ]);
                 }
+}
+
+public function create_verification(Request $request)
+{
+    // Validate required inputs
+    if (empty($request->input('user_id'))) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User ID is empty',
+        ]);
+    }
+
+    if (empty($request->input('txn_id'))) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Transaction ID is empty',
+        ]);
+    }
+
+    if (empty($request->input('amount'))) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Amount is empty',
+        ]);
+    }
+
+    if (empty($request->input('key'))) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Key is empty',
+        ]);
+    }
+
+    // Prepare data for query
+    $user_id = $request->input('user_id');
+    $txn_id = $request->input('txn_id');
+    $amount = $request->input('amount');
+    $key = $request->input('key');
+    $p_info = 'Recharge';
+
+    // Fetch user information
+    $user = Users::find($user_id);
+
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User Not found',
+        ]);
+    }
+
+    $name = $user->name;
+    $email = $user->email;
+    $mobile = $user->mobile ? $user->mobile : '0000000000'; // Use default mobile if not available
+    $redirect_url = 'https://www.google.com/';
+    $datetime = now();
+
+    // Validate mobile number
+    if (!preg_match('/^\d{10}$/', $mobile)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid mobile number',
+        ]);
+    }
+
+    // API endpoint
+    $url = 'https://api.ekqr.in/api/create_order';
+
+    // Data to be sent
+    $data = [
+        'client_txn_id' => $txn_id,
+        'amount' => $amount,
+        'p_info' => $p_info,
+        'txn_date' => $datetime->toDateString(),
+        'customer_name' => $name,
+        'customer_email' => $email,
+        'customer_mobile' => $mobile,
+        'redirect_url' => $redirect_url,
+        'key' => $key
+    ];
+
+    // Initialize HTTP client and send POST request
+    $response = Http::post($url, $data);
+
+    // Check for errors in the response
+    if ($response->failed()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to create order. Curl error: ' . $response->body(),
+        ]);
+    }
+
+    $responseArray = $response->json(); 
+
+    if (!$responseArray['status']) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Client_txn_id already Exits',
+        ]);
+    }
+
+    $order_id = $responseArray['data']['order_id'];
+
+    // Insert transaction into database
+    try {
+        $verificationTrans = new VerificationTrans();
+        $verificationTrans->user_id = $user_id;
+        $verificationTrans->txn_id = $txn_id;
+        $verificationTrans->order_id = $order_id;
+        $verificationTrans->amount = $amount;
+        $verificationTrans->status = 0;
+        $verificationTrans->datetime = $datetime;
+        $verificationTrans->save();
+
+        return response()->json(
+            $responseArray
+        );
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to save recharge transaction. Error: ' . $e->getMessage(),
+        ]);
+    }
+}
+
+public function create_verification_status(Request $request)
+{
+    // Emulate $_POST handling
+    $input = $request->all();
+
+    // Check required inputs
+    if (empty($input['user_id'])) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User ID is empty',
+        ]);
+    }
+
+    if (empty($input['txn_id'])) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Transaction ID is empty',
+        ]);
+    }
+
+    if (empty($input['date'])) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Date is empty',
+        ]);
+    }
+
+    if (empty($input['key'])) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Key is empty',
+        ]);
+    }
+
+    if (empty($input['plan_id'])) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Plan ID is empty',
+        ]);
+    }
+
+    // Escape inputs (if necessary, though not typically needed in Laravel ORM)
+    $user_id = htmlspecialchars($input['user_id']);
+    $txn_id = htmlspecialchars($input['txn_id']);
+    $date = htmlspecialchars($input['date']);
+    $key = htmlspecialchars($input['key']);
+    $plan_id = htmlspecialchars($input['plan_id']);
+
+    // API endpoint
+    $url = 'https://api.ekqr.in/api/check_order_status';
+
+    // Data to be sent
+    $data = [
+        'client_txn_id' => $txn_id,
+        'txn_date' => $date,
+        'key' => $key
+    ];
+
+    try {
+        // Fetch plan information
+        $planEntry = Plans::find($plan_id);
+        if (!$planEntry) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid Plan ID',
+            ], 400);
+        }
+
+        $validity = $planEntry->validity;
+
+        // Fetch user information
+        $user = Users::find($user_id);
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid User ID',
+            ], 404);
+        }
+
+        // Initialize HTTP client and send POST request
+        $response = Http::post($url, $data);
+
+        // Check for errors in the response
+        if (!$response->successful()) {
+            $responseArray = $response->json();
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to check order status. API error: ' . json_encode($responseArray),
+            ], 500);
+        }
+
+
+        // Find existing verification transaction by txn_id
+        $verificationTrans = VerificationTrans::where('txn_id', $txn_id)->first();
+        if (!$verificationTrans) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Verification transaction not found for txn_id: ' . $txn_id,
+            ], 404);
+        }
+
+        // Check if user_id matches
+        if ($verificationTrans->user_id != $user_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User ID does not match the transaction ID',
+            ], 400);
+        }
+
+        // Check current status before updating
+        if ($verificationTrans->status != 1) {
+            // Update fields
+            $verificationTrans->status = 1;
+            $verificationTrans->save();
+
+              // Fetch user
+              $user = Users::find($input['user_id']);
+              if (!$user) {
+                  return response()->json([
+                      'success' => false,
+                      'message' => 'User not found',
+                  ]);
+              }
+
+              // Update user's verified
+              $user->verified = 1;
+              $user->save();
+
+            // Calculate new verification end date
+            $currentEndDate = $user->verification_end_date ? new \Carbon\Carbon($user->verification_end_date) : now();
+            $newEndDate = $currentEndDate->addDays($validity);
+
+            // Update user’s verification_end_date
+            $user->verification_end_date = $newEndDate->format('Y-m-d');
+            $user->save();
+
+            // Return success response
+            return response()->json([
+                'success' => true,
+                'message' => 'Verification completed successfully',
+            ]);
+        } else {
+            // Return error response if status is already 1
+            return response()->json([
+                'success' => false,
+                'message' => 'Verification already added',
+            ], 400);
+        }
+    } catch (\Exception $e) {
+        // Handle any exceptions
+        Log::error('Error occurred while creating verification status', [
+            'exception' => $e->getMessage(),
+            'request_data' => $request->all()
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to check order status. Error: ' . $e->getMessage(),
+        ], 500);
+    }
 }
 public function fakechat_list(Request $request)
 {

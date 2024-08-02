@@ -48,6 +48,8 @@ Route::post('profile_view', [AuthController::class, 'profile_view']);
 Route::post('send_notification', [AuthController::class, 'send_notification']);
 Route::post('create_recharge', [AuthController::class, 'create_recharge']);
 Route::post('check_recharge_status', [AuthController::class, 'check_recharge_status']);
+Route::post('create_verification', [AuthController::class, 'create_verification']);
+Route::post('create_verification_status', [AuthController::class, 'create_verification_status']);
 Route::post('privacy_policy', [AuthController::class, 'privacy_policy']);
 Route::post('terms_conditions', [AuthController::class, 'terms_conditions']);
 Route::post('appsettings_list', [AuthController::class, 'appsettings_list']);
