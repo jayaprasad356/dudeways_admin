@@ -2349,13 +2349,7 @@ public function add_chat(Request $request)
             $query->where('user_id', $user_id)
                   ->where('unread', '>', 0);
         })->where('unread', '>', 0)->get();
-    
-        if ($chats->isEmpty()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No unread chats found.',
-            ], 404);
-        }
+
     
         // Update unread field to 0 for these chats
         foreach ($chats as $chat) {
