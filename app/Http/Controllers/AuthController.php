@@ -2065,7 +2065,7 @@ public function add_chat(Request $request)
         $existingChat->datetime = now();
         
         // Adjust the unread count based on the provided `unread` value
-        $existingChat->unread = ($unread == 1) ? ($existingChat->unread + 1) : ($unread == 0 ? 1 : $existingChat->unread);
+        $existingChat->unread = ($unread == 1 || $unread == 0) ? ($existingChat->unread + $unread) : $existingChat->unread;
 
         if (!$existingChat->save()) {
             return response()->json([
@@ -2339,6 +2339,7 @@ public function add_chat(Request $request)
     public function read_chats(Request $request)
     {
         $user_id = $request->input('user_id');
+        $chat_user_id = $request->input('chat_user_id');
     
         // Validate user_id
         if (empty($user_id)) {
@@ -2348,12 +2349,20 @@ public function add_chat(Request $request)
             ], 400);
         }
     
-        // Find all chats where the user_id is involved and unread is not zero
-        $chats = Chats::where(function($query) use ($user_id) {
-            $query->where('user_id', $user_id)
-                  ->where('unread', '>', 0);
-        })->where('unread', '>', 0)->get();
+        // Validate chat_user_id
+        if (empty($chat_user_id)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'chat_user_id is empty.',
+            ], 400);
+        }
     
+        // Find all chats where the user_id and chat_user_id match and unread is not zero
+        $chats = Chats::where(function($query) use ($user_id, $chat_user_id) {
+            $query->where('user_id', $user_id)
+                  ->where('chat_user_id', $chat_user_id)
+                  ->where('unread', '>', 0);
+        })->get();
 
     
         // Update unread field to 0 for these chats
@@ -2372,7 +2381,6 @@ public function add_chat(Request $request)
             'message' => 'Chats marked as read successfully.',
         ], 200);
     }
-    
 public function delete_chat(Request $request)
 {
     $user_id = $request->input('user_id');
