@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\PointsController;
+use App\Http\Controllers\PlansController;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\TripsController;
 use App\Http\Controllers\ChatsController;
@@ -93,6 +94,15 @@ Route::prefix('admin')->middleware('auth')->group(function () {
       Route::put('/points/{points}', [PointsController::class, 'update'])->name('points.update');
       Route::post('/points', [PointsController::class, 'store'])->name('points.store');
 
+
+      //Points  
+      Route::get('/plans', [PlansController::class, 'index'])->name('plans.index');
+      Route::get('/plans/create', [PlansController::class, 'create'])->name('plans.create');
+      Route::get('/plans/{plans}/edit', [PlansController::class, 'edit'])->name('plans.edit');
+      Route::delete('/plans/{plans}', [PlansController::class, 'destroy'])->name('plans.destroy');
+      Route::put('/plans/{plans}', [PlansController::class, 'update'])->name('plans.update');
+      Route::post('/plans', [PlansController::class, 'store'])->name('plans.store');
+    
        //friends  
        Route::get('/friends', [FriendsController::class, 'index'])->name('friends.index');
        Route::delete('/friends/{friends}', [FriendsController::class, 'destroy'])->name('friends.destroy');

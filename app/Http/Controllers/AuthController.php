@@ -9,6 +9,7 @@ use App\Models\Chats;
 use App\Models\Trips;
 use App\Models\Friends; 
 use App\Models\Points; 
+use App\Models\Plans;
 use App\Models\Notifications; 
 use App\Models\Verifications; 
 use App\Models\Transaction; 
@@ -2276,7 +2277,7 @@ public function add_chat(Request $request)
             $differenceDays = $now->diffInDays($lastSeen);
     
             if ($differenceDays == 0) {
-                $lastSeenFormatted = $lastSeen->format('H:i'); // Today, show time
+                $lastSeenFormatted = $lastSeen->format('g:i A'); // Today, show time in 12-hour format with AM/PM
             } elseif ($differenceDays == 1) {
                 $lastSeenFormatted = 'Yesterday'; // Yesterday
             } elseif ($differenceDays <= 7) {
@@ -2349,6 +2350,7 @@ public function add_chat(Request $request)
             $query->where('user_id', $user_id)
                   ->where('unread', '>', 0);
         })->where('unread', '>', 0)->get();
+    
 
     
         // Update unread field to 0 for these chats
@@ -4236,6 +4238,36 @@ public function fakechat_list(Request $request)
     ], 200);
 }
 
+public function plan_list(Request $request)
+{
+    $plans = Plans::orderBy('price', 'desc')->get();
 
+    if ($plans->isEmpty()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No plans found.',
+        ], 404);
+    }
+
+    $plansDetails = [];
+
+    foreach ($plans as $plan) {
+        $plansDetails[] = [
+            'id' => $plan->id,
+            'plan_name' => $plan->plan_name,
+            'validity' => $plan->validity,
+            'price' => (string) $plan->price,
+            'save_amount' => (string) $plan->save_amount,
+            'updated_at' => Carbon::parse($plan->updated_at)->format('Y-m-d H:i:s'),
+            'created_at' => Carbon::parse($plan->created_at)->format('Y-m-d H:i:s'),
+        ];
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'plans Details retrieved successfully.',
+        'data' => $plansDetails,
+    ], 200);
+}
 
 }    

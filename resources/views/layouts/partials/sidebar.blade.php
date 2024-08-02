@@ -106,6 +106,13 @@
                         <p>Feedbacks</p>
                     </a>
                 </li>
+
+                <li class="nav-item has-treeview">
+                    <a href="{{ route('plans.index') }}" class="nav-link {{ activeSegment('plans') }}">
+                    <i class="nav-icon fas fa-clipboard-list"></i>
+                        <p>Plans</p>
+                    </a>
+                </li>
                
                 <li class="nav-item has-treeview">
                     <a href="{{ route('appsettings.edit', 1) }}" class="nav-link {{ activeSegment('appsettings') }}">
