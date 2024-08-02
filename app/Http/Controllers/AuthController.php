@@ -2295,6 +2295,7 @@ public function add_chat(Request $request)
                 'profile' => $imageUrl, // Display chat_user profile
                 'cover_img' => $coverImageUrl, // Display chat_user profile
                 'online_status' => $chat_user->online_status, // Display chat_user online status
+                'verified' => $chat_user->verified, // Display chat_user online status
                 'friend' => $friendStatus,
                 'latest_message' => $latestMessage ? $latestMessage->latest_message : $chat->latest_message, // Use the fetched latest message
                 'latest_msg_time' => $lastSeenFormatted,
