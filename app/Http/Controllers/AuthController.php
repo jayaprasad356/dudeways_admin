@@ -2331,6 +2331,48 @@ public function add_chat(Request $request)
             'data' => $chatDetails->values()->all(), // Reindex the array to prevent gaps
         ], 200);
     }
+   
+    public function read_chats(Request $request)
+    {
+        $user_id = $request->input('user_id');
+    
+        // Validate user_id
+        if (empty($user_id)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'user_id is empty.',
+            ], 400);
+        }
+    
+        // Find all chats where the user_id is involved and unread is not zero
+        $chats = Chats::where(function($query) use ($user_id) {
+            $query->where('user_id', $user_id)
+                  ->where('unread', '>', 0);
+        })->where('unread', '>', 0)->get();
+    
+        if ($chats->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No unread chats found.',
+            ], 404);
+        }
+    
+        // Update unread field to 0 for these chats
+        foreach ($chats as $chat) {
+            $chat->unread = 0;
+            if (!$chat->save()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to update some chats.',
+                ], 500);
+            }
+        }
+    
+        return response()->json([
+            'success' => true,
+            'message' => 'Chats marked as read successfully.',
+        ], 200);
+    }
     
 public function delete_chat(Request $request)
 {
