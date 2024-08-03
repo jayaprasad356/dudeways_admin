@@ -2752,7 +2752,7 @@ public function friends_list(Request $request)
             'profile' => $imageUrl,
             'cover_img' => $coverImageUrl,
             'last_seen' => $lastSeenFormatted,
-            'distance' => isset($distanceFormatted) ? $distanceFormatted : null, // Distance between user and friend
+            'distance' => isset($distanceFormatted) ? $distanceFormatted :"", // Distance between user and friend
             'status' => $friend->status == 1 ? 'Interested' : 'Not Interested',
             'datetime' => Carbon::parse($friend->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($friend->updated_at)->format('Y-m-d H:i:s'),
