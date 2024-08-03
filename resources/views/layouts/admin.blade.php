@@ -64,7 +64,7 @@
             color:  #007bff;
 }
 .text-pending {
-    color: orange; /* Or any color/style for pending status */
+    color:  #007bff;
 }
 
 .text-paid {
