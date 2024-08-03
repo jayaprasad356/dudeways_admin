@@ -3547,9 +3547,9 @@ public function verification_list(Request $request)
         return [
             'id' => $verification->id,
             'user_id' => $verification->user_id,
-            'selfie_image' => asset('storage/verification/' . $verification->selfie_image),
-            'front_image' => asset('storage/verification/' . $verification->front_image),
-            'back_image' => asset('storage/verification/' . $verification->back_image),
+            'selfie_image' => asset('storage/app/public/verification/' . $verification->selfie_image),
+            'front_image' => asset('storage/app/public/verification/' . $verification->front_image),
+            'back_image' => asset('storage/app/public/verification/' . $verification->back_image),
             'status' => $verification->status,
             'payment_status' => $verification->payment_status,
             'updated_at' => Carbon::parse($verification->updated_at)->format('Y-m-d H:i:s'),
