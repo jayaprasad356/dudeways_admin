@@ -137,7 +137,7 @@ Route::prefix('admin')->middleware('auth')->group(function () {
 
         //Verifications  
         Route::get('/verifications', [VerificationsController::class, 'index'])->name('verifications.index');
-        Route::delete('/verifications/{verifications}', [VerificationsController::class, 'destroy'])->name('verifications.destroy');
+        Route::delete('/verifications/{verification}', [VerificationsController::class, 'destroy'])->name('verifications.destroy');
         Route::post('/verifications/verify', [VerificationsController::class, 'verify'])->name('verifications.verify');
 
            //fakechats  

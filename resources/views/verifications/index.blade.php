@@ -50,6 +50,7 @@
             <table class="table table-bordered table-hover">
                 <thead class="thead-dark">
                     <tr>
+                    <th>Actions</th>
                         <th>Checkbox</th>
                         <th>ID <i class="fas fa-sort"></i></th>
                         <th>User Name <i class="fas fa-sort"></i></th>
@@ -63,6 +64,9 @@
                 <tbody>
                     @foreach ($verifications as $verification)
                     <tr>
+                    <td>
+                        <button class="btn btn-danger btn-delete" data-url="{{route('verifications.destroy', $verification)}}"><i class="fas fa-trash"></i></button>
+                    </td>
                         <td><input type="checkbox" class="checkbox" data-id="{{ $verification->id }}"></td>
                         <td>{{ $verification->id }}</td>
                         <td>{{ optional($verification->user)->name }}</td>
