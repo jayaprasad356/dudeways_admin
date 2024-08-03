@@ -19,6 +19,8 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\VerificationsController;
 use App\Http\Controllers\FakechatsController;
 use App\Http\Controllers\FeedbacksController;
+use App\Http\Controllers\Recharge_transController;
+use App\Http\Controllers\Verification_transController;
 use App\Http\Controllers\ProfessionsController;
 use App\Http\Controllers\TransactionsController;
 use App\Http\Controllers\BulkUserController;
@@ -154,8 +156,16 @@ Route::prefix('admin')->middleware('auth')->group(function () {
                //Feedbacks  
                Route::get('/feedbacks', [FeedbacksController::class, 'index'])->name('feedbacks.index');
                Route::delete('/feedbacks/{feedback}', [FeedbacksController::class, 'destroy'])->name('feedbacks.destroy');
+                    
+                         //Recharge Trans  
+               Route::get('/recharge_trans', [Recharge_transController::class, 'index'])->name('recharge_trans.index');
+               Route::delete('/recharge_trans/{recharge_trans}', [Recharge_transController::class, 'destroy'])->name('recharge_trans.destroy');
+
+                    //Feedbacks  
+                    Route::get('/verification_trans', [Verification_transController::class, 'index'])->name('verification_trans.index');
+                    Route::delete('/verification_trans/{verification_trans}', [Verification_transController::class, 'destroy'])->name('verification_trans.destroy');
+                    
                
-    
 
         //Bulk Users
        // web.php

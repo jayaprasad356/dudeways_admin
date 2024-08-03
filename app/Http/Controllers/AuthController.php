@@ -3359,13 +3359,26 @@ public function verify_front_image(Request $request)
             $message = 'Front image updated successfully.';
         }
 
+        // Store the front image
         $imagePath = $frontImage->store('verification', 'public');
         $verification->front_image = basename($imagePath);
         $verification->save();
 
+        // Fetch the updated verification details
+        $updatedVerification = Verifications::where('user_id', $userId)->first();
+
         return response()->json([
             'success' => true,
             'message' => $message,
+            'data' => [
+                'id' => $updatedVerification->id,
+                'user_id' => $updatedVerification->user_id,
+                'front_image' => asset('storage/app/public/verification/' . $updatedVerification->front_image),
+                'status' => $updatedVerification->status,
+                'payment_status' => $updatedVerification->payment_status,
+                'updated_at' => Carbon::parse($updatedVerification->updated_at)->format('Y-m-d H:i:s'),
+                'created_at' => Carbon::parse($updatedVerification->created_at)->format('Y-m-d H:i:s'),
+            ],
         ], 200);
     } else {
         return response()->json([
@@ -3374,7 +3387,6 @@ public function verify_front_image(Request $request)
         ], 400);
     }
 }
-
 
 public function verify_back_image(Request $request)
 {
@@ -3411,26 +3423,40 @@ public function verify_back_image(Request $request)
         if (!$verification) {
             $verification = new Verifications();
             $verification->user_id = $userId;
-            $message = 'back image added successfully.';
+            $message = 'Back image added successfully.';
         } else {
-            $message = 'back image updated successfully.';
+            $message = 'Back image updated successfully.';
         }
         
+        // Store the back image
         $imagePath = $backImage->store('verification', 'public');
         $verification->back_image = basename($imagePath);
         $verification->save();
 
+        // Fetch the updated verification details
+        $updatedVerification = Verifications::where('user_id', $userId)->first();
+
         return response()->json([
             'success' => true,
             'message' => $message,
+            'data' => [
+                'id' => $updatedVerification->id,
+                'user_id' => $updatedVerification->user_id,
+                'back_image' => asset('storage/app/public/verification/' . $updatedVerification->back_image),
+                'status' => $updatedVerification->status,
+                'payment_status' => $updatedVerification->payment_status,
+                'updated_at' => Carbon::parse($updatedVerification->updated_at)->format('Y-m-d H:i:s'),
+                'created_at' => Carbon::parse($updatedVerification->created_at)->format('Y-m-d H:i:s'),
+            ],
         ], 200);
     } else {
         return response()->json([
             'success' => false,
-            'message' => 'back image is empty.',
+            'message' => 'Back image is empty.',
         ], 400);
     }
 }
+
 public function verify_selfie_image(Request $request)
 {
     $userId = $request->input('user_id');
@@ -3471,13 +3497,26 @@ public function verify_selfie_image(Request $request)
             $message = 'selfie image updated successfully.';
         }
         
+        // Store the selfie image
         $imagePath = $selfieImage->store('verification', 'public');
         $verification->selfie_image = basename($imagePath);
         $verification->save();
 
+        // Fetch the updated verification details
+        $updatedVerification = Verifications::where('user_id', $userId)->first();
+
         return response()->json([
             'success' => true,
             'message' => $message,
+            'data' => [[
+                'id' => $updatedVerification->id,
+                'user_id' => $updatedVerification->user_id,
+                'selfie_image' => asset('storage/app/public/verification/' . $updatedVerification->selfie_image),
+                'status' => $updatedVerification->status,
+                'payment_status' => $updatedVerification->payment_status,
+                'updated_at' => Carbon::parse($updatedVerification->updated_at)->format('Y-m-d H:i:s'),
+                'created_at' => Carbon::parse($updatedVerification->created_at)->format('Y-m-d H:i:s'),
+            ]],
         ], 200);
     } else {
         return response()->json([
@@ -3544,12 +3583,16 @@ public function verification_list(Request $request)
 
     // Format the verification details
     $verificationsDetails = $verifications->map(function ($verification) {
+        $selfieImageUrl = $verification->selfie_image ? asset('storage/app/public/verification/' . $verification->selfie_image) : '';
+        $frontImageUrl = $verification->front_image ? asset('storage/app/public/verification/' . $verification->front_image) : '';
+        $backImageUrl = $verification->back_image ? asset('storage/app/public/verification/' . $verification->back_image) : '';
+
         return [
             'id' => $verification->id,
             'user_id' => $verification->user_id,
-            'selfie_image' => asset('storage/app/public/verification/' . $verification->selfie_image),
-            'front_image' => asset('storage/app/public/verification/' . $verification->front_image),
-            'back_image' => asset('storage/app/public/verification/' . $verification->back_image),
+            'selfie_image' => $selfieImageUrl,
+            'front_image' => $frontImageUrl,
+            'back_image' => $backImageUrl,
             'status' => $verification->status,
             'payment_status' => $verification->payment_status,
             'updated_at' => Carbon::parse($verification->updated_at)->format('Y-m-d H:i:s'),
@@ -3564,6 +3607,7 @@ public function verification_list(Request $request)
         'data' => $verificationsDetails,
     ], 200);
 }
+
 
 public function add_feedback(Request $request)
 {

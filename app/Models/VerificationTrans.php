@@ -20,4 +20,8 @@ class VerificationTrans extends Model
         'txn_date',
         'datetime',
     ];
+    public function user()
+    {
+        return $this->belongsTo(Users::class, 'user_id');
+    }
 }

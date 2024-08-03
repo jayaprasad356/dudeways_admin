@@ -36,12 +36,6 @@
                     </a>
                 </li>
                 <li class="nav-item has-treeview">
-                    <a href="{{ route('bulk-users.upload') }}" class="nav-link {{ activeSegment('bulk-users') }}">
-                        <i class="nav-icon fas fa-user-plus"></i>
-                        <p>Add Bulk User</p>
-                    </a>
-                </li>
-                <li class="nav-item has-treeview">
                     <a href="{{ route('professions.index') }}" class="nav-link {{ activeSegment('professions') }}">
                     <i class="nav-icon fas fa-user-md"></i>
                         <p>Professions</p>
@@ -111,6 +105,21 @@
                     <a href="{{ route('plans.index') }}" class="nav-link {{ activeSegment('plans') }}">
                     <i class="nav-icon fas fa-clipboard-list"></i>
                         <p>Plans</p>
+                    </a>
+                </li>
+
+                <li class="nav-item has-treeview">
+                    <a href="{{ route('recharge_trans.index') }}" class="nav-link {{ activeSegment('recharge_trans') }}">
+                    <i class="nav-icon fas fa-exchange-alt"></i>
+                        <p>Recharge Trans</p>
+                    </a>
+                </li>
+
+
+                <li class="nav-item has-treeview">
+                    <a href="{{ route('verification_trans.index') }}" class="nav-link {{ activeSegment('verification_trans') }}">
+                    <i class="nav-icon fas fa-exchange-alt"></i>
+                        <p>Verification Trans</p>
                     </a>
                 </li>
                
