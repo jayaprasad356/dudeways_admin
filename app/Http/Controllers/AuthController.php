@@ -4406,7 +4406,7 @@ public function create_verification(Request $request)
     }
 }
 
-public function create_verification_status(Request $request)
+public function verification_status(Request $request)
 {
     // Emulate $_POST handling
     $input = $request->all();
@@ -4541,6 +4541,16 @@ public function create_verification_status(Request $request)
             // Update user’s verification_end_date
             $user->verification_end_date = $newEndDate->format('Y-m-d');
             $user->save();
+
+               // Update payment_status in the verifications table
+               $verification = Verifications::where('user_id', $user_id)
+
+               ->first();
+
+           if ($verification) {
+               $verification->payment_status = 1; // Set to 1 for paid
+               $verification->save();
+           }
 
             // Return success response
             return response()->json([
