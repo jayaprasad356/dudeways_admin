@@ -4648,12 +4648,18 @@ public function fakechat_list(Request $request)
     $fakechatData = [];
     foreach ($fakechats as $fakechat) {
         $user = $fakechat->user; // Eager loaded user data
+
+        // Calculate total unread messages for the user
+        $unreadCount = Chats::where('user_id', $fakechat->user_id)
+            ->sum('unread'); // Assuming 'unread' field holds the count of unread messages
+
         $fakechatData[] = [
             'id' => $fakechat->id,
             'user_id' => $fakechat->user_id,
-            'name' => $user ? $user->name :"", // Include user name
+            'name' => $user ? $user->name : "", // Include user name
             'profile' => $user ? asset('storage/app/public/users/' . $user->profile) : null, // Include user profile URL
             'status' => $fakechat->status,
+            'unread_count' => $unreadCount, // Include unread count
         ];
     }
 
@@ -4664,6 +4670,7 @@ public function fakechat_list(Request $request)
         'data' => $fakechatData,
     ], 200);
 }
+
 
 public function plan_list(Request $request)
 {

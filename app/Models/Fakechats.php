@@ -18,4 +18,9 @@ class Fakechats extends Model
     {
         return $this->belongsTo(Users::class);
     }
+
+    public function chat()
+{
+    return $this->belongsTo(Chats::class);
+}
 }
