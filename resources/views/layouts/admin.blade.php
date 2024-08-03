@@ -63,6 +63,18 @@
         .text-disables {
             color:  #007bff;
 }
+.text-pending {
+    color: orange; /* Or any color/style for pending status */
+}
+
+.text-paid {
+    color: green; /* Or any color/style for paid status */
+}
+
+.text-cancelled {
+    color: red; /* Or any color/style for cancelled status */
+}
+
 /* Add these styles to your CSS file or inside a <style> block in the Blade template */
 .status-fake {
     color: red; /* Red color for "Fake" */

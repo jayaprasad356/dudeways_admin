@@ -57,6 +57,7 @@
                         <th>Front Image <i class="fas fa-sort"></i></th>
                         <th>Back Image <i class="fas fa-sort"></i></th>
                         <th>Status <i class="fas fa-sort"></i></th>
+                        <th>Payment Status <i class="fas fa-sort"></i></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -88,6 +89,18 @@
                                 {{ $verification->status == 1 ? 'Verified' : 'Pending' }}
                             </span>
                         </td>
+                        <td>
+                            <span class="
+                                {{ $verification->payment_status == 0 ? 'text-pending' : '' }}
+                                {{ $verification->payment_status == 1 ? 'text-paid' : '' }}
+                                {{ $verification->payment_status == 2 ? 'text-cancelled' : '' }}
+                            ">
+                                {{ $verification->payment_status == 0 ? 'Pending' : '' }}
+                                {{ $verification->payment_status == 1 ? 'Paid' : '' }}
+                                {{ $verification->payment_status == 2 ? 'Cancelled' : '' }}
+                            </span>
+                        </td>
+
                     </tr>
                     @endforeach
                 </tbody>

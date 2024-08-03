@@ -55,6 +55,7 @@ Route::post('terms_conditions', [AuthController::class, 'terms_conditions']);
 Route::post('appsettings_list', [AuthController::class, 'appsettings_list']);
 Route::post('fakechat_list', [AuthController::class, 'fakechat_list']);
 Route::post('plan_list', [AuthController::class, 'plan_list']);
+Route::post('verification_list', [AuthController::class, 'verification_list']);
 
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {

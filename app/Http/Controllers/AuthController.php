@@ -3487,6 +3487,84 @@ public function verify_selfie_image(Request $request)
     }
 }
 
+public function verification_list(Request $request)
+{
+    // Get the user_id from the request
+    $user_id = $request->input('user_id');
+
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 400);
+    }
+
+    // Get offset and limit from request with default values
+    $offset = $request->has('offset') ? $request->input('offset') : 0; // Default offset is 0 if not provided
+    $limit = $request->has('limit') ? $request->input('limit') : 10; // Default limit is 10 if not provided
+
+    // Validate offset
+    if (!is_numeric($offset) || $offset < 0) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid offset.',
+        ], 400);
+    }
+
+    // Validate limit
+    if (!is_numeric($limit) || $limit <= 0) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid limit.',
+        ], 400);
+    }
+
+    // Convert offset and limit to integers
+    $offset = (int)$offset;
+    $limit = (int)$limit;
+
+    $totalVerifications = Verifications::where('user_id', $user_id)->count();
+
+    if ($offset >= $totalVerifications) {
+        $offset = 0;
+    }
+
+    // Fetch verifications for the specific user_id from the database with pagination
+    $verifications = Verifications::where('user_id', $user_id)
+        ->skip($offset)
+        ->take($limit)
+        ->get();
+
+    if ($verifications->isEmpty()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No verifications found.',
+        ], 404);
+    }
+
+    // Format the verification details
+    $verificationsDetails = $verifications->map(function ($verification) {
+        return [
+            'id' => $verification->id,
+            'user_id' => $verification->user_id,
+            'selfie_image' => asset('storage/verification/' . $verification->selfie_image),
+            'front_image' => asset('storage/verification/' . $verification->front_image),
+            'back_image' => asset('storage/verification/' . $verification->back_image),
+            'status' => $verification->status,
+            'payment_status' => $verification->payment_status,
+            'updated_at' => Carbon::parse($verification->updated_at)->format('Y-m-d H:i:s'),
+            'created_at' => Carbon::parse($verification->created_at)->format('Y-m-d H:i:s'),
+        ];
+    });
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Verifications details retrieved successfully.',
+        'total' => $totalVerifications,
+        'data' => $verificationsDetails,
+    ], 200);
+}
+
 public function add_feedback(Request $request)
 {
     $user_id = $request->input('user_id'); 
