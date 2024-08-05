@@ -428,6 +428,12 @@ public function userdetails(Request $request)
     $user->online_status = $online_status;
     $user->save();
     $user->load('profession');
+
+      // Get the sum of unread values
+      $unreadMessagesSum = Chats::where('user_id', $user_id)
+      ->where('unread', '>', 0)  // Assuming 'unread' is a numeric field
+      ->sum('unread');
+
     // Image URLs
     $imageUrl = asset('storage/app/public/users/' . $user->profile);
     $coverimageUrl = asset('storage/app/public/users/' . $user->cover_img);
@@ -461,6 +467,7 @@ public function userdetails(Request $request)
             'view_notify' => $user->view_notify,
             'profile_verified' => $user->profile_verified,
             'cover_img_verified' => $user->cover_img_verified,
+            'unread_count' => $unreadMessagesSum, // Include sum of unread messages
             'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
