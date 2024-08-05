@@ -434,7 +434,9 @@ public function userdetails(Request $request)
     return response()->json([
         'success' => true,
         'message' => 'User details retrieved successfully.',
+        'chat_status' => '1',
         'data' => [
+            'chat_status' => '1',
             'id' => $user->id,
             'name' => $user->name,
             'unique_name' => $user->unique_name,
