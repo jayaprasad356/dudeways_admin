@@ -54,6 +54,12 @@
                     </a>
                 </li>
                 <li class="nav-item has-treeview">
+                    <a href="{{ route('chat_points.index') }}" class="nav-link {{ activeSegment('chat_points') }}">
+                        <i class="nav-icon fas fa-star"></i>
+                        <p>Chat Points</p>
+                    </a>
+                </li>
+                <li class="nav-item has-treeview">
                     <a href="{{ route('chats.index') }}" class="nav-link {{ activeSegment('chats') }}">
                         <i class="nav-icon fas fa-comment"></i>
                         <p>Chats</p>

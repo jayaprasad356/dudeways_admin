@@ -18,5 +18,9 @@ class Chat_points extends Model
     {
         return $this->belongsTo(Users::class, 'user_id');
     }
+    public function chatUser()
+    {
+        return $this->belongsTo(Users::class, 'chat_user_id');
+    }
 }
 

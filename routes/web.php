@@ -18,6 +18,7 @@ use App\Http\Controllers\FriendsController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\VerificationsController;
 use App\Http\Controllers\FakechatsController;
+use App\Http\Controllers\Chat_pointsController;
 use App\Http\Controllers\FeedbacksController;
 use App\Http\Controllers\Recharge_transController;
 use App\Http\Controllers\Verification_transController;
@@ -95,6 +96,14 @@ Route::prefix('admin')->middleware('auth')->group(function () {
       Route::delete('/points/{points}', [PointsController::class, 'destroy'])->name('points.destroy');
       Route::put('/points/{points}', [PointsController::class, 'update'])->name('points.update');
       Route::post('/points', [PointsController::class, 'store'])->name('points.store');
+
+        //Chat Points  
+        Route::get('/chat_points', [Chat_pointsController::class, 'index'])->name('chat_points.index');
+        Route::get('/chat_points/create', [Chat_pointsController::class, 'create'])->name('chat_points.create');
+        Route::get('/chat_points/{chat_points}/edit', [Chat_pointsController::class, 'edit'])->name('chat_points.edit');
+        Route::delete('/chat_points/{chat_points}', [Chat_pointsController::class, 'destroy'])->name('chat_points.destroy');
+        Route::put('/chat_points/{chat_points}', [Chat_pointsController::class, 'update'])->name('chat_points.update');
+        Route::post('/chat_points', [Chat_pointsController::class, 'store'])->name('chat_points.store');
 
 
       //Points  
