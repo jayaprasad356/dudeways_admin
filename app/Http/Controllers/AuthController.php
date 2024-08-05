@@ -2089,7 +2089,8 @@ public function add_chat(Request $request)
             'success' => true,
             'message' => 'Chat updated successfully.',
             'chat_status' => '1',
-            'data' => [
+            'data' => [[
+                'chat_status' => '1',
                 'id' => $existingChat->id,
                 'user_id' => $existingChat->user_id,
                 'chat_user_id' => $existingChat->chat_user_id,
@@ -2103,7 +2104,7 @@ public function add_chat(Request $request)
                 'datetime' => Carbon::parse($existingChat->datetime)->format('Y-m-d H:i:s'),
                 'updated_at' => Carbon::parse($existingChat->updated_at)->format('Y-m-d H:i:s'),
                 'created_at' => Carbon::parse($existingChat->created_at)->format('Y-m-d H:i:s'),
-            ],
+            ]],
         ], 200);
     }
 
@@ -2151,6 +2152,7 @@ public function add_chat(Request $request)
         'message' => 'Chat added successfully.',
         'chat_status' => '1',
         'data' => [[
+            'chat_status' => '1',
             'chat1' => [
                 'id' => $newChat1->id,
                 'user_id' => $newChat1->user_id,
