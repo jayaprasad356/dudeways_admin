@@ -2150,7 +2150,7 @@ public function add_chat(Request $request)
     return response()->json([
         'success' => true,
         'message' => 'Chat added successfully.',
-        'chat_status' => '1',
+          'chat_status' => '1',
         'data' => [[
             'chat_status' => '1',
             'chat1' => [
@@ -2261,6 +2261,7 @@ public function add_chat(Request $request)
                 'success' => false,
                 'message' => 'No chats found.',
                 'total' => 0,
+                'chat_status' => '0',
             ], 404);
         }
     
@@ -2304,13 +2305,30 @@ public function add_chat(Request $request)
     
             $friendStatus = $isFriend ? '1' : '0';  // Check if the user is a friend
     
-            // Fetch the latest message for this chat_user_id where user_id matches
-            $latestMessage = Chats::where('user_id', $chat->chat_user_id)
-                ->where('chat_user_id', $user_id) // Match chat_user_id with the request user_id
-                ->orderBy('datetime', 'desc')
-                ->first(['latest_message']); // Get the latest message
+                  // Fetch the latest message from the chat perspective
+                  $latestChatMessage = Chats::where('user_id', $chat->chat_user_id)
+                  ->where('chat_user_id', $user_id) // Match chat_user_id with the request user_id
+                  ->orderBy('datetime', 'desc')
+                  ->first(['latest_message', 'datetime']); // Get the latest message from chat
+      
+              // Fetch the latest message from the user perspective
+              $latestUserMessage = Chats::where('user_id', $user_id)
+                  ->where('chat_user_id', $chat->chat_user_id) // Match chat_user_id with the request chat_user_id
+                  ->orderBy('datetime', 'desc')
+                  ->first(['latest_message', 'datetime']); // Get the latest message from user
+      
+              // Determine the latest message based on datetime
+              $latestMessage = null;
+              if ($latestChatMessage && $latestUserMessage) {
+                  $latestMessage = Carbon::parse($latestChatMessage->datetime)->greaterThan(Carbon::parse($latestUserMessage->datetime)) ? $latestChatMessage : $latestUserMessage;
+              } elseif ($latestChatMessage) {
+                  $latestMessage = $latestChatMessage;
+              } elseif ($latestUserMessage) {
+                  $latestMessage = $latestUserMessage;
+              }
     
             return [
+                'chat_status' => '1',
                 'id' => $chat->id,
                 'user_id' => $chat->user_id,
                 'chat_user_id' => $chat->chat_user_id,
