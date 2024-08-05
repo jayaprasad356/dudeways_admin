@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Users; 
 use App\Models\Chats; 
+use App\Models\Chat_points; 
 use App\Models\Trips;
 use App\Models\Friends; 
 use App\Models\Points; 
@@ -1935,6 +1936,7 @@ public function delete_trip(Request $request)
         'message' => 'Trip deleted successfully.',
     ], 200);
 }
+
 public function add_chat(Request $request)
 {
     $user_id = $request->input('user_id'); 
@@ -1996,12 +1998,11 @@ public function add_chat(Request $request)
         ], 404);
     }
 
-    // Check existing chat in the specific direction
+    // Check if chat is blocked
     $existingChat = Chats::where('user_id', $user_id)
                           ->where('chat_user_id', $chat_user_id)
                           ->first();
 
-    // Check if chat is blocked
     if ($existingChat && $existingChat->chat_blocked == 1) {
         if ($existingChat->user_id == $user_id) {
             return response()->json([
@@ -2017,56 +2018,107 @@ public function add_chat(Request $request)
     }
 
     // Gender and points check
-    $userGender = $user->gender; // Assuming gender is in the Users model
-    if ($userGender !== 'female') {
-        // Check and update points
-        if ($existingChat) {
-            $lastUpdateTime = Carbon::parse($existingChat->datetime);
-            $currentTime = Carbon::now();
+    $pointsRequired = 10;
+    $userGender = $user->gender;
+    $currentTime = Carbon::now();
 
-            // Deduct points if more than an hour has passed
-            if ($lastUpdateTime->diffInHours($currentTime) >= 1 && $user->points >= 10) {
-                $user->points -= 10;
-                if (!$user->save()) {
+    if ($userGender !== 'female') {
+        // Check for last points deduction
+        $lastChatPoints = Chat_points::where('user_id', $user_id)
+                                     ->where('chat_user_id', $chat_user_id)
+                                     ->latest('datetime')
+                                     ->first();
+
+        if ($lastChatPoints) {
+            $lastUpdateTime = Carbon::parse($lastChatPoints->datetime);
+            // If less than an hour has passed, skip points deduction
+            if ($lastUpdateTime->diffInHours($currentTime) < 1) {
+                // Skip points deduction and return updated chat
+                if ($existingChat) {
+                    $existingChat->latest_message = $message;
+                    $existingChat->latest_msg_time = $currentTime;
+                    $existingChat->datetime = $currentTime;
+                    $existingChat->unread = ($unread == 1 || $unread == 0) ? ($existingChat->unread + $unread) : $existingChat->unread;
+
+                    if (!$existingChat->save()) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Failed to update Chat.',
+                        ], 500);
+                    }
+
+                    // Add notification entry
+                    $notification = new Notifications();
+                    $notification->user_id = $chat_user_id;
+                    $notification->notify_user_id = $user_id;
+                    $notification->message = "{$user->name}, messaged you";
+                    $notification->datetime = $currentTime;
+                    $notification->save();
+                    
+                    $this->sendNotifiToUser(strval($chat_user_id), "{$user->name} messaged you");
+
+                    // Return success response with updated chat data
                     return response()->json([
-                        'success' => false,
-                        'message' => 'Failed to update user points.',
-                    ], 500);
+                        'success' => true,
+                        'message' => 'Chat updated successfully.',
+                        'chat_status' => '1',
+                        'data' => [[
+                            'chat_status' => '1',
+                            'id' => $existingChat->id,
+                            'user_id' => $existingChat->user_id,
+                            'chat_user_id' => $existingChat->chat_user_id,
+                            'name' => $chat_user->name,
+                            'profile' => $chat_user->profile_verified == 1 ? asset('storage/app/public/users/' . $chat_user->profile) : '',
+                            'cover_image' => $chat_user->cover_img_verified == 1 ? asset('storage/app/public/users/' . $chat_user->cover_image) : '',
+                            'latest_message' => $existingChat->latest_message,
+                            'latest_msg_time' => $currentTime->format('Y-m-d H:i:s'),
+                            'msg_seen' => '0',
+                            'unread' => $existingChat->unread,
+                            'datetime' => $currentTime->format('Y-m-d H:i:s'),
+                            'updated_at' => $currentTime->format('Y-m-d H:i:s'),
+                            'created_at' => Carbon::parse($existingChat->created_at)->format('Y-m-d H:i:s'),
+                        ]],
+                    ], 200);
                 }
-            } elseif ($user->points < 10) {
+            }
+        }
+
+        if ($user->points >= $pointsRequired) {
+            // Deduct points from the user
+            $user->points -= $pointsRequired;
+            if (!$user->save()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'You don\'t have sufficient points to chat.',
-                    'chat_status' => '0',
-                ], 400);
+                    'message' => 'Failed to update user points.',
+                ], 500);
+            }
+
+            // Create a new chat points record
+            $chat_points = new Chat_points();
+            $chat_points->user_id = $user_id;
+            $chat_points->chat_user_id = $chat_user_id;
+            $chat_points->points = $pointsRequired;
+            $chat_points->datetime = $currentTime;
+            if (!$chat_points->save()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to save chat points.',
+                ], 500);
             }
         } else {
-            // New chat, deduct points
-            if ($user->points >= 10) {
-                $user->points -= 10;
-                if (!$user->save()) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Failed to update user points.',
-                    ], 500);
-                }
-            } else {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'You don\'t have sufficient points to chat.',
-                    'chat_status' => '0',
-                ], 400);
-            }
+            return response()->json([
+                'success' => false,
+                'message' => 'You don\'t have sufficient points to chat.',
+                'chat_status' => '0',
+            ], 400);
         }
     }
 
     if ($existingChat) {
         // Update the existing chat entry
         $existingChat->latest_message = $message;
-        $existingChat->latest_msg_time = now();
-        $existingChat->datetime = now();
-        
-        // Adjust the unread count based on the provided `unread` value
+        $existingChat->latest_msg_time = $currentTime;
+        $existingChat->datetime = $currentTime;
         $existingChat->unread = ($unread == 1 || $unread == 0) ? ($existingChat->unread + $unread) : $existingChat->unread;
 
         if (!$existingChat->save()) {
@@ -2081,7 +2133,7 @@ public function add_chat(Request $request)
         $notification->user_id = $chat_user_id;
         $notification->notify_user_id = $user_id;
         $notification->message = "{$user->name}, messaged you";
-        $notification->datetime = now();
+        $notification->datetime = $currentTime;
         $notification->save();
         
         $this->sendNotifiToUser(strval($chat_user_id), "{$user->name} messaged you");
@@ -2100,16 +2152,15 @@ public function add_chat(Request $request)
                 'profile' => $chat_user->profile_verified == 1 ? asset('storage/app/public/users/' . $chat_user->profile) : '',
                 'cover_image' => $chat_user->cover_img_verified == 1 ? asset('storage/app/public/users/' . $chat_user->cover_image) : '',
                 'latest_message' => $existingChat->latest_message,
-                'latest_msg_time' => Carbon::parse($existingChat->latest_msg_time)->format('Y-m-d H:i:s'),
+                'latest_msg_time' => $currentTime->format('Y-m-d H:i:s'),
                 'msg_seen' => '0',
                 'unread' => $existingChat->unread,
-                'datetime' => Carbon::parse($existingChat->datetime)->format('Y-m-d H:i:s'),
-                'updated_at' => Carbon::parse($existingChat->updated_at)->format('Y-m-d H:i:s'),
+                'datetime' => $currentTime->format('Y-m-d H:i:s'),
+                'updated_at' => $currentTime->format('Y-m-d H:i:s'),
                 'created_at' => Carbon::parse($existingChat->created_at)->format('Y-m-d H:i:s'),
             ]],
         ], 200);
     }
-
     // If no existing chat, create both directions
     $currentTime = now();
 
@@ -2152,7 +2203,7 @@ public function add_chat(Request $request)
     return response()->json([
         'success' => true,
         'message' => 'Chat added successfully.',
-          'chat_status' => '1',
+        'chat_status' => '1',
         'data' => [[
             'chat_status' => '1',
             'chat1' => [
@@ -2188,8 +2239,6 @@ public function add_chat(Request $request)
         ]],
     ], 201);
 }
-
-
     protected function sendNotifiToUser($chat_user_id, $message)
     {
         // Check the online_status of the user
