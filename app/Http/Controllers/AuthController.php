@@ -2093,9 +2093,6 @@ public function add_chat(Request $request)
                     $existingChat->latest_message = $message;
                     $existingChat->latest_msg_time = $currentTime;
                     $existingChat->datetime = $currentTime;
-                    // Update unread count only for chat_user_id
-                    $existingChat->unread = ($unread == 1 || $unread == 0) ? $existingChat->unread + $unread : $existingChat->unread;
-
                     if (!$existingChat->save()) {
                         return response()->json([
                             'success' => false,
@@ -2112,6 +2109,23 @@ public function add_chat(Request $request)
                     $notification->save();
                     
                     $this->sendNotifiToUser(strval($chat_user_id), "{$user->name} messaged you");
+
+                    // Update reverse chat entry if it exists
+                        $reverseChat = Chats::where('user_id', $chat_user_id)
+                        ->where('chat_user_id', $user_id)
+                        ->first();
+
+                        if ($reverseChat) {
+                            // Update unread count for the reverse chat
+                            $reverseChat->unread = ($unread == 1 || $unread == 0) ? $reverseChat->unread + $unread : $reverseChat->unread;
+                            if (!$reverseChat->save()) {
+                                return response()->json([
+                                    'success' => false,
+                                    'message' => 'Failed to update reverse chat.',
+                                ], 500);
+                            }
+                        }
+
 
                     // Return success response with updated chat data
                     return response()->json([
@@ -2175,8 +2189,7 @@ public function add_chat(Request $request)
         $existingChat->latest_message = $message;
         $existingChat->latest_msg_time = $currentTime;
         $existingChat->datetime = $currentTime;
-        // Update unread count only for chat_user_id
-        $existingChat->unread = ($unread == 1 || $unread == 0) ? $existingChat->unread + $unread : $existingChat->unread;
+       
 
         if (!$existingChat->save()) {
             return response()->json([
@@ -2194,6 +2207,23 @@ public function add_chat(Request $request)
         $notification->save();
         
         $this->sendNotifiToUser(strval($chat_user_id), "{$user->name} messaged you");
+
+
+    // Update reverse chat entry if it exists
+    $reverseChat = Chats::where('user_id', $chat_user_id)
+    ->where('chat_user_id', $user_id)
+    ->first();
+
+    if ($reverseChat) {
+        // Update unread count for the reverse chat
+        $reverseChat->unread = ($unread == 1 || $unread == 0) ? $reverseChat->unread + $unread : $reverseChat->unread;
+        if (!$reverseChat->save()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update reverse chat.',
+            ], 500);
+        }
+    }
 
         // Return success response with updated chat data
         return response()->json([
