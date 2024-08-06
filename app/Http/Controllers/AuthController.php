@@ -4867,4 +4867,32 @@ public function plan_list(Request $request)
     ], 200);
 }
 
-}    
+public function corn_verify(Request $request)
+{
+    // Get current date
+    $currentDate = now();
+
+    // Get users with verification_end_value before the current date
+    $users = Users::where('verification_end_date', '<', $currentDate)->get();
+
+    // Check if there are users to update
+    if ($users->isEmpty()) {
+        return response()->json([
+            'success' => true,
+            'message' => 'No users found with verification_end_value before the current date.',
+        ], 200);
+    }
+
+    // Update verified to 0 for the selected users
+    foreach ($users as $user) {
+        $user->verified = 0;
+        $user->save();
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Successfully updated',
+    ], 200);
+}
+
+}

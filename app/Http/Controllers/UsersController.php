@@ -263,6 +263,7 @@ private function generateUniqueName($name, $user_id)
         $users->cover_img_verified = $request->cover_img_verified;
         $users->points = $request->points;
         $users->total_points = $request->total_points;
+        $users->verification_end_date = $request->verification_end_date;
         $users->datetime = now();
         $users->last_seen = now();
     

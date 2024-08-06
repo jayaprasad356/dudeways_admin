@@ -56,6 +56,7 @@ Route::post('appsettings_list', [AuthController::class, 'appsettings_list']);
 Route::post('fakechat_list', [AuthController::class, 'fakechat_list']);
 Route::post('plan_list', [AuthController::class, 'plan_list']);
 Route::post('verification_list', [AuthController::class, 'verification_list']);
+Route::post('corn_verify', [AuthController::class, 'corn_verify']);
 
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {

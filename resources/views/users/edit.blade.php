@@ -220,6 +220,18 @@
                     @enderror
                 </div>
 
+                <div class="form-group">
+                    <label for="verification_end_date">Verification End Date</label>
+                    <input type="date" name="verification_end_date" class="form-control @error('verification_end_date') is-invalid @enderror"
+                           id="verification_end_date"
+                           placeholder="Verification End Date" value="{{ old('verification_end_date', $users->verification_end_date) }}">
+                    @error('verification_end_date')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                    @enderror
+                </div>
+
                     <div class="form-group">
                         <label for="verified">Verified</label>
                         <div class="custom-control custom-switch">
