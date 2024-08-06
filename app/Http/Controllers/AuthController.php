@@ -28,6 +28,7 @@ use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 
 class AuthController extends Controller
@@ -467,7 +468,7 @@ public function userdetails(Request $request)
             'view_notify' => $user->view_notify,
             'profile_verified' => $user->profile_verified,
             'cover_img_verified' => $user->cover_img_verified,
-            'unread_count' => $unreadMessagesSum, // Include sum of unread messages
+            'unread_count' => strval($unreadMessagesSum), // Cast unread count to string
             'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
@@ -1092,6 +1093,7 @@ public function add_trip(Request $request)
 public function update_trip_image(Request $request)
 {
     $tripId = $request->input('trip_id');
+    $profileImage = $request->input('profile_image');
 
     if (empty($tripId)) {
         return response()->json([
@@ -1100,6 +1102,7 @@ public function update_trip_image(Request $request)
         ], 400);
     }
 
+    // Fetch the trip
     $trip = Trips::find($tripId);
 
     if (!$trip) {
@@ -1109,25 +1112,70 @@ public function update_trip_image(Request $request)
         ], 404);
     }
 
-    $tripImage = $request->file('trip_image');
+        // Validate profile_image value
+        if ($profileImage !== '1' && $profileImage !== '0') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid value for profile_image.',
+            ], 400);
+        }
+        
+    if ($profileImage == 1) {
+        // Fetch the user associated with the trip
+        $user = Users::find($trip->user_id);
 
-    if ($tripImage) {
-        $imagePath = $tripImage->store('trips', 'public');
-        $trip->trip_image = basename($imagePath);
-        $trip->trip_datetime = now(); 
-        $trip->save();
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found.',
+            ], 404);
+        }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Trip image updated successfully.',
-        ], 200);
-    } 
-    else {
-        return response()->json([
-            'success' => false,
-            'message' => 'Trip image is empty.',
-        ], 400);
+        // Check if the user has a profile image
+        if (!$user->profile) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User does not have a profile image.',
+            ], 404);
+        }
+
+        // Determine the path to the profile image
+        $profileImagePath = storage_path('app/public/users/' . $user->profile);
+
+        // Check if the profile image exists
+        if (file_exists($profileImagePath)) {
+            // Copy the profile image to the trips directory
+            $destinationPath = 'trips/' . basename($profileImagePath);
+            Storage::disk('public')->copy('users/' . $user->profile, $destinationPath);
+            $trip->trip_image = basename($destinationPath);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Profile image file not found.',
+            ], 404);
+        }
+    } else {
+        $tripImage = $request->file('trip_image');
+
+        if ($tripImage) {
+            $imagePath = $tripImage->store('trips', 'public');
+            $trip->trip_image = basename($imagePath);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Trip image is empty.',
+            ], 400);
+        }
     }
+
+    // Update the trip record
+    $trip->trip_datetime = now(); 
+    $trip->save();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Trip image updated successfully.',
+    ], 200);
 }
 
 public function update_trip(Request $request)
@@ -2045,7 +2093,8 @@ public function add_chat(Request $request)
                     $existingChat->latest_message = $message;
                     $existingChat->latest_msg_time = $currentTime;
                     $existingChat->datetime = $currentTime;
-                    $existingChat->unread = ($unread == 1 || $unread == 0) ? ($existingChat->unread + $unread) : $existingChat->unread;
+                    // Update unread count only for chat_user_id
+                    $existingChat->unread = ($unread == 1 || $unread == 0) ? $existingChat->unread + $unread : $existingChat->unread;
 
                     if (!$existingChat->save()) {
                         return response()->json([
@@ -2080,7 +2129,7 @@ public function add_chat(Request $request)
                             'latest_message' => $existingChat->latest_message,
                             'latest_msg_time' => $currentTime->format('Y-m-d H:i:s'),
                             'msg_seen' => '0',
-                            'unread' => $existingChat->unread,
+                            'unread' => strval($existingChat->unread), // Cast unread count to string
                             'datetime' => $currentTime->format('Y-m-d H:i:s'),
                             'updated_at' => $currentTime->format('Y-m-d H:i:s'),
                             'created_at' => Carbon::parse($existingChat->created_at)->format('Y-m-d H:i:s'),
@@ -2126,7 +2175,8 @@ public function add_chat(Request $request)
         $existingChat->latest_message = $message;
         $existingChat->latest_msg_time = $currentTime;
         $existingChat->datetime = $currentTime;
-        $existingChat->unread = ($unread == 1 || $unread == 0) ? ($existingChat->unread + $unread) : $existingChat->unread;
+        // Update unread count only for chat_user_id
+        $existingChat->unread = ($unread == 1 || $unread == 0) ? $existingChat->unread + $unread : $existingChat->unread;
 
         if (!$existingChat->save()) {
             return response()->json([
@@ -2161,13 +2211,14 @@ public function add_chat(Request $request)
                 'latest_message' => $existingChat->latest_message,
                 'latest_msg_time' => $currentTime->format('Y-m-d H:i:s'),
                 'msg_seen' => '0',
-                'unread' => $existingChat->unread,
+                'unread' => strval($existingChat->unread), // Cast unread count to string
                 'datetime' => $currentTime->format('Y-m-d H:i:s'),
                 'updated_at' => $currentTime->format('Y-m-d H:i:s'),
                 'created_at' => Carbon::parse($existingChat->created_at)->format('Y-m-d H:i:s'),
             ]],
         ], 200);
     }
+
     // If no existing chat, create both directions
     $currentTime = now();
 
@@ -2176,7 +2227,7 @@ public function add_chat(Request $request)
     $newChat1->user_id = $user_id;
     $newChat1->chat_user_id = $chat_user_id;
     $newChat1->latest_message = $message;
-    $newChat1->unread = $unread;
+    $newChat1->unread = 0;
     $newChat1->latest_msg_time = $currentTime;
     $newChat1->datetime = $currentTime;
 
@@ -2223,7 +2274,7 @@ public function add_chat(Request $request)
                 'latest_message' => $newChat1->latest_message,
                 'latest_msg_time' => Carbon::parse($newChat1->latest_msg_time)->format('Y-m-d H:i:s'),
                 'msg_seen' => '0',
-                'unread' => $newChat1->unread,
+                'unread' => strval($newChat1->unread), // Cast unread count to string
                 'datetime' => Carbon::parse($newChat1->datetime)->format('Y-m-d H:i:s'),
                 'updated_at' => Carbon::parse($newChat1->updated_at)->format('Y-m-d H:i:s'),
                 'created_at' => Carbon::parse($newChat1->created_at)->format('Y-m-d H:i:s'),
@@ -2238,7 +2289,7 @@ public function add_chat(Request $request)
                 'latest_message' => $newChat2->latest_message,
                 'latest_msg_time' => Carbon::parse($newChat2->latest_msg_time)->format('Y-m-d H:i:s'),
                 'msg_seen' => '0',
-                'unread' => $newChat2->unread,
+                'unread' => strval($newChat2->unread), // Cast unread count to string
                 'datetime' => Carbon::parse($newChat2->datetime)->format('Y-m-d H:i:s'),
                 'updated_at' => Carbon::parse($newChat2->updated_at)->format('Y-m-d H:i:s'),
                 'created_at' => Carbon::parse($newChat2->created_at)->format('Y-m-d H:i:s'),
@@ -2246,6 +2297,7 @@ public function add_chat(Request $request)
         ]],
     ], 201);
 }
+
     protected function sendNotifiToUser($chat_user_id, $message)
     {
         // Check the online_status of the user
@@ -2400,6 +2452,7 @@ public function add_chat(Request $request)
                 'latest_msg_time' => $lastSeenFormatted,
                 'msg_seen' => $chat->msg_seen,
                 'unread' => $chat->unread,
+                'unread' => strval($chat->unread), // Cast unread count to string
                 'datetime' => Carbon::parse($chat->datetime)->format('Y-m-d H:i:s'),
                 'updated_at' => Carbon::parse($chat->updated_at)->format('Y-m-d H:i:s'),
                 'created_at' => Carbon::parse($chat->created_at)->format('Y-m-d H:i:s'),
