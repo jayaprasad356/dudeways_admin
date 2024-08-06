@@ -4872,14 +4872,16 @@ public function corn_verify(Request $request)
     // Get current date
     $currentDate = now();
 
-    // Get users with verification_end_value before the current date
-    $users = Users::where('verification_end_date', '<', $currentDate)->get();
+    // Get users with verification_end_date before the current date and verified = 1
+    $users = Users::where('verification_end_date', '<', $currentDate)
+                  ->where('verified', 1)
+                  ->get();
 
     // Check if there are users to update
     if ($users->isEmpty()) {
         return response()->json([
             'success' => true,
-            'message' => 'No users found with verification_end_value before the current date.',
+            'message' => 'No users found with verification_end_date before the current date and verified = 1.',
         ], 200);
     }
 
@@ -4891,8 +4893,9 @@ public function corn_verify(Request $request)
 
     return response()->json([
         'success' => true,
-        'message' => 'Successfully updated',
+        'message' => 'Successfully updated ' . $users->count() . ' users.',
     ], 200);
 }
+
 
 }
