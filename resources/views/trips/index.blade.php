@@ -121,8 +121,9 @@
 @endsection
 
 @section('js')
-    <script src="{{ asset('plugins/sweetalert2/sweetalert2.min.js') }}"></script>
+<script src="{{ asset('plugins/sweetalert2/sweetalert2.min.js') }}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
       $(document).ready(function () {
         // Function to get URL parameters
@@ -156,8 +157,8 @@
             window.location.search = `search=${encodeURIComponent(search)}&trip_status=${encodeURIComponent(verified)}`;
         }
 
-        // Handle delete button click
-        $(document).on('click', '.btn-delete', function () {
+           // Handle delete button click
+           $(document).on('click', '.btn-delete', function () {
             $this = $(this);
             const swalWithBootstrapButtons = Swal.mixin({
                 customClass: {
@@ -185,7 +186,6 @@
                 }
             })
         });
-
         // Handle table sorting
         $('.table th').click(function () {
             var table = $(this).parents('table').eq(0);

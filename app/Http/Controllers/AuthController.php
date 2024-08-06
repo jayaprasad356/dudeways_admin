@@ -954,11 +954,12 @@ public function add_trip(Request $request)
     $trip_title = $request->input('trip_title');
     $trip_description = $request->input('trip_description');
     $location = $request->input('location');
+    $profile_image = $request->input('profile_image'); // Use this flag to decide if profile image should be used
 
     $errors = [];
 
-       // Validate each input and return specific error messages
-       if (empty($trip_type)) {
+    // Validate each input and return specific error messages
+    if (empty($trip_type)) {
         return response()->json([
             'success' => false,
             'message' => 'Trip Type is empty.',
@@ -970,14 +971,12 @@ public function add_trip(Request $request)
             'message' => 'From Date is empty.',
         ], 400);
     }
-          
     if (empty($to_date)) {
         return response()->json([
             'success' => false,
             'message' => 'To Date is empty.',
         ], 400);
     }
-            
     if (empty($trip_title)) {
         return response()->json([
             'success' => false,
@@ -996,13 +995,13 @@ public function add_trip(Request $request)
             'message' => 'Location is empty.',
         ], 400);
     }
-
     if (empty($user_id)) {
         return response()->json([
             'success' => false,
             'message' => 'User ID is empty.',
         ], 400);
     }
+
     // Check if the user exists
     $user = Users::find($user_id);
     if (!$user) {
@@ -1012,59 +1011,56 @@ public function add_trip(Request $request)
         ], 404);
     }
 
-    // Check if any validation errors occurred
-    if (!empty($errors)) {
+    // Check if the user already has a pending trip
+    $existingPendingTrip = Trips::where('user_id', $user_id)
+        ->where('trip_status', 0)
+        ->exists();
+
+    if ($existingPendingTrip) {
         return response()->json([
             'success' => false,
-            'message' => $errors,
+            'message' => 'Your existing trip is still in review.',
         ], 400);
     }
 
-        // Check if the user already has a pending trip
-        $existingPendingTrip = Trips::where('user_id', $user_id)
-        ->where('trip_status', 0) 
-        ->exists();
+    // Create a new trip instance
+    $trip = new Trips();
+    $trip->user_id = $user_id;
+    $trip->trip_type = $trip_type;
+    $trip->from_date = Carbon::parse($from_date)->format('Y-m-d');
+    $trip->to_date = Carbon::parse($to_date)->format('Y-m-d');
+    $trip->trip_title = $trip_title;
+    $trip->trip_description = $trip_description;
+    $trip->location = $location;
+    $trip->trip_datetime = now();
 
-        if ($existingPendingTrip) {
-          return response()->json([
-           'success' => false,
-           'message' => 'Your existing trip is still in review',
-          ], 400);
-        }
+    // Use user's profile image as trip image if specified
+    if ($profile_image && $user->profile) {
+        $trip->trip_image = $user->profile;
+    } else {
+        // Handle case where no image is used
+        $trip->trip_image = '';
+    }
 
+    $trip->save();
 
-   // Create a new trip instance
-   $trip = new trips();
-   $trip->user_id = $user_id;
-   $trip->trip_type = $trip_type;
-   $trip->from_date = Carbon::parse($from_date)->format('Y-m-d');
-   $trip->to_date = Carbon::parse($to_date)->format('Y-m-d');
-   $trip->trip_title = $trip_title;
-   $trip->trip_description = $trip_description;
-   $trip->location = $location;
-   $trip->trip_datetime = now();
-   $trip->save();
+    // Image URL
+    $imageUrl = $trip->trip_image ? asset('storage/app/public/trips/' . $trip->trip_image) : '';
 
-        // Image URL
-        $imageUrl = asset('storage/app/public/trips/' . $trip->trip_image);
-  // Fetch user details associated with the trip
-  $user = Users::find($trip->user_id);
+    // Calculate time difference in hours
+    $tripTime = Carbon::parse($trip->trip_datetime);
+    $currentTime = Carbon::now();
+    $hoursDifference = $tripTime->diffInHours($currentTime);
 
-   // Calculate time difference in hours
- $tripTime = Carbon::parse($trip->trip_datetime);
- $currentTime = Carbon::now();
- $hoursDifference = $tripTime->diffInHours($currentTime);
- 
- // Determine the time display string
- if ($hoursDifference == 0) {
-     $timeDifference = 'now';
- } elseif ($hoursDifference < 24) {
-     $timeDifference = $hoursDifference . 'h';
- } else {
-     $daysDifference = floor($hoursDifference / 24);
-     $timeDifference = $daysDifference . 'd';
- }
-
+    // Determine the time display string
+    if ($hoursDifference == 0) {
+        $timeDifference = 'now';
+    } elseif ($hoursDifference < 24) {
+        $timeDifference = $hoursDifference . 'h';
+    } else {
+        $daysDifference = floor($hoursDifference / 24);
+        $timeDifference = $daysDifference . 'd';
+    }
 
     return response()->json([
         'success' => true,
@@ -1089,7 +1085,6 @@ public function add_trip(Request $request)
         ],
     ], 201);
 }
-
 
 public function update_trip_image(Request $request)
 {
@@ -1137,7 +1132,6 @@ public function update_trip_image(Request $request)
 public function update_trip(Request $request)
 {
     $trip_id = $request->input('trip_id');
-    $profileImage = $request->input('profile_image');
 
     if (empty($trip_id)) {
         return response()->json([
@@ -1164,14 +1158,6 @@ public function update_trip(Request $request)
     $trip_description = $request->input('trip_description');
     $location = $request->input('location');
     $trip_image = $request->file('trip_image');
-
-    // Validate profile_image value
-    if ($profileImage !== '1' && $profileImage !== '0') {
-        return response()->json([
-            'success' => false,
-            'message' => 'Invalid value for profile_image.',
-        ], 400);
-    }
 
     // Update trip details if provided
     if ($user_id !== null) {
@@ -1230,6 +1216,7 @@ public function update_trip(Request $request)
         }
         $trip->trip_description = $trip_description;
     }
+ 
     if ($location !== null) {
         if (empty($location)) {
             return response()->json([
@@ -1239,86 +1226,37 @@ public function update_trip(Request $request)
         }
         $trip->location = $location;
     }
-
-    // Handle profile image
-    if ($profileImage == 1) {
-        // Fetch the user associated with the trip
-        $user = Users::find($trip->user_id);
-
-        if (!$user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'User not found.',
-            ], 404);
-        }
-
-        // Check if the user has a profile image
-        if (!$user->profile) {
-            return response()->json([
-                'success' => false,
-                'message' => 'User does not have a profile image.',
-            ], 404);
-        }
-
-        // Determine the path to the profile image
-        $profileImagePath = storage_path('app/public/users/' . $user->profile);
-
-        // Check if the profile image exists
-        if (file_exists($profileImagePath)) {
-            // Copy the profile image to the trips directory
-            $destinationPath = 'trips/' . basename($profileImagePath);
-            Storage::disk('public')->copy('users/' . $user->profile, $destinationPath);
-            $trip->trip_image = basename($destinationPath);
-        } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'Profile image file not found.',
-            ], 404);
-        }
-    } else {
-        // Handle new trip image upload if provided and profile_image is not 1
-        if ($trip_image !== null) {
-            // Delete old trip image if it exists
-            if ($trip->trip_image) {
-                Storage::disk('public')->delete('trips/' . $trip->trip_image);
-            }
-
-            // Store the new trip image
-            $imagePath = $trip_image->store('trips', 'public');
-            $trip->trip_image = basename($imagePath);
-        }
+    if ($trip_image !== null) {
+        $imagePath = $trip_image->store('trips', 'public');
+        $trip->trip_image = basename($imagePath);
     }
 
     $trip->trip_datetime = now(); 
 
     // Save the updated trip
-    if (!$trip->save()) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to update trip.',
-        ], 500);
-    }
+    $trip->save();
 
-    // Fetch user details associated with the trip
-    $user = Users::find($trip->user_id);
+        // Fetch user details associated with the trip
+        $user = Users::find($trip->user_id);
 
-    // Image URL
-    $imageUrl = asset('storage/app/public/trips/' . $trip->trip_image);
+            // Image URL
+            $imageUrl = asset('storage/app/public/trips/' . $trip->trip_image);
 
-    // Calculate time difference in hours
-    $tripTime = Carbon::parse($trip->trip_datetime);
-    $currentTime = Carbon::now();
-    $hoursDifference = $tripTime->diffInHours($currentTime);
-    
-    // Determine the time display string
-    if ($hoursDifference == 0) {
-        $timeDifference = 'now';
-    } elseif ($hoursDifference < 24) {
-        $timeDifference = $hoursDifference . 'h';
-    } else {
-        $daysDifference = floor($hoursDifference / 24);
-        $timeDifference = $daysDifference . 'd';
-    }
+            // Calculate time difference in hours
+ $tripTime = Carbon::parse($trip->trip_datetime);
+ $currentTime = Carbon::now();
+ $hoursDifference = $tripTime->diffInHours($currentTime);
+ 
+ // Determine the time display string
+ if ($hoursDifference == 0) {
+     $timeDifference = 'now';
+ } elseif ($hoursDifference < 24) {
+     $timeDifference = $hoursDifference . 'h';
+ } else {
+     $daysDifference = floor($hoursDifference / 24);
+     $timeDifference = $daysDifference . 'd';
+ }
+
 
     return response()->json([
         'success' => true,
