@@ -15,10 +15,15 @@ class Verifications extends Model
         'front_image',
         'back_image',
         'status',
+        'plan_id',
     ];
 
     public function user()
     {
         return $this->belongsTo(Users::class);
+    }
+    public function plan()
+    {
+        return $this->belongsTo(Plans::class);
     }
 }

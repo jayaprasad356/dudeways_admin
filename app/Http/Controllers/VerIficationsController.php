@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Verifications;
 use App\Models\Users;
+use App\Models\Plans;
 use Illuminate\Http\Request;
 use Berkayk\OneSignal\OneSignalClient;
 
@@ -24,18 +25,21 @@ class VerificationsController extends Controller
             if ($verification) {
                 $user = Users::find($verification->user_id);
                 if ($user && $user->verify_bonus_sent !== 1) {
-                    $user->points += 100; 
-                    $user->total_points += 100; 
-                    $user->verified = 1;
-                    $user->verify_bonus_sent = 1;
-                    $user->save();
+                    $plan = Plans::find($verification->plan_id);
+                    if ($plan) {
+                        $validity = $plan->validity;
 
-                    \App\Models\Transaction::create([
-                        'user_id' => $user->id,
-                        'type' => 'verify_points',
-                        'points' => 100, // Assuming the points are 100
-                        'datetime' => now(),
-                    ]);
+                        // Calculate new verification end date
+                        $currentEndDate = $user->verification_end_date ? new \Carbon\Carbon($user->verification_end_date) : now();
+                        $newEndDate = $currentEndDate->addDays($validity);
+
+                        // Update user’s verification_end_date
+                        $user->verification_end_date = $newEndDate->format('Y-m-d');
+                        $user->save();
+
+                        $user->verified = 1;
+                        $user->save();
+                    }
                 }
 
                   // Send notification to the user who posted the verification
@@ -65,7 +69,7 @@ class VerificationsController extends Controller
 
     public function index(Request $request)
     {
-        $query = Verifications::query()->with('user'); // Eager load the user relationship
+        $query = Verifications::query()->with('user')->with('plan'); // Eager load the user and plan relationships
 
         // Filter by user if user_id is provided
         if ($request->has('user_id')) {
@@ -84,8 +88,9 @@ class VerificationsController extends Controller
         $verifications = $query->latest()->paginate(10); // Paginate the results
 
         $users = Users::all(); // Fetch all users for the filter dropdown
+        $plans = Plans::all(); // Fetch all plans for the filter dropdown
 
-        return view('verifications.index', compact('verifications', 'users')); // Pass verifications and users to the view
+        return view('verifications.index', compact('verifications', 'users', 'plans')); // Pass verifications, users, and plans to the view
     }
 
     public function destroy(Verifications $verification)

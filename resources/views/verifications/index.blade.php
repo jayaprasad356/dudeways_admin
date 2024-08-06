@@ -54,6 +54,7 @@
                         <th>Checkbox</th>
                         <th>ID <i class="fas fa-sort"></i></th>
                         <th>User Name <i class="fas fa-sort"></i></th>
+                        <th>Plan Name<i class="fas fa-sort"></i></th>
                         <th>Selfie Image <i class="fas fa-sort"></i></th>
                         <th>Front Image <i class="fas fa-sort"></i></th>
                         <th>Back Image <i class="fas fa-sort"></i></th>
@@ -70,6 +71,7 @@
                         <td><input type="checkbox" class="checkbox" data-id="{{ $verification->id }}"></td>
                         <td>{{ $verification->id }}</td>
                         <td>{{ optional($verification->user)->name }}</td>
+                        <td>{{ optional($verification->plan)->plan_name }}</td>
                         <td>
                             <a href="{{ asset('storage/app/public/verification/' . $verification->selfie_image) }}" data-lightbox="selfie_image-{{ $verification->id }}">
                                 <img class="customer-img img-thumbnail img-fluid" src="{{ asset('storage/app/public/verification/' . $verification->selfie_image) }}" alt=""

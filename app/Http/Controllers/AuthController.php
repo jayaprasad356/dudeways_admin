@@ -4748,29 +4748,18 @@ public function verification_status(Request $request)
                   ]);
               }
 
-              // Update user's verified
-              $user->verified = 1;
-              $user->save();
-
-            // Calculate new verification end date
-            $currentEndDate = $user->verification_end_date ? new \Carbon\Carbon($user->verification_end_date) : now();
-            $newEndDate = $currentEndDate->addDays($validity);
-
-            // Update user’s verification_end_date
-            $user->verification_end_date = $newEndDate->format('Y-m-d');
-            $user->save();
-
                // Update payment_status in the verifications table
                $verification = Verifications::where('user_id', $user_id)
 
                ->first();
 
            if ($verification) {
+            $verification->plan_id = $plan_id; // Set to 1 for paid
                $verification->payment_status = 1; // Set to 1 for paid
                $verification->save();
            }
 
-            // Return success response
+            // Return success response  
             return response()->json([
                 'success' => true,
                 'message' => 'Verification completed successfully',
