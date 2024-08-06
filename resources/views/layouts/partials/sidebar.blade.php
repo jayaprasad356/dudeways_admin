@@ -42,7 +42,7 @@
                     </a>
                 </li>
                 <li class="nav-item has-treeview">
-                    <a href="{{ route('trips.index') }}" class="nav-link {{ activeSegment('trips') }}">
+                <a href="{{ route('trips.index') }}?search=&trip_status=0"  class="nav-link {{ activeSegment('trips') }}">
                         <i class="nav-icon fas fa-suitcase"></i>
                         <p>Trips</p>
                     </a>

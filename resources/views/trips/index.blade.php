@@ -30,10 +30,10 @@
             <div class="col-md-4 text-right">
                 <!-- Search Form -->
                 <form action="{{ route('trips.index') }}" method="GET">
-                    <div class="input-group">
-                        <input type="text" name="search" class="form-control" placeholder="Search by....">
+                <div class="input-group">
+                        <input type="text" id="search-input" name="search" class="form-control" placeholder="Search by..." autocomplete="off" value="{{ request()->input('search') }}">
                         <div class="input-group-append">
-                            <button class="btn btn-outline-secondary" type="submit"><i class="fas fa-search"></i></button>
+                            <button class="btn btn-primary" type="submit" style="display: none;">Search</button>
                         </div>
                     </div>
                 </form>
@@ -48,7 +48,7 @@
 
                         <div class="form-group col-md-3">
                             <label for="status-filter">Filter by Status:</label>
-                            <select name="trip_status" id="status-filter" class="form-control">
+                            <select name="trip_status" id="trip_status-filter" class="form-control">
                                 <option value="0" {{ request()->input('trip_status') === '0' ? 'selected' : '' }}>Pending</option>
                                 <option value="1" {{ request()->input('trip_status') === '1' ? 'selected' : '' }}>Approved</option>
                                 <option value="2" {{ request()->input('trip_status') === '2' ? 'selected' : '' }}>Cancelled</option>
@@ -115,7 +115,7 @@
                 </tbody>
             </table>
         </div>
-        {{ $trips->links() }}
+        {{ $trips->appends(request()->query())->links() }}
     </div>
 </div>
 @endsection
@@ -124,106 +124,103 @@
     <script src="{{ asset('plugins/sweetalert2/sweetalert2.min.js') }}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
     <script>
-        $(document).ready(function () {
-            // Submit the form when user or status selection changes
-            $('#user-filter, #status-filter').change(function () {
-                var statusFilterValue = $('#status-filter').val();
-                
-                // Check if both filters are empty or only the status filter is selected
-                if ((statusFilterValue === '') || (statusFilterValue !== '')) {
-                    $('#filter-form').submit();
-                } else if (statusFilterValue !== '') {
-                    // If only the status filter is selected, construct the URL without the user_id parameter
-                    var url = "{{ route('trips.index') }}?trip_status=" + statusFilterValue;
-                    window.location.href = url;
-                } else {
-                    // If only the user filter is selected, submit the form with both filters
-                    $('#filter-form').submit();
-                }
+      $(document).ready(function () {
+        // Function to get URL parameters
+        function getQueryParams() {
+            const params = {};
+            window.location.search.substring(1).split("&").forEach(function (pair) {
+                const [key, value] = pair.split("=");
+                params[key] = decodeURIComponent(value);
             });
+            return params;
+        }
 
-            // Handle pagination clicks to maintain trip_status parameter
-            $('.pagination a').click(function (e) {
-                e.preventDefault();
-                var pageUrl = $(this).attr('href');
-                var statusFilterValue = $('#status-filter').val();
-                
-                if (statusFilterValue !== '') {
-                    var separator = pageUrl.includes('?') ? '&' : '?';
-                    pageUrl += separator + 'trip_status=' + statusFilterValue;
-                }
+        // Load initial parameters
+        const queryParams = getQueryParams();
+        $('#search-input').val(queryParams.search || '');
+        $('#trip_status-filter').val(queryParams.trip_status || '');
 
-                window.location.href = pageUrl;
-            });
+        // Handle search input
+        $('#search-input').on('input', function () {
+            filterUsers();
         });
-    </script>
 
-    <script>
-        $(document).ready(function() {
-            $('.table th').click(function() {
-                var table = $(this).parents('table').eq(0);
-                var index = $(this).index();
-                var rows = table.find('tr:gt(0)').toArray().sort(comparer(index));
-                this.asc = !this.asc;
-                if (!this.asc) {
-                    rows = rows.reverse();
-                }
-                for (var i = 0; i < rows.length; i++) {
-                    table.append(rows[i]);
-                }
-                // Update arrows
-                updateArrows(table, index, this.asc);
-            });
-
-            function comparer(index) {
-                return function(a, b) {
-                    var valA = getCellValue(a, index),
-                        valB = getCellValue(b, index);
-                    return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.localeCompare(valB);
-                };
-            }
-
-            function getCellValue(row, index) {
-                return $(row).children('td').eq(index).text();
-            }
-
-            function updateArrows(table, index, asc) {
-                table.find('.arrow').remove();
-                var arrow = asc ? '<i class="fas fa-arrow-up arrow"></i>' : '<i class="fas fa-arrow-down arrow"></i>';
-                table.find('th').eq(index).append(arrow);
-            }
+        // Handle status filter change
+        $('#trip_status-filter').change(function () {
+            filterUsers();
         });
-    </script>
-<script>
-  $(document).on('click', '.btn-delete', function () {
-                $this = $(this);
-                const swalWithBootstrapButtons = Swal.mixin({
-                    customClass: {
-                        confirmButton: 'btn btn-success',
-                        cancelButton: 'btn btn-danger'
-                    },
-                    buttonsStyling: false
-                })
 
-                swalWithBootstrapButtons.fire({
-                    title: 'Are you sure?',
-                    text: "Do you really want to delete this customer?",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Yes, delete it!',
-                    cancelButtonText: 'No',
-                    reverseButtons: true
-                }).then((result) => {
-                    if (result.value) {
-                        $.post($this.data('url'), {_method: 'DELETE', _token: '{{csrf_token()}}'}, function (res) {
-                            $this.closest('tr').fadeOut(500, function () {
-                                $(this).remove();
-                            })
+        function filterUsers() {
+            let search = $('#search-input').val();
+            let verified = $('#trip_status-filter').val();
+            window.location.search = `search=${encodeURIComponent(search)}&trip_status=${encodeURIComponent(verified)}`;
+        }
+
+        // Handle delete button click
+        $(document).on('click', '.btn-delete', function () {
+            $this = $(this);
+            const swalWithBootstrapButtons = Swal.mixin({
+                customClass: {
+                    confirmButton: 'btn btn-success',
+                    cancelButton: 'btn btn-danger'
+                },
+                buttonsStyling: false
+            })
+
+            swalWithBootstrapButtons.fire({
+                title: 'Are you sure?',
+                text: "Do you really want to delete this user?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'No',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.value) {
+                    $.post($this.data('url'), {_method: 'DELETE', _token: '{{csrf_token()}}'}, function (res) {
+                        $this.closest('tr').fadeOut(500, function () {
+                            $(this).remove();
                         })
-                    }
-                })
-            });
-</script>
+                    })
+                }
+            })
+        });
+
+        // Handle table sorting
+        $('.table th').click(function () {
+            var table = $(this).parents('table').eq(0);
+            var index = $(this).index();
+            var rows = table.find('tr:gt(0)').toArray().sort(comparer(index));
+            this.asc = !this.asc;
+            if (!this.asc) {
+                rows = rows.reverse();
+            }
+            for (var i = 0; i < rows.length; i++) {
+                table.append(rows[i]);
+            }
+            // Update arrows
+            updateArrows(table, index, this.asc);
+        });
+
+        function comparer(index) {
+            return function (a, b) {
+                var valA = getCellValue(a, index),
+                    valB = getCellValue(b, index);
+                return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.localeCompare(valB);
+            };
+        }
+
+        function getCellValue(row, index) {
+            return $(row).children('td').eq(index).text();
+        }
+
+        function updateArrows(table, index, asc) {
+            table.find('.arrow').remove();
+            var arrow = asc ? '<i class="fas fa-arrow-up arrow"></i>' : '<i class="fas fa-arrow-down arrow"></i>';
+            table.find('th').eq(index).append(arrow);
+        }
+    });
+    </script>
 
     <script>
         $(document).ready(function () {

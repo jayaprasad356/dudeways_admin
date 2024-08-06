@@ -1028,7 +1028,7 @@ public function add_trip(Request $request)
         if ($existingPendingTrip) {
           return response()->json([
            'success' => false,
-           'message' => 'You already have a pending trip. Please complete or cancel the existing trip before adding a new one.',
+           'message' => 'Your existing trip is still in review',
           ], 400);
         }
 
@@ -4872,30 +4872,28 @@ public function corn_verify(Request $request)
     // Get current date
     $currentDate = now();
 
-    // Get users with verification_end_date before the current date and verified = 1
-    $users = Users::where('verification_end_date', '<', $currentDate)
-                  ->where('verified', 1)
-                  ->get();
+    // Get users with verification_end_value before the current date
+    $users = Users::where('verification_end_date', '<', $currentDate)->get();
 
     // Check if there are users to update
     if ($users->isEmpty()) {
         return response()->json([
             'success' => true,
-            'message' => 'No users found with verification_end_date before the current date and verified = 1.',
+            'message' => 'No users found with verification_end_value before the current date.',
         ], 200);
     }
 
-    // Update verified to 0 for the selected users
+    // Update status to 0 for the selected users
     foreach ($users as $user) {
         $user->verified = 0;
         $user->save();
     }
 
+    // Return a success message with the count of updated users
     return response()->json([
         'success' => true,
-        'message' => 'Successfully updated ' . $users->count() . ' users.',
+        'message' => 'Successfully updated',
     ], 200);
 }
-
 
 }

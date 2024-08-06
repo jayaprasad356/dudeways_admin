@@ -96,23 +96,38 @@ class TripsController extends Controller
      }
      public function index(Request $request)
      {
-         $query = Trips::query()->with('users');
-     
-         if ($request->has('user_id')) {
-             $user_id = $request->input('user_id');
-             $query->where('user_id', $user_id);
-         }
-     
-         if ($request->has('trip_status')) {
-             $trip_status = $request->input('trip_status');
-             $query->where('trip_status', $trip_status);
-         } else {
-             // By default, fetch pending trips
-             $query->where('trip_status', 0);
-         }
-     
-         $trips = $query->latest()->paginate(10);
-         $users = Users::all();
+        $query = Trips::query()->with('users');
+
+        // Handle the search input
+        if ($request->has('search') && !empty($request->input('search'))) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('trip_title', 'like', "%$search%")
+                  ->orWhere('trip_type', 'like', "%$search%")
+                  ->orWhere('location', 'like', "%$search%")
+                  ->orWhereHas('users', function ($q) use ($search) {
+                      $q->where('name', 'like', "%$search%");
+                  });
+            });
+        }
+    
+// Filter by verified status
+if ($request->filled('trip_status')) {
+    $trip_status = $request->input('trip_status');
+    $query->where('trip_status', $trip_status);
+}
+
+// Default sorting: Show pending trips first, then other statuses
+$query->orderByRaw('CASE WHEN trip_status = 0 THEN 1 ELSE 2 END')
+      ->latest(); // This will sort by trip_datetime in descending order, after showing pending trips first
+
+        // Check if the request is AJAX
+        if ($request->wantsJson()) {
+            return response($query->get());
+        }
+    
+        $trips = $query->latest()->paginate(10);
+        $users = Users::all();
      
          return view('trips.index', compact('trips', 'users'));
      }

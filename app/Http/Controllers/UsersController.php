@@ -27,8 +27,6 @@ class UsersController extends Controller
                   ->orWhere('unique_name', 'LIKE', "%$search%");
             });
         }
-
-
           
            // Filter by verified status
     if ($request->filled('verified')) {

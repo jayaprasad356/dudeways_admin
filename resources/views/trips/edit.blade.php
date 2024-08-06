@@ -3,7 +3,7 @@
 @section('title', 'Update Trips')
 @section('content-header', 'Update Trips')
 @section('content-actions')
-    <a href="{{route('trips.index')}}" class="btn btn-success"><i class="fas fa-back"></i>Back To Trip</a>
+    <a href="{{ route('trips.index') }}?search=&trip_status=0"  class="btn btn-success"><i class="fas fa-back"></i>Back To Trip</a>
 @endsection
 @section('content')
 
