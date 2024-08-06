@@ -1090,10 +1090,10 @@ public function add_trip(Request $request)
     ], 201);
 }
 
+
 public function update_trip_image(Request $request)
 {
     $tripId = $request->input('trip_id');
-    $profileImage = $request->input('profile_image');
 
     if (empty($tripId)) {
         return response()->json([
@@ -1112,75 +1112,32 @@ public function update_trip_image(Request $request)
         ], 404);
     }
 
-        // Validate profile_image value
-        if ($profileImage !== '1' && $profileImage !== '0') {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid value for profile_image.',
-            ], 400);
-        }
-        
-    if ($profileImage == 1) {
-        // Fetch the user associated with the trip
-        $user = Users::find($trip->user_id);
+  
+    $tripImage = $request->file('trip_image');
 
-        if (!$user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'User not found.',
-            ], 404);
-        }
+    if ($tripImage) {
+        $imagePath = $tripImage->store('trips', 'public');
+        $trip->trip_image = basename($imagePath);
+        $trip->trip_datetime = now(); 
+        $trip->save();
 
-        // Check if the user has a profile image
-        if (!$user->profile) {
-            return response()->json([
-                'success' => false,
-                'message' => 'User does not have a profile image.',
-            ], 404);
-        }
-
-        // Determine the path to the profile image
-        $profileImagePath = storage_path('app/public/users/' . $user->profile);
-
-        // Check if the profile image exists
-        if (file_exists($profileImagePath)) {
-            // Copy the profile image to the trips directory
-            $destinationPath = 'trips/' . basename($profileImagePath);
-            Storage::disk('public')->copy('users/' . $user->profile, $destinationPath);
-            $trip->trip_image = basename($destinationPath);
-        } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'Profile image file not found.',
-            ], 404);
-        }
-    } else {
-        $tripImage = $request->file('trip_image');
-
-        if ($tripImage) {
-            $imagePath = $tripImage->store('trips', 'public');
-            $trip->trip_image = basename($imagePath);
-        } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'Trip image is empty.',
-            ], 400);
-        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Trip image updated successfully.',
+        ], 200);
+    } 
+    else {
+        return response()->json([
+            'success' => false,
+            'message' => 'Trip image is empty.',
+        ], 400);
     }
-
-    // Update the trip record
-    $trip->trip_datetime = now(); 
-    $trip->save();
-
-    return response()->json([
-        'success' => true,
-        'message' => 'Trip image updated successfully.',
-    ], 200);
 }
 
 public function update_trip(Request $request)
 {
     $trip_id = $request->input('trip_id');
+    $profileImage = $request->input('profile_image');
 
     if (empty($trip_id)) {
         return response()->json([
@@ -1207,6 +1164,14 @@ public function update_trip(Request $request)
     $trip_description = $request->input('trip_description');
     $location = $request->input('location');
     $trip_image = $request->file('trip_image');
+
+    // Validate profile_image value
+    if ($profileImage !== '1' && $profileImage !== '0') {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid value for profile_image.',
+        ], 400);
+    }
 
     // Update trip details if provided
     if ($user_id !== null) {
@@ -1265,7 +1230,6 @@ public function update_trip(Request $request)
         }
         $trip->trip_description = $trip_description;
     }
- 
     if ($location !== null) {
         if (empty($location)) {
             return response()->json([
@@ -1275,37 +1239,86 @@ public function update_trip(Request $request)
         }
         $trip->location = $location;
     }
-    if ($trip_image !== null) {
-        $imagePath = $trip_image->store('trips', 'public');
-        $trip->trip_image = basename($imagePath);
+
+    // Handle profile image
+    if ($profileImage == 1) {
+        // Fetch the user associated with the trip
+        $user = Users::find($trip->user_id);
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found.',
+            ], 404);
+        }
+
+        // Check if the user has a profile image
+        if (!$user->profile) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User does not have a profile image.',
+            ], 404);
+        }
+
+        // Determine the path to the profile image
+        $profileImagePath = storage_path('app/public/users/' . $user->profile);
+
+        // Check if the profile image exists
+        if (file_exists($profileImagePath)) {
+            // Copy the profile image to the trips directory
+            $destinationPath = 'trips/' . basename($profileImagePath);
+            Storage::disk('public')->copy('users/' . $user->profile, $destinationPath);
+            $trip->trip_image = basename($destinationPath);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Profile image file not found.',
+            ], 404);
+        }
+    } else {
+        // Handle new trip image upload if provided and profile_image is not 1
+        if ($trip_image !== null) {
+            // Delete old trip image if it exists
+            if ($trip->trip_image) {
+                Storage::disk('public')->delete('trips/' . $trip->trip_image);
+            }
+
+            // Store the new trip image
+            $imagePath = $trip_image->store('trips', 'public');
+            $trip->trip_image = basename($imagePath);
+        }
     }
 
     $trip->trip_datetime = now(); 
 
     // Save the updated trip
-    $trip->save();
+    if (!$trip->save()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to update trip.',
+        ], 500);
+    }
 
-        // Fetch user details associated with the trip
-        $user = Users::find($trip->user_id);
+    // Fetch user details associated with the trip
+    $user = Users::find($trip->user_id);
 
-            // Image URL
-            $imageUrl = asset('storage/app/public/trips/' . $trip->trip_image);
+    // Image URL
+    $imageUrl = asset('storage/app/public/trips/' . $trip->trip_image);
 
-            // Calculate time difference in hours
- $tripTime = Carbon::parse($trip->trip_datetime);
- $currentTime = Carbon::now();
- $hoursDifference = $tripTime->diffInHours($currentTime);
- 
- // Determine the time display string
- if ($hoursDifference == 0) {
-     $timeDifference = 'now';
- } elseif ($hoursDifference < 24) {
-     $timeDifference = $hoursDifference . 'h';
- } else {
-     $daysDifference = floor($hoursDifference / 24);
-     $timeDifference = $daysDifference . 'd';
- }
-
+    // Calculate time difference in hours
+    $tripTime = Carbon::parse($trip->trip_datetime);
+    $currentTime = Carbon::now();
+    $hoursDifference = $tripTime->diffInHours($currentTime);
+    
+    // Determine the time display string
+    if ($hoursDifference == 0) {
+        $timeDifference = 'now';
+    } elseif ($hoursDifference < 24) {
+        $timeDifference = $hoursDifference . 'h';
+    } else {
+        $daysDifference = floor($hoursDifference / 24);
+        $timeDifference = $daysDifference . 'd';
+    }
 
     return response()->json([
         'success' => true,
