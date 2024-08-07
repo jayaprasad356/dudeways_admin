@@ -2435,8 +2435,7 @@ public function add_chat(Request $request)
                 'friend' => $friendStatus,
                 'latest_message' => $latestMessage ? $latestMessage->latest_message : $chat->latest_message, // Use the fetched latest message
                 'latest_msg_time' => $lastSeenFormatted,
-                'msg_seen' => $chat->msg_seen,
-                'unread' => $chat->unread,
+                'msg_seen' => strval($chat->msg_seen), // Cast unread count to string
                 'unread' => strval($chat->unread), // Cast unread count to string
                 'datetime' => Carbon::parse($chat->datetime)->format('Y-m-d H:i:s'),
                 'updated_at' => Carbon::parse($chat->updated_at)->format('Y-m-d H:i:s'),
@@ -2456,6 +2455,7 @@ public function add_chat(Request $request)
     {
         $user_id = $request->input('user_id');
         $chat_user_id = $request->input('chat_user_id');
+        $msg_seen = $request->input('msg_seen');
     
         // Validate user_id
         if (empty($user_id)) {
@@ -2473,17 +2473,22 @@ public function add_chat(Request $request)
             ], 400);
         }
     
-        // Find all chats where the user_id and chat_user_id match and unread is not zero
+        // Find all chats where the user_id and chat_user_id match
         $chats = Chats::where(function($query) use ($user_id, $chat_user_id) {
             $query->where('user_id', $user_id)
-                  ->where('chat_user_id', $chat_user_id)
-                  ->where('unread', '>', 0);
+                  ->where('chat_user_id', $chat_user_id);
         })->get();
-
     
-        // Update unread field to 0 for these chats
+        // Update unread field and optionally msg_seen field for these chats
         foreach ($chats as $chat) {
+            // Always update unread to 0
             $chat->unread = 0;
+            
+            // Update msg_seen only if it is provided and valid
+            if (isset($msg_seen) && in_array($msg_seen, [0, 1])) {
+                $chat->msg_seen = $msg_seen;
+            }
+    
             if (!$chat->save()) {
                 return response()->json([
                     'success' => false,
