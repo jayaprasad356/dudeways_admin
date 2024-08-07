@@ -2391,36 +2391,56 @@ public function add_chat(Request $request)
                 $lastSeenFormatted = $lastSeen->format('M jS'); // This year, show month and day with ordinal indicator
             } else {
                 $lastSeenFormatted = $lastSeen->format('M jS, Y'); // Older than current year, show month, day, and year
-            }
-    
+            }  // Check if the user is a friend
+           
             // Check if the user is a friend
             $isFriend = Friends::where('user_id', $user_id)
-                ->where('friend_user_id', $chat->chat_user_id) // Check against notify_user_id
+                ->where('friend_user_id', $chat->chat_user_id) // Check against chat_user_id
                 ->exists();
     
             $friendStatus = $isFriend ? '1' : '0';  // Check if the user is a friend
     
-                  // Fetch the latest message from the chat perspective
-                  $latestChatMessage = Chats::where('user_id', $chat->chat_user_id)
-                  ->where('chat_user_id', $user_id) // Match chat_user_id with the request user_id
-                  ->orderBy('datetime', 'desc')
-                  ->first(['latest_message', 'datetime']); // Get the latest message from chat
-      
-              // Fetch the latest message from the user perspective
-              $latestUserMessage = Chats::where('user_id', $user_id)
-                  ->where('chat_user_id', $chat->chat_user_id) // Match chat_user_id with the request chat_user_id
-                  ->orderBy('datetime', 'desc')
-                  ->first(['latest_message', 'datetime']); // Get the latest message from user
-      
-              // Determine the latest message based on datetime
-              $latestMessage = null;
-              if ($latestChatMessage && $latestUserMessage) {
-                  $latestMessage = Carbon::parse($latestChatMessage->datetime)->greaterThan(Carbon::parse($latestUserMessage->datetime)) ? $latestChatMessage : $latestUserMessage;
-              } elseif ($latestChatMessage) {
-                  $latestMessage = $latestChatMessage;
-              } elseif ($latestUserMessage) {
-                  $latestMessage = $latestUserMessage;
-              }
+            // Fetch the latest message from both perspectives
+            $latestChatMessage = Chats::where('user_id', $chat->chat_user_id)
+                ->where('chat_user_id', $user_id) // Match chat_user_id with the request user_id
+                ->orderBy('datetime', 'desc')
+                ->first(['latest_message', 'datetime']); // Get the latest message from chat
+    
+            $latestUserMessage = Chats::where('user_id', $user_id)
+                ->where('chat_user_id', $chat->chat_user_id) // Match chat_user_id with the request chat_user_id
+                ->orderBy('datetime', 'desc')
+                ->first(['latest_message', 'datetime']); // Get the latest message from user
+    
+            // Determine the latest message based on datetime
+            $latestMessage = null;
+            if ($latestChatMessage && $latestUserMessage) {
+                $latestMessage = Carbon::parse($latestChatMessage->datetime)->greaterThan(Carbon::parse($latestUserMessage->datetime)) ? $latestChatMessage : $latestUserMessage;
+            } elseif ($latestChatMessage) {
+                $latestMessage = $latestChatMessage;
+            } elseif ($latestUserMessage) {
+                $latestMessage = $latestUserMessage;
+            }
+    
+            // Format latest_msg_time similarly
+            $latestMsgTime = $latestMessage ? Carbon::parse($latestMessage->datetime)->format('Y-m-d H:i:s') : $chat->latest_msg_time;
+            $latestMsgTimeFormatted = Carbon::parse($latestMsgTime);
+            $msgDifferenceDays = $now->diffInDays($latestMsgTimeFormatted);
+    
+            if ($msgDifferenceDays == 0) {
+                $latestMsgTimeFormatted = $latestMsgTimeFormatted->format('g:i A'); // Today, show time in 12-hour format with AM/PM
+            } elseif ($msgDifferenceDays == 1) {
+                $latestMsgTimeFormatted = 'Yesterday'; // Yesterday
+            } elseif ($msgDifferenceDays <= 7) {
+                $latestMsgTimeFormatted = $latestMsgTimeFormatted->format('l'); // Last week, show day name
+            } elseif ($msgDifferenceDays <= 14 && $latestMsgTimeFormatted->isSameMonth($now)) {
+                $latestMsgTimeFormatted = 'Last week'; // Within 14 days and same month, show "Last week"
+            } elseif ($latestMsgTimeFormatted->month == $now->subMonths(1)->month) {
+                $latestMsgTimeFormatted = 'Last month'; // Last month
+            } elseif ($latestMsgTimeFormatted->isSameYear($now)) {
+                $latestMsgTimeFormatted = $latestMsgTimeFormatted->format('M jS'); // This year, show month and day with ordinal indicator
+            } else {
+                $latestMsgTimeFormatted = $latestMsgTimeFormatted->format('M jS, Y'); // Older than current year, show month, day, and year
+            }
     
             return [
                 'chat_status' => '1',
@@ -2429,12 +2449,12 @@ public function add_chat(Request $request)
                 'chat_user_id' => $chat->chat_user_id,
                 'name' => $chat_user->name, // Display chat_user name
                 'profile' => $imageUrl, // Display chat_user profile
-                'cover_img' => $coverImageUrl, // Display chat_user profile
+                'cover_img' => $coverImageUrl, // Display chat_user cover image
                 'online_status' => $chat_user->online_status, // Display chat_user online status
-                'verified' => $chat_user->verified, // Display chat_user online status
+                'verified' => $chat_user->verified, // Display chat_user verified status
                 'friend' => $friendStatus,
                 'latest_message' => $latestMessage ? $latestMessage->latest_message : $chat->latest_message, // Use the fetched latest message
-                'latest_msg_time' => $lastSeenFormatted,
+                'latest_msg_time' => $latestMsgTimeFormatted, // Use the formatted latest message time
                 'msg_seen' => strval($chat->msg_seen), // Cast unread count to string
                 'unread' => strval($chat->unread), // Cast unread count to string
                 'datetime' => Carbon::parse($chat->datetime)->format('Y-m-d H:i:s'),
@@ -2450,7 +2470,7 @@ public function add_chat(Request $request)
             'data' => $chatDetails->values()->all(), // Reindex the array to prevent gaps
         ], 200);
     }
-   
+    
     public function read_chats(Request $request)
     {
         $user_id = $request->input('user_id');
