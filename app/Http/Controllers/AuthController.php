@@ -1009,6 +1009,14 @@ public function add_trip(Request $request)
         ], 404);
     }
 
+       // Check if the user has enough points if male
+       if ($user->gender === 'male' && $user->points < 50) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User does not have enough points to add a trip.',
+        ], 403);
+    }
+
   
     // Handle profile image URL and save it to the trips folder if needed
     if ($profile_image == 1 && !empty($user->profile)) {
