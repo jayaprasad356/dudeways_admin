@@ -4464,13 +4464,7 @@ public function check_recharge_status(Request $request)
                     'success' => true,
                     'message' => 'Transaction completed successfully',
                 ]);
-            } else {
-                // Return error response if status is already 1
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Points already added',
-                ]);
-            }
+            } 
                 } catch (\Exception $e) {
                     // Handle any exceptions
                     return response()->json([
@@ -4685,14 +4679,20 @@ public function verification_status(Request $request)
         $response = Http::post($url, $data);
 
         // Check for errors in the response
+        $responseArray = $response->json();
+        $payment_Status = $responseArray['data']['status'];
+        if($payment_Status != 'success'){
+            return response()->json([
+                'success' => false,
+                'message' => 'Payment Failed',
+            ]);
+        }
         if (!$response->successful()) {
-            $responseArray = $response->json();
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to check order status. API error: ' . json_encode($responseArray),
-            ], 500);
+            ]);
         }
-
 
         // Find existing verification transaction by txn_id
         $verificationTrans = VerificationTrans::where('txn_id', $txn_id)->first();
