@@ -1025,7 +1025,7 @@ public function add_trip(Request $request)
     if ($user->gender === 'male' && $user->points < 50) {
         return response()->json([
             'success' => false,
-            'message' => 'User does not have enough points to add a trip.',
+            'message' => 'Minimum 50 points required to add a trip.',
         ], 403);
     }
 
