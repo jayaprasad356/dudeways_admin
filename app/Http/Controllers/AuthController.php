@@ -1009,15 +1009,31 @@ public function add_trip(Request $request)
         ], 404);
     }
 
-       // Check if the user has enough points if male
-       if ($user->gender === 'male' && $user->points < 50) {
+    // Check if the user already has a pending trip
+    $pendingTrip = Trips::where('user_id', $user_id)
+        ->where('trip_status', 0) // Assuming 0 means pending
+        ->exists();
+
+    if ($pendingTrip) {
+        return response()->json([
+            'success' => false,
+            'message' => 'You already have a pending trip. Please wait until it is approved before adding a new one.',
+        ], 403);
+    }
+
+    // Check if the user has enough points if male
+    if ($user->gender === 'male' && $user->points < 50) {
         return response()->json([
             'success' => false,
             'message' => 'User does not have enough points to add a trip.',
         ], 403);
     }
 
-  
+    // Deduct 50 points from the user if male
+    if ($user->gender === 'male') {
+        $user->points -= 50;
+        $user->save();
+    }
     // Handle profile image URL and save it to the trips folder if needed
     if ($profile_image == 1 && !empty($user->profile)) {
         // Get the profile image file path
