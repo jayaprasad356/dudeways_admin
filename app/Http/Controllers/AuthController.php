@@ -4287,7 +4287,6 @@ public function create_recharge(Request $request)
 
 public function check_recharge_status(Request $request)
 {
-    // Emulate $_POST handling
     $input = $request->all();
 
     // Check required inputs
@@ -4379,15 +4378,19 @@ public function check_recharge_status(Request $request)
 
         // Check for errors in the response
         $responseArray = $response->json();
+        $payment_Status = $responseArray['data']['status'];
+        if($payment_Status != 'success'){
+            return response()->json([
+                'success' => false,
+                'message' => 'Payment Failed',
+            ]);
+        }
         if (!$response->successful()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to check order status. API error: ' . json_encode($responseArray),
             ]);
         }
-
-     
-    
 
         // Find existing recharge transaction by txn_id
         $rechargeTrans = RechargeTrans::where('txn_id', $txn_id)->first();
