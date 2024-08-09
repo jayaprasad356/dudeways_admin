@@ -439,12 +439,15 @@ public function userdetails(Request $request)
     $imageUrl = asset('storage/app/public/users/' . $user->profile);
     $coverimageUrl = asset('storage/app/public/users/' . $user->cover_img);
 
+     // Determine chat_status based on points
+     $chatStatus = $user->points < 10 ? '0' : '1';
+
     return response()->json([
         'success' => true,
         'message' => 'User details retrieved successfully.',
         'chat_status' => '1',
         'data' => [
-            'chat_status' => '1',
+            'chat_status' => $chatStatus,
             'id' => $user->id,
             'name' => $user->name,
             'unique_name' => $user->unique_name,
