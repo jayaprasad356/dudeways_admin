@@ -66,6 +66,7 @@
                     @foreach ($verifications as $verification)
                     <tr>
                     <td>
+                    <a href="{{ route('verifications.edit', $verification) }}" class="btn btn-primary"><i class="fas fa-edit"></i></a>
                         <button class="btn btn-danger btn-delete" data-url="{{route('verifications.destroy', $verification)}}"><i class="fas fa-trash"></i></button>
                     </td>
                         <td><input type="checkbox" class="checkbox" data-id="{{ $verification->id }}"></td>

@@ -92,6 +92,44 @@ class VerificationsController extends Controller
 
         return view('verifications.index', compact('verifications', 'users', 'plans')); // Pass verifications, users, and plans to the view
     }
+    public function edit(Verifications $verifications)
+    {
+        $users = Users::all(); // Fetch all users
+        $plans = Plans::all(); // Fetch all plans
+        
+        return view('verifications.edit', compact('verifications', 'users', 'plans'));
+    }
+    
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Verifications  $customer
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, Verifications $verifications)
+{
+    // Validate the request data
+    $request->validate([
+        'status' => 'required|integer|in:0,1,2',
+        'payment_status' => 'required|integer|in:0,1,2',
+    ]);
+
+    // Update the verification model with the provided data
+    $verifications->status = $request->input('status');
+    $verifications->payment_status = $request->input('payment_status');
+
+    // Save the model
+    if ($verifications->save()) {
+        return redirect()->route('verifications.edit', $verifications->id)
+            ->with('success', 'Success, verifications have been updated.');
+    } else {
+        return redirect()->back()
+            ->with('error', 'Sorry, something went wrong while updating the verification.');
+    }
+}
+
 
     public function destroy(Verifications $verification)
     {
