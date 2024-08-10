@@ -2077,6 +2077,7 @@ public function add_chat(Request $request)
             if ($lastUpdateTime->diffInHours($currentTime) < 1) {
                 // Skip points deduction and return updated chat
                 if ($existingChat) {
+                    $existingChat->msg_seen = 1;
                     $existingChat->latest_message = $message;
                     $existingChat->latest_msg_time = $currentTime;
                     $existingChat->datetime = $currentTime;
@@ -2129,7 +2130,7 @@ public function add_chat(Request $request)
                             'cover_image' => $chat_user->cover_img_verified == 1 ? asset('storage/app/public/users/' . $chat_user->cover_image) : '',
                             'latest_message' => $existingChat->latest_message,
                             'latest_msg_time' => $currentTime->format('Y-m-d H:i:s'),
-                            'msg_seen' => '0',
+                            'msg_seen' => $existingChat->msg_seen,
                             'unread' => strval($existingChat->unread), // Cast unread count to string
                             'datetime' => $currentTime->format('Y-m-d H:i:s'),
                             'updated_at' => $currentTime->format('Y-m-d H:i:s'),
@@ -2173,6 +2174,7 @@ public function add_chat(Request $request)
 
     if ($existingChat) {
         // Update the existing chat entry
+        $existingChat->msg_seen = 1;
         $existingChat->latest_message = $message;
         $existingChat->latest_msg_time = $currentTime;
         $existingChat->datetime = $currentTime;
@@ -2227,7 +2229,7 @@ public function add_chat(Request $request)
                 'cover_image' => $chat_user->cover_img_verified == 1 ? asset('storage/app/public/users/' . $chat_user->cover_image) : '',
                 'latest_message' => $existingChat->latest_message,
                 'latest_msg_time' => $currentTime->format('Y-m-d H:i:s'),
-                'msg_seen' => '0',
+                'msg_seen' => $existingChat->msg_seen,
                 'unread' => strval($existingChat->unread), // Cast unread count to string
                 'datetime' => $currentTime->format('Y-m-d H:i:s'),
                 'updated_at' => $currentTime->format('Y-m-d H:i:s'),
@@ -2244,16 +2246,18 @@ public function add_chat(Request $request)
     $newChat1->user_id = $user_id;
     $newChat1->chat_user_id = $chat_user_id;
     $newChat1->latest_message = $message;
-    $newChat1->unread = 0;
+    $newChat1->unread = 0; // Assuming this user has seen the message
+    $newChat1->msg_seen = 1; // Assuming this user has seen the message
     $newChat1->latest_msg_time = $currentTime;
     $newChat1->datetime = $currentTime;
-
+    
     // Create the chat entry for chat_user_id to user_id
     $newChat2 = new Chats();
     $newChat2->user_id = $chat_user_id;
     $newChat2->chat_user_id = $user_id;
     $newChat2->latest_message = $message;
     $newChat2->unread = $unread;
+    $newChat2->msg_seen = 0; // Assuming this user has not seen the message yet
     $newChat2->latest_msg_time = $currentTime;
     $newChat2->datetime = $currentTime;
 
@@ -2290,7 +2294,7 @@ public function add_chat(Request $request)
                 'cover_image' => $chat_user->cover_img_verified == 1 ? asset('storage/app/public/users/' . $chat_user->cover_image) : '',
                 'latest_message' => $newChat1->latest_message,
                 'latest_msg_time' => Carbon::parse($newChat1->latest_msg_time)->format('Y-m-d H:i:s'),
-                'msg_seen' => '0',
+                'msg_seen' => '1',
                 'unread' => strval($newChat1->unread), // Cast unread count to string
                 'datetime' => Carbon::parse($newChat1->datetime)->format('Y-m-d H:i:s'),
                 'updated_at' => Carbon::parse($newChat1->updated_at)->format('Y-m-d H:i:s'),
