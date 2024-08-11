@@ -2066,40 +2066,8 @@ public function add_chat(Request $request)
 
     if ($userGender !== 'female') {
 
-        if ($user->points >= $pointsRequired) {
-            // Deduct points from the user
-            $user->points -= $pointsRequired;
-            if (!$user->save()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Failed to update user points.',
-                ], 500);
-            }
+        
 
-            // Create a new chat points record
-            $chat_points = new Chat_points();
-            $chat_points->user_id = $user_id;
-            $chat_points->chat_user_id = $chat_user_id;
-            $chat_points->points = $pointsRequired;
-            $chat_points->datetime = $currentTime;
-            if (!$chat_points->save()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Failed to save chat points.',
-                ], 500);
-            }
-        } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'Purchase Points to Continue Chat',
-                'chat_status' => '0',
-            ], 400);
-        }
-        // Check for last points deduction
-        $lastChatPoints = Chat_points::where('user_id', $user_id)
-                                     ->where('chat_user_id', $chat_user_id)
-                                     ->latest('datetime')
-                                     ->first();
 
         if ($lastChatPoints) {
             $lastUpdateTime = Carbon::parse($lastChatPoints->datetime);
@@ -2169,6 +2137,39 @@ public function add_chat(Request $request)
                     ], 200);
                 }
             }
+        }
+        if ($user->points >= $pointsRequired) {
+            $lastChatPoints = Chat_points::where('user_id', $user_id)
+            ->where('chat_user_id', $chat_user_id)
+            ->latest('datetime')
+            ->first();
+            // Deduct points from the user
+            $user->points -= $pointsRequired;
+            if (!$user->save()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to update user points.',
+                ], 500);
+            }
+
+            // Create a new chat points record
+            $chat_points = new Chat_points();
+            $chat_points->user_id = $user_id;
+            $chat_points->chat_user_id = $chat_user_id;
+            $chat_points->points = $pointsRequired;
+            $chat_points->datetime = $currentTime;
+            if (!$chat_points->save()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to save chat points.',
+                ], 500);
+            }
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Purchase Points to Continue Chat',
+                'chat_status' => '0',
+            ], 400);
         }
 
         
