@@ -2065,9 +2065,11 @@ public function add_chat(Request $request)
     $currentTime = Carbon::now();
 
     if ($userGender !== 'female') {
-
-        
-
+        // Check for last points deduction
+        $lastChatPoints = Chat_points::where('user_id', $user_id)
+                                     ->where('chat_user_id', $chat_user_id)
+                                     ->latest('datetime')
+                                     ->first();
 
         if ($lastChatPoints) {
             $lastUpdateTime = Carbon::parse($lastChatPoints->datetime);
@@ -2138,11 +2140,8 @@ public function add_chat(Request $request)
                 }
             }
         }
+
         if ($user->points >= $pointsRequired) {
-            $lastChatPoints = Chat_points::where('user_id', $user_id)
-            ->where('chat_user_id', $chat_user_id)
-            ->latest('datetime')
-            ->first();
             // Deduct points from the user
             $user->points -= $pointsRequired;
             if (!$user->save()) {
@@ -2167,12 +2166,10 @@ public function add_chat(Request $request)
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'Purchase Points to Continue Chat',
+                'message' => 'You don\'t have sufficient points to chat.',
                 'chat_status' => '0',
             ], 400);
         }
-
-        
     }
 
     if ($existingChat) {
