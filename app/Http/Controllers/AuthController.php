@@ -2923,6 +2923,7 @@ public function friends_list(Request $request)
             'friend_user_id' => $friend->friend_user_id,
             'name' => $friendUser->name,
             'unique_name' => $friendUser->unique_name,
+            'verified' => strval($friendUser->verified), // Cast verified string
             'introduction' => $friendUser->introduction,
             'gender' => $friendUser->gender,
             'age' => $friendUser->age,
@@ -3135,6 +3136,7 @@ public function notification_list(Request $request)
             'notify_user_id' => $notification->notify_user_id,
             'name' => $notify_user->name,
             'unique_name' => $notify_user->unique_name,
+            'verified' => strval($notify_user->verified), // Cast verified string
             'profile' => $imageUrl,
             'cover_img' => $coverImageUrl,
             'message' => $notification->message,

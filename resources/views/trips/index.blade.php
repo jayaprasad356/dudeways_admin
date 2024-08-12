@@ -154,8 +154,13 @@
         function filterUsers() {
             let search = $('#search-input').val();
             let verified = $('#trip_status-filter').val();
+            if (search.length >= 4) { // Adjust this number as needed
+            window.location.search = `search=${encodeURIComponent(search)}&trip_status=${encodeURIComponent(verified)}`;
+        } else if (search.length === 0) { // If search input is cleared, keep URL parameters
             window.location.search = `search=${encodeURIComponent(search)}&trip_status=${encodeURIComponent(verified)}`;
         }
+        }
+       
 
            // Handle delete button click
            $(document).on('click', '.btn-delete', function () {

@@ -181,38 +181,46 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-      $(document).ready(function () {
-        // Function to get URL parameters
-        function getQueryParams() {
-            const params = {};
-            window.location.search.substring(1).split("&").forEach(function (pair) {
-                const [key, value] = pair.split("=");
-                params[key] = decodeURIComponent(value);
-            });
-            return params;
-        }
-
-        // Load initial parameters
-        const queryParams = getQueryParams();
-        $('#search-input').val(queryParams.search || '');
-        $('#verified-filter').val(queryParams.verified || '');
-
-        // Handle search input
-        $('#search-input').on('input', function () {
-            filterUsers();
+   $(document).ready(function () {
+    // Function to get URL parameters
+    function getQueryParams() {
+        const params = {};
+        window.location.search.substring(1).split("&").forEach(function (pair) {
+            const [key, value] = pair.split("=");
+            params[key] = decodeURIComponent(value);
         });
+        return params;
+    }
 
-        // Handle status filter change
-        $('#verified-filter').change(function () {
+    // Load initial parameters
+    const queryParams = getQueryParams();
+    $('#search-input').val(queryParams.search || '');
+    $('#verified-filter').val(queryParams.verified || '');
+
+    // Handle search input with debounce
+    let debounceTimeout;
+    $('#search-input').on('input', function () {
+        clearTimeout(debounceTimeout);
+        debounceTimeout = setTimeout(function () {
             filterUsers();
-        });
+        }, 300); // Adjust delay as needed
+    });
 
-        function filterUsers() {
-            let search = $('#search-input').val();
-            let verified = $('#verified-filter').val();
+    // Handle status filter change
+    $('#verified-filter').change(function () {
+        filterUsers();
+    });
+
+    function filterUsers() {
+        let search = $('#search-input').val();
+        let verified = $('#verified-filter').val();
+
+        if (search.length >= 4) { // Adjust this number as needed
+            window.location.search = `search=${encodeURIComponent(search)}&verified=${encodeURIComponent(verified)}`;
+        } else if (search.length === 0) { // If search input is cleared, keep URL parameters
             window.location.search = `search=${encodeURIComponent(search)}&verified=${encodeURIComponent(verified)}`;
         }
-
+    }
         // Handle delete button click
         $(document).on('click', '.btn-delete', function () {
             $this = $(this);
