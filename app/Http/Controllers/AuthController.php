@@ -453,7 +453,7 @@ public function userdetails(Request $request)
             'gender' => $user->gender,
             'state' => $user->state,
             'city' => $user->city,
-            'profession' => $user->profession ? $user->profession->profession : null,
+            'profession' => $user->profession ? $user->profession->profession : '',
             'refer_code' => $user->refer_code,
             'referred_by' => $user->referred_by,
             'profile' => $imageUrl,
@@ -480,11 +480,18 @@ public function userdetails(Request $request)
 public function other_userdetails(Request $request)
 {
     $user_id = $request->input('user_id');
+    $other_user_id = $request->input('other_user_id');
 
     if (empty($user_id)) {
         return response()->json([
             'success' => false,
             'message' => 'user_id is empty.',
+        ], 400);
+    }
+    if (empty($other_user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'other_user_id is empty.',
         ], 400);
     }
 
@@ -499,11 +506,18 @@ public function other_userdetails(Request $request)
     }
 
     $user->load('profession');
-    // Image URLs
 
+    // Image URLs
     $imageUrl = $user->profile_verified == 1 ? asset('storage/app/public/users/' . $user->profile) : '';
     $coverImageUrl = $user->cover_img_verified == 1 ? asset('storage/app/public/users/' . $user->cover_img) : '';
-    
+
+  
+        // Check if the other user is a friend
+        $isFriend = Friends::where(function ($query) use ($user_id, $other_user_id) {
+            $query->where('user_id', $user_id)
+                  ->where('friend_user_id', $other_user_id);
+        })
+        ->exists();
 
     return response()->json([
         'success' => true,
@@ -518,7 +532,7 @@ public function other_userdetails(Request $request)
             'gender' => $user->gender,
             'state' => $user->state,
             'city' => $user->city,
-            'profession' => $user->profession ? $user->profession->profession : null,
+            'profession' => $user->profession ? $user->profession->profession : '',
             'refer_code' => $user->refer_code,
             'referred_by' => $user->referred_by,
             'profile' => $imageUrl,
@@ -536,6 +550,7 @@ public function other_userdetails(Request $request)
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
+            'friend_status' => $isFriend ?'1': '0', // Add friend status to response
         ],
     ], 200);
 }
