@@ -16,6 +16,7 @@ use App\Http\Controllers\NewsController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\FriendsController;
 use App\Http\Controllers\NotificationsController;
+use App\Http\Controllers\UserNotificationsController;
 use App\Http\Controllers\VerificationsController;
 use App\Http\Controllers\FakechatsController;
 use App\Http\Controllers\Chat_pointsController;
@@ -25,6 +26,7 @@ use App\Http\Controllers\Verification_transController;
 use App\Http\Controllers\ProfessionsController;
 use App\Http\Controllers\TransactionsController;
 use App\Http\Controllers\BulkUserController;
+use App\Models\UserNotifications;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -137,6 +139,15 @@ Route::prefix('admin')->middleware('auth')->group(function () {
         Route::put('/professions/{professions}', [ProfessionsController::class, 'update'])->name('professions.update');
         Route::post('/professions', [ProfessionsController::class, 'store'])->name('professions.store');
 
+
+          //UserNotifications  
+          Route::get('/usernotifications', [UserNotificationsController::class, 'index'])->name('usernotifications.index');
+          Route::get('/usernotifications/create', [UserNotificationsController::class, 'create'])->name('usernotifications.create');
+          Route::get('/usernotifications/{usernotifications}/edit', [UserNotificationsController::class, 'edit'])->name('usernotifications.edit');
+          Route::delete('/usernotifications/{usernotifications}', [UserNotificationsController::class, 'destroy'])->name('usernotifications.destroy');
+          Route::put('/usernotifications/{usernotifications}', [UserNotificationsController::class, 'update'])->name('usernotifications.update');
+          Route::post('/usernotifications', [UserNotificationsController::class, 'store'])->name('usernotifications.store');
+  
 
     
         Route::get('news/1/edit', [NewsController::class, 'edit'])->name('news.edit');

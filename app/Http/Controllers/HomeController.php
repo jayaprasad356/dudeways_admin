@@ -31,13 +31,14 @@ class HomeController extends Controller
     {
         $startOfDay = Carbon::today(); // Start of the day (00:00:00)
         $endOfDay = Carbon::today()->setTime(23, 59, 59); // End of the day (23:59:59)
+        $today = Carbon::today()->format('Y-m-d');
 
         $users_count = Users::count();
         $trips_count = Trips::count();
         $today_registration_count = Users::whereBetween('created_at', [$startOfDay, $endOfDay])->count();
-        $today_reward_count = Transactions::where('type->reward_points') // Ensure 'reward_points' exists in 'type'
-            ->whereDate('datetime', Carbon::today()) // Filter by current date only
-            ->count();
+        $today_reward_count = Transactions::where('type', 'reward_points')
+        ->whereDate('datetime', $today)
+        ->count();
         $pending_trips_count = Trips::where('trip_status', 0)->count();
         $pending_verification_count = Verifications::where('status', 0)
         ->where('payment_status', 1)

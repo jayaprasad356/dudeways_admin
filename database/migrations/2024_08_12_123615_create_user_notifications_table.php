@@ -13,12 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('points', function (Blueprint $table) {
+        Schema::create('user_notifications', function (Blueprint $table) {
             $table->id();
-            $table->integer('points');
-            $table->integer('discount_points');
-            $table->integer('offer_percent');
-            $table->integer('price');
+            $table->string('title'); 
+            $table->string('message'); 
+            $table->timestamp('datetime'); // Adding the latest message time as a timestamp
             $table->timestamps();
         });
     }
@@ -30,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('points');
+        Schema::dropIfExists('user_notifications');
     }
 };
