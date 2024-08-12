@@ -495,62 +495,61 @@ public function other_userdetails(Request $request)
         ], 400);
     }
 
-    // Fetch the user details from the database based on the provided user_id
-    $user = Users::find($user_id);
+    // Fetch the other user's details from the database based on the provided other_user_id
+    $otherUser = Users::find($other_user_id);
 
-    if (!$user) {
+    if (!$otherUser) {
         return response()->json([
             'success' => false,
-            'message' => 'User not found.',
+            'message' => 'Other user not found.',
         ], 404);
     }
 
-    $user->load('profession');
+    $otherUser->load('profession');
 
     // Image URLs
-    $imageUrl = $user->profile_verified == 1 ? asset('storage/app/public/users/' . $user->profile) : '';
-    $coverImageUrl = $user->cover_img_verified == 1 ? asset('storage/app/public/users/' . $user->cover_img) : '';
+    $imageUrl = $otherUser->profile_verified == 1 ? asset('storage/app/public/users/' . $otherUser->profile) : '';
+    $coverImageUrl = $otherUser->cover_img_verified == 1 ? asset('storage/app/public/users/' . $otherUser->cover_img) : '';
 
-  
-        // Check if the other user is a friend
-        $isFriend = Friends::where(function ($query) use ($user_id, $other_user_id) {
-            $query->where('user_id', $user_id)
-                  ->where('friend_user_id', $other_user_id);
-        })
-        ->exists();
+    // Check if the other user is a friend
+    $isFriend = Friends::where(function ($query) use ($user_id, $other_user_id) {
+        $query->where('user_id', $user_id)
+              ->where('friend_user_id', $other_user_id);
+    })
+    ->exists();
 
     return response()->json([
         'success' => true,
-        'message' => 'User details retrieved successfully.',
+        'message' => 'Other user details retrieved successfully.',
         'data' => [
-            'id' => $user->id,
-            'name' => $user->name,
-            'unique_name' => $user->unique_name,
-            'email' => $user->email,
-            'mobile' => $user->mobile,
-            'age' => $user->age,
-            'gender' => $user->gender,
-            'state' => $user->state,
-            'city' => $user->city,
-            'profession' => $user->profession ? $user->profession->profession : '',
-            'refer_code' => $user->refer_code,
-            'referred_by' => $user->referred_by,
+            'id' => $otherUser->id,
+            'name' => $otherUser->name,
+            'unique_name' => $otherUser->unique_name,
+            'email' => $otherUser->email,
+            'mobile' => $otherUser->mobile,
+            'age' => $otherUser->age,
+            'gender' => $otherUser->gender,
+            'state' => $otherUser->state,
+            'city' => $otherUser->city,
+            'profession' => $otherUser->profession ? $otherUser->profession->profession : '',
+            'refer_code' => $otherUser->refer_code,
+            'referred_by' => $otherUser->referred_by ? $otherUser->referred_by->referred_by : '',
             'profile' => $imageUrl,
             'cover_img' => $coverImageUrl,
-            'points' => $user->points,
-            'verified' => $user->verified,
-            'online_status' => $user->online_status,
-            'introduction' => $user->introduction,
-            'message_notify' => $user->message_notify,
-            'add_friend_notify' => $user->add_friend_notify,
-            'view_notify' => $user->view_notify,
-            'profile_verified' => $user->profile_verified,
-            'cover_img_verified' => $user->cover_img_verified,
-            'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
-            'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
-            'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
-            'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
-            'friend_status' => $isFriend ?'1': '0', // Add friend status to response
+            'points' => $otherUser->points,
+            'verified' => $otherUser->verified,
+            'online_status' => $otherUser->online_status,
+            'introduction' => $otherUser->introduction,
+            'message_notify' => $otherUser->message_notify,
+            'add_friend_notify' => $otherUser->add_friend_notify,
+            'view_notify' => $otherUser->view_notify,
+            'profile_verified' => $otherUser->profile_verified,
+            'cover_img_verified' => $otherUser->cover_img_verified,
+            'last_seen' => Carbon::parse($otherUser->last_seen)->format('Y-m-d H:i:s'),
+            'datetime' => Carbon::parse($otherUser->datetime)->format('Y-m-d H:i:s'),
+            'updated_at' => Carbon::parse($otherUser->updated_at)->format('Y-m-d H:i:s'),
+            'created_at' => Carbon::parse($otherUser->created_at)->format('Y-m-d H:i:s'),
+            'friend_status' => $isFriend ? '1' : '0', // Add friend status to response
         ],
     ], 200);
 }
@@ -679,7 +678,7 @@ public function update_cover_img(Request $request)
                 'gender' => $user->gender,
                 'state' => $user->state,
                 'city' => $user->city,
-               'profession' => $user->profession ? $user->profession->profession : null,
+               'profession' => $user->profession ? $user->profession->profession : '',
                 'refer_code' => $user->refer_code,
                 'referred_by' => $user->referred_by,
                 'profile' => $imageUrl,
