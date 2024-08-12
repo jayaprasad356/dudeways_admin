@@ -439,20 +439,11 @@ public function userdetails(Request $request)
     $imageUrl = asset('storage/app/public/users/' . $user->profile);
     $coverimageUrl = asset('storage/app/public/users/' . $user->cover_img);
 
-     // Determine chat_status based on gender and points
-     if ($user->gender === 'female') {
-        $chatStatus = '1';
-    } else if ($user->points < 10) {
-        $chatStatus = '0';
-    } else {
-        $chatStatus = '1'; // Default if points are 10 or more
-    }
 
     return response()->json([
         'success' => true,
         'message' => 'User details retrieved successfully.',
         'data' => [
-            'chat_status' => $chatStatus,
             'id' => $user->id,
             'name' => $user->name,
             'unique_name' => $user->unique_name,

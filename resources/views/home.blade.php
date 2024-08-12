@@ -38,13 +38,41 @@
                 <!-- small box -->
                 <div class="small-box bg-green">
                     <div class="inner">
-                        <h3>{{ $pending_verification }}</h3>
+                        <h3>{{ $pending_verification_count }}</h3>
                         <p>Pending Verification</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-user-clock"></i> <!-- Example of a different icon -->
                     </div>
                     <a href="{{ route('verifications.index') }}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-6">
+                <!-- small box -->
+                <div class="small-box bg-purple">
+                    <div class="inner">
+                        <h3>{{ $today_registration_count }}</h3>
+                        <p>Today Registration Count</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-user-clock"></i> <!-- Example of a different icon -->
+                    </div>
+                    <a href="{{ route('users.index') }}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-6">
+                <!-- small box -->
+                <div class="small-box bg-yellow">
+                    <div class="inner">
+                        <h3>{{ $today_reward_count }}</h3>
+                        <p>Today Rewards Count</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-user-clock"></i> <!-- Example of a different icon -->
+                    </div>
+                    <a href="{{ route('transactions.index') }}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
             </div>
 

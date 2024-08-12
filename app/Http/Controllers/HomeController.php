@@ -6,7 +6,9 @@ use App\Models\Points;
 use App\Models\Users;
 use App\Models\Trips;
 use App\Models\Verifications;
+use App\Models\Transactions;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class HomeController extends Controller
 {
@@ -25,29 +27,33 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
- 
-     public function index()
-     {
-         $users_count = Users::count();
-         $trips_count = Trips::count();
-         $points_count = Points::count();
-         $pending_trips_count = Trips::where('trip_status', 0)->count();
-         $pending_profile_count = Users::where('profile_verified', 0)->count();
-         $pending_cover_image_count = Users::where('cover_img_verified', 0)->count();
-         $pending_verification = Verifications::where('status', 0)->count();
-     
-         // Count of pending profiles and cover images
-         //$pending_profile_count = Users::where('profile_verified', 0)->whereNotNull('profile')->count();
-         //$pending_cover_image_count = Users::where('profile_verified', 0)->whereNotNull('cover_img')->count();
-     
-         return view('home', [
-             'users_count' => $users_count,
-             'trips_count' => $trips_count,
-             'points_count' => $points_count,
-             'pending_trips_count' => $pending_trips_count,
-             'pending_profile_count' => $pending_profile_count,
-             'pending_cover_image_count' => $pending_cover_image_count,
-             'pending_verification' => $pending_verification,
-         ]);
-     }
-    }     
+    public function index()
+    {
+        $startOfDay = Carbon::today(); // Start of the day (00:00:00)
+        $endOfDay = Carbon::today()->setTime(23, 59, 59); // End of the day (23:59:59)
+
+        $users_count = Users::count();
+        $trips_count = Trips::count();
+        $today_registration_count = Users::whereBetween('created_at', [$startOfDay, $endOfDay])->count();
+        $today_reward_count = Transactions::where('type->reward_points') // Ensure 'reward_points' exists in 'type'
+            ->whereDate('datetime', Carbon::today()) // Filter by current date only
+            ->count();
+        $pending_trips_count = Trips::where('trip_status', 0)->count();
+        $pending_verification_count = Verifications::where('status', 0)
+        ->where('payment_status', 1)
+        ->count();
+        
+        // Optional: Count of pending profiles and cover images
+        // $pending_profile_count = Users::where('profile_verified', 0)->whereNotNull('profile')->count();
+        // $pending_cover_image_count = Users::where('profile_verified', 0)->whereNotNull('cover_img')->count();
+        
+        return view('home', [
+            'users_count' => $users_count,
+            'trips_count' => $trips_count,
+            'today_registration_count' => $today_registration_count,
+            'today_reward_count' => $today_reward_count,
+            'pending_trips_count' => $pending_trips_count,
+            'pending_verification_count' => $pending_verification_count,
+        ]);
+    }
+}
