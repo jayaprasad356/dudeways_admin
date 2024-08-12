@@ -1,9 +1,9 @@
 @extends('layouts.admin')
 
-@section('title', 'User Notifications Management')
-@section('content-header', 'User Notifications Management')
+@section('title', 'Notifications Management')
+@section('content-header', 'Notifications Management')
 @section('content-actions')
-    <a href="{{route('usernotifications.create')}}" class="btn btn-success"><i class="fas fa-plus"></i> Add New User Notifications</a>
+    <a href="{{route('usernotifications.create')}}" class="btn btn-success"><i class="fas fa-plus"></i> Add New Notifications</a>
 @endsection
 @section('css')
     <link rel="stylesheet" href="{{ asset('plugins/sweetalert2/sweetalert2.min.css') }}">

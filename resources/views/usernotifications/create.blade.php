@@ -1,9 +1,9 @@
 @extends('layouts.admin')
 
-@section('title', 'Create User Notifications')
-@section('content-header', 'Create User Notifications')
+@section('title', 'Create Notifications')
+@section('content-header', 'Create Notifications')
 @section('content-actions')
-    <a href="{{route('usernotifications.index')}}" class="btn btn-success"><i class="fas fa-back"></i>Back To User Notifications</a>
+    <a href="{{route('usernotifications.index')}}" class="btn btn-success"><i class="fas fa-back"></i>Back To Notifications</a>
 @endsection
 @section('content')
 

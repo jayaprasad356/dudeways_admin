@@ -74,14 +74,14 @@
                 <li class="nav-item has-treeview">
                     <a href="{{ route('notifications.index') }}" class="nav-link {{ activeSegment('notifications') }}">
                         <i class="nav-icon fas fa-bell"></i>
-                        <p>Notifications</p>
+                        <p>User Notifications</p>
                     </a>
                 </li>
 
                 <li class="nav-item has-treeview">
                     <a href="{{ route('usernotifications.index') }}" class="nav-link {{ activeSegment('usernotifications') }}">
                         <i class="nav-icon fas fa-bell"></i>
-                        <p>User Notifications</p>
+                        <p>Notifications</p>
                     </a>
                 </li>
 
