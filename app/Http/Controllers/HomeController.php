@@ -33,7 +33,6 @@ class HomeController extends Controller
         $endOfDay = Carbon::today()->setTime(23, 59, 59); // End of the day (23:59:59)
         $today = Carbon::today()->format('Y-m-d');
 
-        $users_count = Users::count();
         $trips_count = Trips::count();
         $today_registration_count = Users::whereBetween('created_at', [$startOfDay, $endOfDay])->count();
         $today_reward_count = Transactions::where('type', 'reward_points')
@@ -49,7 +48,6 @@ class HomeController extends Controller
         // $pending_cover_image_count = Users::where('profile_verified', 0)->whereNotNull('cover_img')->count();
         
         return view('home', [
-            'users_count' => $users_count,
             'trips_count' => $trips_count,
             'today_registration_count' => $today_registration_count,
             'today_reward_count' => $today_reward_count,
