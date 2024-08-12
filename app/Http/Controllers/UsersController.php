@@ -307,12 +307,13 @@ private function generateUniqueName($name, $user_id)
         }
     
         $user->points += $request->input('points');
+        $user->total_points += $request->input('points');
         $user->save();
     
         // Create a new transaction
         \App\Models\Transaction::create([
             'user_id' => $user->id,
-            'type' => 'credit_points',
+            'type' => 'recharge',
             'points' => $request->input('points'),
             'datetime' => now(),
         ]);
