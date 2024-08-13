@@ -2490,6 +2490,7 @@ public function add_chat(Request $request)
                 'chat_user_id' => $chat->chat_user_id,
                 'name' => $chat_user->name, // Display chat_user name
                 'unique_name' => $chat_user->unique_name, // Display chat_user name
+                'points' => $chat_user->points, // Display chat_user name
                 'profile' => $imageUrl, // Display chat_user profile
                 'cover_img' => $coverImageUrl, // Display chat_user cover image
                 'online_status' => $chat_user->online_status, // Display chat_user online status
