@@ -3918,6 +3918,7 @@ public function appsettings_list(Request $request)
             'link' => $item->link,
             'app_version' => $item->app_version,
             'description' => $item->description,
+            'login' => strval($item->login),
         ];
     }
 

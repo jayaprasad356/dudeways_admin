@@ -16,6 +16,7 @@
                         <th>Link</th>
                         <th>App Version</th>
                         <th>Description</th>
+                        <th>Login</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -26,6 +27,7 @@
                         <td>{{ $appsettings->link }}</td>
                         <td>{{ $appsettings->app_version }}</td>
                         <td>{{ $appsettings->description }}</td>
+                        <td>{{ $appsettings->login }}</td>
                         <td>
                             <a href="{{ route('appsettings.edit', $appsettings->id) }}" class="btn btn-primary"><i class="fas fa-edit"></i></a>
                            
