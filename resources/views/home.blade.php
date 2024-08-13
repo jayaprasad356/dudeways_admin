@@ -5,6 +5,34 @@
 @section('content')
     <div class="container-fluid">
         <div class="row">
+            <!-- small box -->
+            <div class="col-lg-4 col-6">
+                <div class="small-box bg-purple">
+                    <div class="inner">
+                        <h3>{{ $today_recharge_points }}</h3>
+                        <p>Today Recharge Points</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-user-clock"></i> <!-- Example of a different icon -->
+                    </div>
+                    <a href="{{ route('transactions.index') }}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-6">
+                <!-- small box -->
+                <div class="small-box bg-yellow">
+                    <div class="inner">
+                        <h3>{{ $today_reward_count }}</h3>
+                        <p>Today Rewards Count</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-user-clock"></i> <!-- Example of a different icon -->
+                    </div>
+                    <a href="{{ route('transactions.index') }}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+
              <div class="col-lg-4 col-6">
                 <!-- small box -->
                 <div class="small-box bg-blue">
@@ -47,19 +75,6 @@
                 </div>
             </div>
 
-            <div class="col-lg-4 col-6">
-                <!-- small box -->
-                <div class="small-box bg-yellow">
-                    <div class="inner">
-                        <h3>{{ $today_reward_count }}</h3>
-                        <p>Today Rewards Count</p>
-                    </div>
-                    <div class="icon">
-                        <i class="fas fa-user-clock"></i> <!-- Example of a different icon -->
-                    </div>
-                    <a href="{{ route('transactions.index') }}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
-                </div>
-            </div>
 
             <!-- ./col -->
         </div>
