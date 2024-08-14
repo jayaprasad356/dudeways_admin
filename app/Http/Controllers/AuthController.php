@@ -4950,4 +4950,14 @@ public function recharge_user_list(Request $request)
     ], 200);
 }
 
+public function online_reset(Request $request)
+{
+    Users::query()->update(['online_status' => 0]);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Online Status Reset successfully.',
+    ], 200);
+}
+
 }
