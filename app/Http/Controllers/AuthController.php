@@ -2368,13 +2368,14 @@ public function add_chat(Request $request)
             ], 400);
         }
     
-        // Fetch chats where the user is the receiver (i.e., chat_user_id is the provided user_id)
-        $chats = Chats::where('chat_user_id', $user_id)
-            ->select('id','user_id', 'chat_user_id', 'latest_msg_time','latest_message')
-            ->orderBy('latest_msg_time', 'desc') // Order by latest message time in descending order
-            ->skip($offset) // Apply offset
-            ->take($limit) // Limit the number of results
-            ->get();
+         // Fetch the latest chat for each unique user_id and chat_user_id combination
+    $chats = Chats::where('chat_user_id', $user_id)
+    ->select('id','user_id', 'chat_user_id', 'latest_msg_time','latest_message')
+    ->groupBy('user_id', 'chat_user_id') // Group by user_id and chat_user_id
+    ->orderBy('latest_msg_time', 'desc') // Order by latest_msg_time in descending order
+    ->skip($offset) // Apply offset
+    ->take($limit) // Limit the number of results
+    ->get();
     
         if ($chats->isEmpty()) {
             return response()->json([
