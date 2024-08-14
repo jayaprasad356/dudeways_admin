@@ -29,6 +29,7 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 
 class AuthController extends Controller
@@ -467,6 +468,8 @@ public function userdetails(Request $request)
             'view_notify' => $user->view_notify,
             'profile_verified' => $user->profile_verified,
             'cover_img_verified' => $user->cover_img_verified,
+            'latitude' => $user->latitude,
+            'longtitude' => $user->longtitude,
             'unread_count' => strval($unreadMessagesSum), // Cast unread count to string
             'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
@@ -4958,6 +4961,120 @@ public function online_reset(Request $request)
         'success' => true,
         'message' => 'Online Status Reset successfully.',
     ], 200);
+}
+
+public function send_msg_all(Request $request)
+{
+    $user_id = $request->input('user_id');
+    $message = $request->input('message');
+
+    // Validate inputs
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 400);
+    }
+
+    if (empty($message)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Message is empty.',
+        ], 400);
+    }
+
+    // Validate the sender user
+    $user = Users::find($user_id);
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User not found.',
+        ], 404);
+    }
+
+    // Fetch all users excluding the sender
+    $allUsers = Users::where('id', '!=', $user_id)->get();
+
+    if ($allUsers->isEmpty()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No other users found to send the message to.',
+        ], 404);
+    }
+
+    $currentTime = now();
+
+    // Begin a database transaction
+    DB::beginTransaction();
+    try {
+        // Iterate over each user and create chat and notification entries
+        foreach ($allUsers as $recipient) {
+            // Create chat entry
+            $newChat = new Chats();
+            $newChat->user_id = $user_id;
+            $newChat->chat_user_id = $recipient->id;
+            $newChat->latest_message = $message;
+            $newChat->latest_msg_time = $currentTime;
+            $newChat->datetime = $currentTime;
+
+            if (!$newChat->save()) {
+                throw new \Exception('Failed to save Chat entry for user ID ' . $recipient->id);
+            }
+
+            // Create notification entry
+            $notification = new Notifications();
+            $notification->user_id = $recipient->id;
+            $notification->notify_user_id = $user_id;
+            $notification->message = "{$user->name} messaged you";
+            $notification->datetime = $currentTime;
+
+            if (!$notification->save()) {
+                throw new \Exception('Failed to save Notification entry for user ID ' . $recipient->id);
+            }
+
+            // Send notification
+            $this->sendNotifiToallUser($recipient->id, "{$user->name} messaged you");
+        }
+
+        // Commit the transaction
+        DB::commit();
+
+        // Return success response
+        return response()->json([
+            'success' => true,
+            'message' => 'Message sent to all users successfully.',
+        ], 201);
+    } catch (\Exception $e) {
+        // Rollback the transaction if anything fails
+        DB::rollBack();
+
+        return response()->json([
+            'success' => false,
+            'message' => $e->getMessage(),
+        ], 500);
+    }
+}
+
+protected function sendNotifiToallUser($recipientId, $message)
+{
+    // Check the online_status of the user
+    $user = Users::find($recipientId); // Assuming User is your model class
+    if ($user && $user->online_status == 0) {
+        // User is offline, send notification via OneSignal
+        try {
+            $this->oneSignalClient->sendNotificationToExternalUser(
+                $message,
+                $recipientId,
+                $url = null,
+                $data = null,
+                $buttons = null,
+                $schedule = null
+            );
+        } catch (\Exception $e) {
+            // Handle OneSignal notification error
+            Log::error('Failed to send notification to user ID ' . $recipientId . ': ' . $e->getMessage());
+        }
+    }
 }
 
 }
