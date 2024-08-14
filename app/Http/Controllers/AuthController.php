@@ -5009,16 +5009,28 @@ public function send_msg_all(Request $request)
     try {
         // Iterate over each user and create chat and notification entries
         foreach ($allUsers as $recipient) {
-            // Create chat entry
-            $newChat = new Chats();
-            $newChat->user_id = $user_id;
-            $newChat->chat_user_id = $recipient->id;
-            $newChat->latest_message = $message;
-            $newChat->latest_msg_time = $currentTime;
-            $newChat->datetime = $currentTime;
+            // Create chat entry for the recipient
+            $newChat1 = new Chats();
+            $newChat1->user_id = $user_id;
+            $newChat1->chat_user_id = $recipient->id;
+            $newChat1->latest_message = $message;
+            $newChat1->latest_msg_time = $currentTime;
+            $newChat1->datetime = $currentTime;
 
-            if (!$newChat->save()) {
+            if (!$newChat1->save()) {
                 throw new \Exception('Failed to save Chat entry for user ID ' . $recipient->id);
+            }
+
+            // Create the chat entry for the recipient to user_id
+            $newChat2 = new Chats();
+            $newChat2->user_id = $recipient->id;
+            $newChat2->chat_user_id = $user_id;
+            $newChat2->latest_message = $message;
+            $newChat2->latest_msg_time = $currentTime;
+            $newChat2->datetime = $currentTime;
+
+            if (!$newChat2->save()) {
+                throw new \Exception('Failed to save Chat entry for recipient ID ' . $recipient->id);
             }
 
             // Create notification entry
@@ -5029,9 +5041,8 @@ public function send_msg_all(Request $request)
             $notification->datetime = $currentTime;
 
             if (!$notification->save()) {
-                throw new \Exception('Failed to save Notification entry for user ID ' . $recipient->id);
+                throw new \Exception('Failed to save Notification entry for recipient ID ' . $recipient->id);
             }
-
 
             $this->sendNotifiToUser(strval($recipient->id), "{$user->name} messaged you");
         }
