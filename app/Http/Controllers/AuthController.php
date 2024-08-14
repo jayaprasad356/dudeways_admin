@@ -5032,8 +5032,7 @@ public function send_msg_all(Request $request)
                 throw new \Exception('Failed to save Notification entry for user ID ' . $recipient->id);
             }
 
-            // Send notification
-            $this->sendNotifiToallUser($recipient->id, "{$user->name} messaged you");
+            $this->sendNotifiToUser(strval($recipient->id), "{$user->name} messaged you");
         }
 
         // Commit the transaction
