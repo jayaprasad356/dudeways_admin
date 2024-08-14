@@ -2382,20 +2382,18 @@ public function add_chat(Request $request)
     
         // Fetch total count of chats for the specific user_id
         $totalChats = Chats::where('user_id', $user_id)->count();
-
     
         // If offset is beyond the total chats, set offset to 0
         if ($offset >= $totalChats) {
             $offset = 0;
         }
     
-      // Fetch chats for the specific user_id from the database with pagination
-      $chats = Chats::where('user_id', $user_id)
-      ->orderBy('latest_msg_time', 'desc') // Order by latest_msg_time
-      ->skip($offset)
-      ->take($limit)
-      ->get();
-      
+        // Fetch chats for the specific user_id from the database with pagination
+        $chats = Chats::where('user_id', $user_id)
+            ->orderBy('datetime', 'desc')
+            ->skip($offset)
+            ->take($limit)
+            ->get();
     
         if ($chats->isEmpty()) {
             return response()->json([
@@ -5033,6 +5031,7 @@ public function send_msg_all(Request $request)
             if (!$notification->save()) {
                 throw new \Exception('Failed to save Notification entry for user ID ' . $recipient->id);
             }
+
 
             $this->sendNotifiToUser(strval($recipient->id), "{$user->name} messaged you");
         }
