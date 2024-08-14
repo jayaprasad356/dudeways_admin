@@ -2264,7 +2264,7 @@ public function add_chat(Request $request)
     $newChat2->user_id = $chat_user_id;
     $newChat2->chat_user_id = $user_id;
     $newChat2->latest_message = $message;
-    $newChat2->unread = $unread;
+    $newChat2->unread = 1;
     $newChat2->msg_seen = 0; // Assuming this user has not seen the message yet
     $newChat2->latest_msg_time = $currentTime;
     $newChat2->datetime = $currentTime;
@@ -5009,28 +5009,45 @@ public function send_msg_all(Request $request)
     try {
         // Iterate over each user and create chat and notification entries
         foreach ($allUsers as $recipient) {
-            // Create chat entry for the recipient
-            $newChat1 = new Chats();
-            $newChat1->user_id = $user_id;
-            $newChat1->chat_user_id = $recipient->id;
-            $newChat1->latest_message = $message;
-            $newChat1->latest_msg_time = $currentTime;
-            $newChat1->datetime = $currentTime;
+            // Check if the chat entry already exists for this pair
+            $existingChat1 = Chats::where('user_id', $user_id)
+                                   ->where('chat_user_id', $recipient->id)
+                                   ->first();
 
-            if (!$newChat1->save()) {
-                throw new \Exception('Failed to save Chat entry for user ID ' . $recipient->id);
+            $existingChat2 = Chats::where('user_id', $recipient->id)
+                                   ->where('chat_user_id', $user_id)
+                                   ->first();
+
+            // Create chat entry for the sender to the recipient if it doesn't exist
+            if (!$existingChat1) {
+                $newChat1 = new Chats();
+                $newChat1->user_id = $user_id;
+                $newChat1->chat_user_id = $recipient->id;
+                $newChat1->latest_message = $message;
+                $newChat1->unread = 0; // Assuming this user has seen the message
+                $newChat1->msg_seen = 1; // Assuming this user has seen the message
+                $newChat1->latest_msg_time = $currentTime;
+                $newChat1->datetime = $currentTime;
+
+                if (!$newChat1->save()) {
+                    throw new \Exception('Failed to save Chat entry for user ID ' . $recipient->id);
+                }
             }
 
-            // Create the chat entry for the recipient to user_id
-            $newChat2 = new Chats();
-            $newChat2->user_id = $recipient->id;
-            $newChat2->chat_user_id = $user_id;
-            $newChat2->latest_message = $message;
-            $newChat2->latest_msg_time = $currentTime;
-            $newChat2->datetime = $currentTime;
+            // Create chat entry for the recipient to the sender if it doesn't exist
+            if (!$existingChat2) {
+                $newChat2 = new Chats();
+                $newChat2->user_id = $recipient->id;
+                $newChat2->chat_user_id = $user_id;
+                $newChat2->latest_message = $message;
+                $newChat2->unread = 1; // Assuming this user has not seen the message yet
+                $newChat2->msg_seen = 0; // Assuming this user has not seen the message yet
+                $newChat2->latest_msg_time = $currentTime;
+                $newChat2->datetime = $currentTime;
 
-            if (!$newChat2->save()) {
-                throw new \Exception('Failed to save Chat entry for recipient ID ' . $recipient->id);
+                if (!$newChat2->save()) {
+                    throw new \Exception('Failed to save Chat entry for recipient ID ' . $recipient->id);
+                }
             }
 
             // Create notification entry
@@ -5065,6 +5082,7 @@ public function send_msg_all(Request $request)
         ], 500);
     }
 }
+
 
 protected function sendNotifiToallUser($recipientId, $message)
 {
