@@ -2379,22 +2379,25 @@ public function add_chat(Request $request)
         // Convert offset and limit to integers
         $offset = (int)$offset;
         $limit = (int)$limit;
+
     
-        // Fetch total count of chats for the specific user_id
-        $totalChats = Chats::where('user_id', $user_id)->count();
-    
-        // If offset is beyond the total chats, set offset to 0
-        if ($offset >= $totalChats) {
-            $offset = 0;
-        }
-    
-          // Fetch chats for the specific user_id from the database with pagination
+    // Fetch total count of chats for the specific user_id
+    $totalChats = Chats::where('user_id', $user_id)
+        ->orWhere('chat_user_id', $user_id) // Include chats where the user_id is either user_id or chat_user_id
+        ->count();
+
+    // If offset is beyond the total chats, set offset to 0
+    if ($offset >= $totalChats) {
+        $offset = 0;
+    }
+
+    // Fetch the most recent chat for the specific user_id with pagination, limited to one result
     $chats = Chats::where('user_id', $user_id)
-    ->orWhere('chat_user_id', $user_id) // Include chats where the user_id is either user_id or chat_user_id
-    ->orderBy('datetime', 'desc')
-    ->skip($offset)
-    ->take($limit)
-    ->get();
+        ->orWhere('chat_user_id', $user_id) // Include chats where the user_id is either user_id or chat_user_id
+        ->orderBy('datetime', 'desc')
+        ->skip($offset)
+        ->take(1) // Take only one chat record
+        ->first(); // Use first() to get a single record
     
         if ($chats->isEmpty()) {
             return response()->json([
