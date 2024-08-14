@@ -4914,4 +4914,40 @@ public function corn_verify(Request $request)
     ], 200);
 }
 
+public function recharge_user_list(Request $request)
+{
+    $transactions = Transaction::where('type', 'recharge')
+    ->orderBy('created_at', 'desc')
+    ->limit(5)
+    ->with('user')
+    ->get();
+
+    if ($transactions->isEmpty()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No recharge transactions found.',
+        ], 404);
+    }
+
+    $professionData = [];
+    foreach ($transactions as $transaction) {
+        $professionData[] = [
+            'id' => $transaction->id,
+            'user_id' => $transaction->user_id,
+            'user_name' => $transaction->user ? $transaction->user->name : '',
+            'city' => $transaction->user ? $transaction->user->city : '',
+            'state' => $transaction->user ? $transaction->user->state : '',
+            'type' => $transaction->type,
+            'points' => $transaction->points,
+            'datetime' => $transaction->datetime,
+        ];
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Recharge transactions listed successfully.',
+        'data' => $professionData,
+    ], 200);
+}
+
 }
