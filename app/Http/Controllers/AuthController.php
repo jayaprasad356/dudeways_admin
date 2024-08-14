@@ -2388,12 +2388,13 @@ public function add_chat(Request $request)
             $offset = 0;
         }
     
-        // Fetch chats for the specific user_id from the database with pagination
-        $chats = Chats::where('user_id', $user_id)
-            ->orderBy('datetime', 'desc')
-            ->skip($offset)
-            ->take($limit)
-            ->get();
+          // Fetch chats for the specific user_id from the database with pagination
+    $chats = Chats::where('user_id', $user_id)
+    ->orWhere('chat_user_id', $user_id) // Include chats where the user_id is either user_id or chat_user_id
+    ->orderBy('datetime', 'desc')
+    ->skip($offset)
+    ->take($limit)
+    ->get();
     
         if ($chats->isEmpty()) {
             return response()->json([
