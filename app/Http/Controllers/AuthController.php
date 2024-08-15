@@ -181,8 +181,8 @@ public function register(Request $request)
     $profession_id = $request->input('profession_id');
     $referred_by = $request->input('referred_by');
     $introduction = $request->input('introduction');
-    $points = $request->input('points', 0);
-    $total_points = $request->input('total_points', 0);
+    $points = $request->input('points', 25);
+    $total_points = $request->input('total_points', 25);
     $mobile = $request->input('mobile', '0000000000');
 
     if (empty($state)) {
@@ -1037,19 +1037,15 @@ public function add_trip(Request $request)
         ], 403);
     }
 
-    // Check if the user has enough points if male
-   // if ($user->gender === 'male' && $user->points < 50) {
-   //     return response()->json([
-   //         'success' => false,
-   //         'message' => 'Minimum 50 points required to add a trip.',
-   //     ], 403);
-   // }
+        // Check if the user is verified and gender is male
+        if ($user->gender == 'male' && $user->verified != 1) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Please Verify your profile then post trip.',
+            ], 403);
+           }
 
-    // Deduct 50 points from the user if male
-    //if ($user->gender === 'male') {
-    //    $user->points -= 50;
-    //    $user->save();
-   // }
+
     // Handle profile image URL and save it to the trips folder if needed
     if ($profile_image == 1 && !empty($user->profile)) {
         // Get the profile image file path
