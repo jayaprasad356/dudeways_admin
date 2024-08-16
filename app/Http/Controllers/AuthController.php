@@ -2369,7 +2369,7 @@ public function add_chat(Request $request)
         if (!is_numeric($offset)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Offset is invalid.',
+                'message' => 'Offset is empty.',
             ], 400);
         }
     
@@ -2377,7 +2377,7 @@ public function add_chat(Request $request)
         if (!is_numeric($limit)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Limit is invalid.',
+                'message' => 'Limit is empty.',
             ], 400);
         }
     
@@ -2395,7 +2395,6 @@ public function add_chat(Request $request)
     
         // Fetch chats for the specific user_id from the database with pagination
         $chats = Chats::where('user_id', $user_id)
-            ->orderBy('datetime', 'desc')
             ->skip($offset)
             ->take($limit)
             ->get();
@@ -2513,12 +2512,15 @@ public function add_chat(Request $request)
                 'created_at' => Carbon::parse($chat->created_at)->format('Y-m-d H:i:s'),
             ];
         })->filter(); // Remove null values from the collection
+
+         // Sort chat details by the latest message time
+         $sortedChatDetails = $chatDetails->sortByDesc('latest_msg_time_value');
     
         return response()->json([
             'success' => true,
             'message' => 'Chat details listed successfully.',
             'total' => $totalChats,
-            'data' => $chatDetails->values()->all(), // Reindex the array to prevent gaps
+            'data' => $sortedChatDetails->values()->all(), // Reindex the array to prevent gaps
         ], 200);
     }
     
