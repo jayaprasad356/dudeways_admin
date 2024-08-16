@@ -60,6 +60,7 @@ Route::post('corn_verify', [AuthController::class, 'corn_verify']);
 Route::post('recharge_user_list', [AuthController::class, 'recharge_user_list']);
 Route::post('online_reset', [AuthController::class, 'online_reset']);
 Route::post('send_msg_all', [AuthController::class, 'send_msg_all']);
+Route::post('delete_profile', [AuthController::class, 'delete_profile']);
 
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {

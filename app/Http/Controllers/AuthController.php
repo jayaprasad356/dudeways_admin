@@ -5096,4 +5096,40 @@ protected function sendNotifiToallUser($recipientId, $message)
     }
 }
 
+public function delete_profile(Request $request)
+{
+    $user_id = $request->input('user_id');
+
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 400);
+    }
+
+    // Fetch the user from the database based on the provided user_id
+    $user = Users::find($user_id);
+
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User not found.',
+        ], 404);
+    }
+
+    // Check if a profile image exists and delete it from storage
+    if ($user->profile && Storage::exists('public/users/' . $user->profile)) {
+        Storage::delete('public/users/' . $user->profile);
+    }
+
+    // Optionally: Clear the profile image path in the database if needed
+    $user->profile = null;
+    $user->save();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'User profile image deleted successfully.',
+    ], 200);
+}
+
 }
