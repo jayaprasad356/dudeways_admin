@@ -1429,7 +1429,7 @@ public function trip_list(Request $request)
         if (!$request->has('gender')) {
             return response()->json([
                 'success' => false,
-                'message' => 'Gender is required.',
+                'message' => 'gender is required.',
             ], 400);
         }
 
