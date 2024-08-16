@@ -437,8 +437,8 @@ public function userdetails(Request $request)
       ->sum('unread');
 
     // Image URLs
-    $imageUrl = asset('storage/app/public/users/' . $user->profile);
-    $coverimageUrl = asset('storage/app/public/users/' . $user->cover_img);
+    $imageUrl = $user->profile ? asset('storage/app/public/users/' . $user->profile) : '';
+    $coverimageUrl = $user->cover_img ? asset('storage/app/public/users/' . $user->cover_img) : '';
 
 
     return response()->json([
