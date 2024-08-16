@@ -175,6 +175,7 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         Berkayk\OneSignal\OneSignalServiceProvider::class,
+        Kreait\Laravel\Firebase\ServiceProvider::class,
 
     ],
 
