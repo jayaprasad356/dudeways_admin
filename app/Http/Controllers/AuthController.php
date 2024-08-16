@@ -1425,25 +1425,13 @@ public function trip_list(Request $request)
                             ->skip($offset)
                             ->take($limit)
                             ->get();
-    } elseif ($type == 'gender') {
-        if (!$request->has('gender')) {
-            return response()->json([
-                'success' => false,
-                'message' => 'gender is required.',
-            ], 400);
-        }
-
-        $gender = $request->input('gender');
-
-        // Filter trips by the gender of the user who created the trip
-        $tripsQuery->whereHas('users', function ($query) use ($gender) {
-            $query->where('gender', $gender);
+    } elseif ($type == 'female') {
+        // Filter trips by gender 'female'
+        $tripsQuery->whereHas('users', function ($query) {
+            $query->where('gender', 'female');
         });
 
         $totalTrips = $tripsQuery->count();
-        if ($offset >= $totalTrips) {
-            $offset = 0;
-        }
         $trips = $tripsQuery->skip($offset)
                             ->take($limit)
                             ->get();
