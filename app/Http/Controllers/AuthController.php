@@ -1425,6 +1425,28 @@ public function trip_list(Request $request)
                             ->skip($offset)
                             ->take($limit)
                             ->get();
+    } elseif ($type == 'gender') {
+        if (!$request->has('gender')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gender is required.',
+            ], 400);
+        }
+
+        $gender = $request->input('gender');
+
+        // Filter trips by the gender of the user who created the trip
+        $tripsQuery->whereHas('users', function ($query) use ($gender) {
+            $query->where('gender', $gender);
+        });
+
+        $totalTrips = $tripsQuery->count();
+        if ($offset >= $totalTrips) {
+            $offset = 0;
+        }
+        $trips = $tripsQuery->skip($offset)
+                            ->take($limit)
+                            ->get();
     } else {
         return response()->json([
             'success' => false,
@@ -1454,7 +1476,6 @@ public function trip_list(Request $request)
             'distance' => round($distance)
         ];
     }
-
     if ($type == 'nearby') {
         if (empty($tripsWithDistance)) {
             return response()->json([
