@@ -3951,6 +3951,7 @@ public function settings_list(Request $request)
             'id' => $item->id,
             'instagram_link' => $item->instagram,
             'telegram_link' => $item->telegram,
+            'upi_id' => $item->upi_id,
         ];
     }
 

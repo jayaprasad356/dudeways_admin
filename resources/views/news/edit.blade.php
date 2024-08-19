@@ -24,6 +24,11 @@
             </div>
 
             <div class="form-group">
+                <label for="upi_id">UPI ID</label>
+                <input type="text" class="form-control" id="upi_id" name="upi_id" value="{{ $news->upi_id }}" required>
+            </div>
+
+            <div class="form-group">
                 <label for="privacy_policy">Privacy Policy</label>
                 <textarea name="privacy_policy" id="privacy_policy" class="form-control ckeditor-content" rows="10" required>{!! $news->privacy_policy !!}</textarea>
             </div>
