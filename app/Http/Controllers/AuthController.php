@@ -3704,6 +3704,75 @@ public function verify_selfie_image(Request $request)
     }
 }
 
+public function payment_image(Request $request)
+{
+    $userId = $request->input('user_id');
+
+    if (empty($userId)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 400);
+    }
+
+    $user = Users::find($userId);
+
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User not found.',
+        ], 404);
+    }
+
+    if ($user->verified == 1) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User already verified.',
+        ], 403); 
+    }
+
+    $paymentImage = $request->file('payment_image');
+
+    if ($paymentImage) {
+        $verification = Verifications::where('user_id', $userId)->first();
+
+        if (!$verification) {
+            $verification = new Verifications();
+            $verification->user_id = $userId;
+            $message = 'Payment image added successfully.';
+        } else {
+            $message = 'Payment image updated successfully.';
+        }
+        
+        // Store the selfie image
+        $imagePath = $paymentImage->store('verification', 'public');
+        $verification->payment_image = basename($imagePath);
+        $verification->save();
+
+        // Fetch the updated verification details
+        $updatedVerification = Verifications::where('user_id', $userId)->first();
+
+        return response()->json([
+            'success' => true,
+            'message' => $message,
+            'data' => [[
+                'id' => $updatedVerification->id,
+                'user_id' => $updatedVerification->user_id,
+                'payment_image' => asset('storage/app/public/verification/' . $updatedVerification->payment_image),
+                'status' => $updatedVerification->status,
+                'payment_status' => $updatedVerification->payment_status,
+                'updated_at' => Carbon::parse($updatedVerification->updated_at)->format('Y-m-d H:i:s'),
+                'created_at' => Carbon::parse($updatedVerification->created_at)->format('Y-m-d H:i:s'),
+            ]],
+        ], 200);
+    } else {
+        return response()->json([
+            'success' => false,
+            'message' => 'Payment image is empty.',
+        ], 400);
+    }
+}
+
 public function verification_list(Request $request)
 {
     // Get the user_id from the request
@@ -3764,6 +3833,7 @@ public function verification_list(Request $request)
         $selfieImageUrl = $verification->selfie_image ? asset('storage/app/public/verification/' . $verification->selfie_image) : '';
         $frontImageUrl = $verification->front_image ? asset('storage/app/public/verification/' . $verification->front_image) : '';
         $backImageUrl = $verification->back_image ? asset('storage/app/public/verification/' . $verification->back_image) : '';
+        $PaymentImageUrl = $verification->payment_image ? asset('storage/app/public/verification/' . $verification->payment_image) : '';
 
         return [
             'id' => $verification->id,
@@ -3771,6 +3841,7 @@ public function verification_list(Request $request)
             'selfie_image' => $selfieImageUrl,
             'front_image' => $frontImageUrl,
             'back_image' => $backImageUrl,
+            'payment_image' => $PaymentImageUrl,
             'status' => $verification->status,
             'payment_status' => $verification->payment_status,
             'updated_at' => Carbon::parse($verification->updated_at)->format('Y-m-d H:i:s'),

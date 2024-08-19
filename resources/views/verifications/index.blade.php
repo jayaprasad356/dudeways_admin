@@ -58,6 +58,7 @@
                         <th>Selfie Image <i class="fas fa-sort"></i></th>
                         <th>Front Image <i class="fas fa-sort"></i></th>
                         <th>Back Image <i class="fas fa-sort"></i></th>
+                        <th>Payment Image <i class="fas fa-sort"></i></th>
                         <th>Status <i class="fas fa-sort"></i></th>
                         <th>Payment Status <i class="fas fa-sort"></i></th>
                     </tr>
@@ -88,6 +89,12 @@
                         <td>
                             <a href="{{ asset('storage/app/public/verification/' . $verification->back_image) }}" data-lightbox="back_image-{{ $verification->id }}">
                                 <img class="customer-img img-thumbnail img-fluid" src="{{ asset('storage/app/public/verification/' . $verification->back_image) }}" alt=""
+                                    style="max-width: 100px; max-height: 100px;">
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{{ asset('storage/app/public/verification/' . $verification->payment_image) }}" data-lightbox="payment_image-{{ $verification->id }}">
+                                <img class="customer-img img-thumbnail img-fluid" src="{{ asset('storage/app/public/verification/' . $verification->payment_image) }}" alt=""
                                     style="max-width: 100px; max-height: 100px;">
                             </a>
                         </td>

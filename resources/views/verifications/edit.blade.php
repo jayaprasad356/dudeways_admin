@@ -74,6 +74,17 @@
                     </div>
 
                     <div class="form-group">
+                        <span>Payment Image:</span>
+                        <img src="{{ asset('storage/app/public/verification/' . $verifications->payment_image) }}" alt="{{ $verifications->name }}" style="max-width: 100px; max-height: 100px;">
+                        <br>
+                        @error('payment_image')
+                        <span class="invalid-feedback" role="alert">
+                            <strong>{{ $message }}</strong>
+                        </span>
+                        @enderror
+                    </div>
+
+                    <div class="form-group">
     <label for="status">Status</label>
     <div class="btn-group btn-group-toggle d-block" data-toggle="buttons">
         <label class="btn btn-outline-success {{ old('status', $verifications->status) === 1 ? 'active' : '' }}">
