@@ -165,6 +165,7 @@ Route::prefix('admin')->middleware('auth')->group(function () {
         Route::get('/verifications/{verifications}/edit', [VerificationsController::class, 'edit'])->name('verifications.edit');
         Route::put('/verifications/{verifications}', [VerificationsController::class, 'update'])->name('verifications.update');
         Route::post('/verifications/verify', [VerificationsController::class, 'verify'])->name('verifications.verify');
+        Route::delete('/verifications/{verification}/deleteImage', [VerificationsController::class, 'deleteImage'])->name('verifications.deleteImage');
 
            //fakechats  
            Route::get('/fakechats', [FakechatsController::class, 'index'])->name('fakechats.index');

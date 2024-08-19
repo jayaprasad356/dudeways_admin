@@ -6,6 +6,7 @@ use App\Models\Users;
 use App\Models\Plans;
 use Illuminate\Http\Request;
 use Berkayk\OneSignal\OneSignalClient;
+use Illuminate\Support\Facades\Storage; // Add this at the top of the file
 
 class VerificationsController extends Controller
 {
@@ -144,5 +145,24 @@ class VerificationsController extends Controller
             'success' => true,
         ]);
     }
+
+    public function deleteImage(Verifications $verification)
+    {
+        // Check if the payment_image exists
+        if (Storage::disk('public')->exists('verification/' . $verification->payment_image)) {
+            // Delete the payment_image from storage
+            Storage::disk('public')->delete('verification/' . $verification->payment_image);
+    
+            // Set the payment_image field to null in the database
+            $verification->payment_image = null;
+            $verification->save();
+    
+            return response()->json(['success' => true, 'message' => 'Payment image deleted successfully.']);
+        }
+    
+        return response()->json(['success' => false, 'message' => 'Image not found or already deleted.'], 404);
+    }
+    
+    
 }
 
