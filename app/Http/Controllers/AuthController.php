@@ -5293,7 +5293,7 @@ public function send_msg_to_user(Request $request)
     $notification->save();
     
     $this->saveChatsToFirebase($user_id, $chat_user_id, $message, $currentTime);
-    $this->sendNotifiToParticularUser(strval($chat_user_id), "{$user->name} messaged you");
+    //$this->sendNotifiToParticularUser(strval($chat_user_id), "{$user->name} messaged you");
 
     return response()->json([
         'success' => true,
@@ -5301,7 +5301,7 @@ public function send_msg_to_user(Request $request)
     ], 201);
 }
 
-protected function sendNotifiToParticularUser($chat_user_id, $message)
+/*protected function sendNotifiToParticularUser($chat_user_id, $message)
 {
     // Check the online_status of the user
     $user = Users::find($chat_user_id); // Assuming User is your model class
@@ -5316,7 +5316,7 @@ protected function sendNotifiToParticularUser($chat_user_id, $message)
             $schedule = null
         );
     }
-}
+}*/
 
 private function saveChatsToFirebase($userId, $chatUserId, $message, $time)
 {
@@ -5367,18 +5367,37 @@ private function saveChatsToFirebase($userId, $chatUserId, $message, $time)
 
 public function active_users_list(Request $request)
 {
-    // Retrieve offset and limit from request, with default values
+    // Retrieve offset, limit, and user_id from the request, with default values
     $offset = $request->input('offset', 0); // Default offset is 0
     $limit = $request->input('limit', 10);  // Default limit is 10
+    $excludeUserId = $request->input('user_id'); // The user_id to exclude if online_status is 1
 
-    // Get the total count of active users with online_status = 1
-    $totalActiveUsers = Users::where('online_status', 1)->count();
+    // Validate the user_id input
+    if (empty($excludeUserId)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 400);
+    }
 
-    // Fetch active users with online_status = 1, applying offset and limit
-    $activeUsers = Users::where('online_status', 1)
-                        ->offset($offset)
-                        ->limit($limit)
-                        ->get();
+    // Check if the user_id exists in the Users table
+    $user = Users::find($excludeUserId);
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User not found.',
+        ], 404);
+    }
+
+    // Get the total count of active users with online_status = 1, excluding the specific user if necessary
+    $totalActiveUsersQuery = Users::where('online_status', 1)
+                                  ->where('id', '!=', $excludeUserId);
+    $totalActiveUsers = $totalActiveUsersQuery->count();
+
+    // Fetch active users with online_status = 1, excluding the specific user if necessary, applying offset and limit
+    $activeUsers = $totalActiveUsersQuery->offset($offset)
+                                         ->limit($limit)
+                                         ->get();
 
     // Check if any active users are found
     if ($activeUsers->isEmpty()) {
@@ -5414,5 +5433,7 @@ public function active_users_list(Request $request)
         'data' => $activeUsersData,
     ], 200);
 }
+
+
 
 }
