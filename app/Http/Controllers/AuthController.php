@@ -5242,81 +5242,101 @@ public function send_msg_to_user(Request $request)
               ->where('chat_user_id', $chat_user_id);
     })->first();
 
-    if ($existingChat) {
+    try {
+        if ($existingChat) {
+            // Update the existing chat
+            $existingChat->latest_message = $message;
+            $existingChat->latest_msg_time = $currentTime;
+            $existingChat->datetime = $currentTime;
 
-        $currentTime = now();
-        // Update the existing chat
-        $existingChat->latest_message = $message;
-        $existingChat->latest_msg_time = $currentTime;
-        $existingChat->datetime = $currentTime;
+            if (!$existingChat->save()) {
+                throw new \Exception('Failed to update Chat.');
+            }
 
-        if (!$existingChat->save()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to update Chat.',
-            ], 500);
+            $responseMessage = 'Chat updated successfully.';
+        } else {
+            // Create new chat entries
+            $newChat1 = new Chats();
+            $newChat1->user_id = $user_id;
+            $newChat1->chat_user_id = $chat_user_id;
+            $newChat1->latest_message = $message;
+            $newChat1->latest_msg_time = $currentTime;
+            $newChat1->datetime = $currentTime;
+
+            $newChat2 = new Chats();
+            $newChat2->user_id = $chat_user_id;
+            $newChat2->chat_user_id = $user_id;
+            $newChat2->latest_message = $message;
+            $newChat2->latest_msg_time = $currentTime;
+            $newChat2->datetime = $currentTime;
+
+            if (!$newChat1->save() || !$newChat2->save()) {
+                throw new \Exception('Failed to save new Chat entries.');
+            }
+
+            $responseMessage = 'Chat added successfully.';
         }
 
-        $responseMessage = 'Chat updated successfully.';
-    } else {
-        // Create new chat entries
-        $newChat1 = new Chats();
-        $newChat1->user_id = $user_id;
-        $newChat1->chat_user_id = $chat_user_id;
-        $newChat1->latest_message = $message;
-        $newChat1->latest_msg_time = $currentTime;
-        $newChat1->datetime = $currentTime;
-
-        $newChat2 = new Chats();
-        $newChat2->user_id = $chat_user_id;
-        $newChat2->chat_user_id = $user_id;
-        $newChat2->latest_message = $message;
-        $newChat2->latest_msg_time = $currentTime;
-        $newChat2->datetime = $currentTime;
-
-        if (!$newChat1->save() || !$newChat2->save()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to save new Chat entries.',
-            ], 500);
+        // Add notification entry
+        $notification = new Notifications();
+        $notification->user_id = $chat_user_id;
+        $notification->notify_user_id = $user_id;
+        $notification->message = "{$user->name} messaged you";
+        $notification->datetime = $currentTime;
+        if (!$notification->save()) {
+            throw new \Exception('Failed to save notification.');
         }
 
-        $responseMessage = 'Chat added successfully.';
+        // Save chat data to Firebase
+        $this->saveChatsToFirebase($user_id, $chat_user_id, $message, $currentTime);
+
+        // Send notification to user
+        $this->sendNotifiToParticularUser(strval($chat_user_id), "{$user->name} messaged you");
+
+        return response()->json([
+            'success' => true,
+            'message' => $responseMessage,
+        ], 201);
+
+    } catch (\Exception $e) {
+        Log::error('Chat operation failed', [
+            'error' => $e->getMessage(),
+            'user_id' => $user_id,
+            'chat_user_id' => $chat_user_id,
+            'message' => $message
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => $e->getMessage(),
+        ], 500);
     }
-
-    // Add notification entry
-    $notification = new Notifications();
-    $notification->user_id = $chat_user_id;
-    $notification->notify_user_id = $user_id;
-    $notification->message = "{$user->name} messaged you";
-    $notification->datetime = $currentTime;
-    $notification->save();
-    
-    $this->saveChatsToFirebase($user_id, $chat_user_id, $message, $currentTime);
-    //$this->sendNotifiToParticularUser(strval($chat_user_id), "{$user->name} messaged you");
-
-    return response()->json([
-        'success' => true,
-        'message' => $responseMessage,
-    ], 201);
 }
 
-/*protected function sendNotifiToParticularUser($chat_user_id, $message)
+protected function sendNotifiToParticularUser($chat_user_id, $message)
 {
     // Check the online_status of the user
     $user = Users::find($chat_user_id); // Assuming User is your model class
     if ($user && $user->online_status == 0) {
         // User is offline, send notification via OneSignal
-        $this->oneSignalClient->sendNotificationToExternalUser(
-            $message,
-            $chat_user_id,
-            $url = null,
-            $data = null,
-            $buttons = null,
-            $schedule = null
-        );
+        try {
+            $this->oneSignalClient->sendNotificationToExternalUser(
+                $message,
+                $chat_user_id,
+                $url = null,
+                $data = null,
+                $buttons = null,
+                $schedule = null
+            );
+        } catch (\Exception $e) {
+            Log::error('Failed to send notification', [
+                'error' => $e->getMessage(),
+                'user_id' => $chat_user_id,
+                'message' => $message
+            ]);
+        }
     }
-}*/
+}
 
 private function saveChatsToFirebase($userId, $chatUserId, $message, $time)
 {
@@ -5336,34 +5356,45 @@ private function saveChatsToFirebase($userId, $chatUserId, $message, $time)
     $userUniqueName = $user->unique_name; // Assuming the Users model has a `unique_name` attribute
     $recipientUniqueName = $chatUser->unique_name; // Same assumption
 
-    $firebase = (new \Kreait\Firebase\Factory())
-        ->withServiceAccount(base_path('storage/app/firebase-auth.json'))
-        ->withDatabaseUri('https://dudeways-c8f31-default-rtdb.asia-southeast1.firebasedatabase.app/')
-        ->createDatabase();
+    try {
+        $firebase = (new \Kreait\Firebase\Factory())
+            ->withServiceAccount(base_path('storage/app/firebase-auth.json'))
+            ->withDatabaseUri('https://dudeways-c8f31-default-rtdb.asia-southeast1.firebasedatabase.app/')
+            ->createDatabase();
 
-    // Generate a random number between 100000 and 999999 for chatID
-    $randomNumber = random_int(100000, 999999);
+        // Generate a random number between 100000 and 999999 for chatID
+        $randomNumber = random_int(100000, 999999);
 
-    // Prepare chat data with the required fields
-    $chatData = [
-        'attachmentType' => "Text",
-        'chatID' => $randomNumber,
-        'dateTime' => $time->getTimestamp(), // Store as a Unix timestamp
-        'message' => $message,
-        'msgSeen' => false, // Assuming the message is not seen initially
-        'receiverID' => $chatUserId,
-        'senderID' => $userId,
-        'sentBy' => $userName,
-        'type' => "Text",
-        'typing' => false,
-    ];
+        // Prepare chat data with the required fields
+        $chatData = [
+            'attachmentType' => "Text",
+            'chatID' => $randomNumber,
+            'dateTime' => $time->getTimestamp(), // Store as a Unix timestamp
+            'message' => $message,
+            'msgSeen' => false, // Assuming the message is not seen initially
+            'receiverID' => $chatUserId,
+            'senderID' => $userId,
+            'sentBy' => $userName,
+            'type' => "Text",
+            'typing' => false,
+        ];
 
-    // Use unique names to construct the path
-    $path = 'CHATS_V1/' . $userUniqueName . '/' . $recipientUniqueName;
+        // Use unique names to construct the path
+        $path = 'CHATS_V1/' . $userUniqueName . '/' . $recipientUniqueName;
 
-    // Save chat data to Firebase
-    $firebase->getReference($path . '/' . $randomNumber)->set($chatData);
+        // Save chat data to Firebase
+        $firebase->getReference($path . '/' . $randomNumber)->set($chatData);
+
+    } catch (\Exception $e) {
+        Log::error('Failed to save chat to Firebase', [
+            'error' => $e->getMessage(),
+            'user_id' => $userId,
+            'chat_user_id' => $chatUserId,
+            'message' => $message
+        ]);
+    }
 }
+
 
 public function active_users_list(Request $request)
 {
