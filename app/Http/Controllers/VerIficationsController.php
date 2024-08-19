@@ -70,26 +70,32 @@ class VerificationsController extends Controller
     public function index(Request $request)
     {
         $query = Verifications::query()->with('user')->with('plan'); // Eager load the user and plan relationships
-
-        // Filter by user if user_id is provided
-        if ($request->has('user_id')) {
-            $user_id = $request->input('user_id');
-            $query->where('user_id', $user_id);
+    
+        // Handle the search input
+        if ($request->has('search') && !empty($request->input('search'))) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('id', 'like', "%$search%")
+                  ->orWhereHas('user', function ($q) use ($search) {
+                      $q->where('name', 'like', "%$search%");
+                  });
+            });
         }
-
-        if ($request->has('status')) {
-            $status = $request->input('status');
-            $query->where('status', $status);
-        } else {
-            // By default, fetch pending trips
-            $query->where('status', 0);
+    
+        // Filter by verified status with default to 0
+        $status = $request->input('status', 0); // Default to 0 if not provided
+        $query->where('status', $status);
+    
+        // Check if the request is AJAX
+        if ($request->wantsJson()) {
+            return response($query->get());
         }
-
+    
         $verifications = $query->latest()->paginate(10); // Paginate the results
-
+    
         $users = Users::all(); // Fetch all users for the filter dropdown
         $plans = Plans::all(); // Fetch all plans for the filter dropdown
-
+    
         return view('verifications.index', compact('verifications', 'users', 'plans')); // Pass verifications, users, and plans to the view
     }
     public function edit(Verifications $verifications)
@@ -98,8 +104,7 @@ class VerificationsController extends Controller
         $plans = Plans::all(); // Fetch all plans
         
         return view('verifications.edit', compact('verifications', 'users', 'plans'));
-    }
-    
+    }    
 
     /**
      * Update the specified resource in storage.
