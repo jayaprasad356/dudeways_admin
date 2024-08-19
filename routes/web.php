@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Http\Controllers;
+
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\PointsController;
 use App\Http\Controllers\PlansController;

@@ -30,6 +30,8 @@ use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Kreait\Firebase\Factory;
+use Kreait\Firebase\ServiceAccount;
 
 
 class AuthController extends Controller
@@ -2362,22 +2364,14 @@ public function add_chat(Request $request)
         }
     
         // Get offset and limit from request with default values
-        $offset = $request->has('offset') ? $request->input('offset') : 0; // Default offset is 0 if not provided
-        $limit = $request->has('limit') ? $request->input('limit') : 10; // Default limit is 10 if not provided
+        $offset = $request->has('offset') ? $request->input('offset') : 0;
+        $limit = $request->has('limit') ? $request->input('limit') : 10;
     
-        // Validate offset
-        if (!is_numeric($offset)) {
+        // Validate offset and limit
+        if (!is_numeric($offset) || !is_numeric($limit)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Offset is invalid.',
-            ], 400);
-        }
-    
-        // Validate limit
-        if (!is_numeric($limit)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Limit is invalid.',
+                'message' => 'Offset or limit is empty.',
             ], 400);
         }
     
@@ -2393,13 +2387,13 @@ public function add_chat(Request $request)
             $offset = 0;
         }
     
-        // Fetch chats for the specific user_id from the database with pagination
+        // Fetch chats for the specific user_id with ordering by latest_msg_time
         $chats = Chats::where('user_id', $user_id)
             ->orderBy('latest_msg_time', 'desc')
             ->skip($offset)
             ->take($limit)
             ->get();
-
+    
         if ($chats->isEmpty()) {
             return response()->json([
                 'success' => false,
@@ -2411,84 +2405,65 @@ public function add_chat(Request $request)
     
         // Prepare chat details
         $chatDetails = $chats->map(function ($chat) use ($user_id) {
-            $chat_user = Users::find($chat->chat_user_id); // Fetch the chat_user details
+            $chat_user = Users::find($chat->chat_user_id);
     
-            // Check if chat_user exists
             if (!$chat_user) {
-                return null; // Skip this chat if user not found
+                return null;
             }
     
             $imageUrl = $chat_user->profile_verified == 1 ? asset('storage/app/public/users/' . $chat_user->profile) : '';
             $coverImageUrl = $chat_user->cover_img_verified == 1 ? asset('storage/app/public/users/' . $chat_user->cover_img) : '';
     
-            // Determine the format of last_seen
-            $lastSeen = Carbon::parse($chat->latest_msg_time);
-            $now = Carbon::now();
-            $differenceDays = $now->diffInDays($lastSeen);
-    
-            if ($differenceDays == 0) {
-                $lastSeenFormatted = $lastSeen->format('g:i A'); // Today, show time in 12-hour format with AM/PM
-            } elseif ($differenceDays == 1) {
-                $lastSeenFormatted = 'Yesterday'; // Yesterday
-            } elseif ($differenceDays <= 7) {
-                $lastSeenFormatted = $lastSeen->format('l'); // Last week, show day name
-            } elseif ($differenceDays <= 14 && $lastSeen->isSameMonth($now)) {
-                $lastSeenFormatted = 'Last week'; // Within 14 days and same month, show "Last week"
-            } elseif ($lastSeen->month == $now->subMonths(1)->month) {
-                $lastSeenFormatted = 'Last month'; // Last month
-            } elseif ($lastSeen->isSameYear($now)) {
-                $lastSeenFormatted = $lastSeen->format('M jS'); // This year, show month and day with ordinal indicator
-            } else {
-                $lastSeenFormatted = $lastSeen->format('M jS, Y'); // Older than current year, show month, day, and year
-            }  // Check if the user is a friend
-           
             // Check if the user is a friend
             $isFriend = Friends::where('user_id', $user_id)
-                ->where('friend_user_id', $chat->chat_user_id) // Check against chat_user_id
+                ->where('friend_user_id', $chat->chat_user_id)
                 ->exists();
     
-            $friendStatus = $isFriend ? '1' : '0';  // Check if the user is a friend
+            $friendStatus = $isFriend ? '1' : '0';
     
             // Fetch the latest message from both perspectives
             $latestChatMessage = Chats::where('user_id', $chat->chat_user_id)
-                ->where('chat_user_id', $user_id) // Match chat_user_id with the request user_id
+                ->where('chat_user_id', $user_id)
                 ->orderBy('datetime', 'desc')
-                ->first(['latest_message', 'datetime']); // Get the latest message from chat
+                ->first(['latest_message', 'datetime']);
     
             $latestUserMessage = Chats::where('user_id', $user_id)
-                ->where('chat_user_id', $chat->chat_user_id) // Match chat_user_id with the request chat_user_id
+                ->where('chat_user_id', $chat->chat_user_id)
                 ->orderBy('datetime', 'desc')
-                ->first(['latest_message', 'datetime']); // Get the latest message from user
+                ->first(['latest_message', 'datetime']);
     
-            // Determine the latest message based on datetime
-            $latestMessage = null;
+            // Determine the most recent datetime
+            $latestMsgTime = null;
             if ($latestChatMessage && $latestUserMessage) {
-                $latestMessage = Carbon::parse($latestChatMessage->datetime)->greaterThan(Carbon::parse($latestUserMessage->datetime)) ? $latestChatMessage : $latestUserMessage;
+                $latestMsgTime = Carbon::parse($latestChatMessage->datetime)->greaterThan(Carbon::parse($latestUserMessage->datetime)) 
+                    ? Carbon::parse($latestChatMessage->datetime) 
+                    : Carbon::parse($latestUserMessage->datetime);
             } elseif ($latestChatMessage) {
-                $latestMessage = $latestChatMessage;
+                $latestMsgTime = Carbon::parse($latestChatMessage->datetime);
             } elseif ($latestUserMessage) {
-                $latestMessage = $latestUserMessage;
+                $latestMsgTime = Carbon::parse($latestUserMessage->datetime);
+            } else {
+                $latestMsgTime = Carbon::parse($chat->latest_msg_time);
             }
     
-            // Format latest_msg_time similarly
-            $latestMsgTime = $latestMessage ? Carbon::parse($latestMessage->datetime)->format('Y-m-d H:i:s') : $chat->latest_msg_time;
-            $latestMsgTimeFormatted = Carbon::parse($latestMsgTime);
-            $msgDifferenceDays = $now->diffInDays($latestMsgTimeFormatted);
+            // Determine the display format for latest_msg_time
+            $now = Carbon::now();
+            $msgDifferenceDays = $now->diffInDays($latestMsgTime);
     
             if ($msgDifferenceDays == 0) {
-                $latestMsgTimeFormatted = $latestMsgTimeFormatted->format('g:i A'); // Today, show time in 12-hour format with AM/PM
+                $latestMsgTimeFormatted = $latestMsgTime->format('g:i A');
             } elseif ($msgDifferenceDays == 1) {
-                $latestMsgTimeFormatted = 'Yesterday'; // Yesterday
+                $latestMsgTimeFormatted = 'Yesterday';
             } elseif ($msgDifferenceDays <= 7) {
-                $latestMsgTimeFormatted = $latestMsgTimeFormatted->format('l'); // Last week, show day name
-            } elseif ($msgDifferenceDays <= 14 && $latestMsgTimeFormatted->isSameMonth($now)) {
-                $latestMsgTimeFormatted = 'Last week'; // Within 14 days and same month, show "Last week"
-            } elseif ($latestMsgTimeFormatted->month == $now->subMonths(1)->month) {
-                $latestMsgTimeFormatted = 'Last month'; // Last month
-            } elseif ($latestMsgTimeFormatted->isSameYear($now)) {
-                $latestMsgTimeFormatted = $latestMsgTimeFormatted->format('M jS'); // This year, show month and day with ordinal indicator
+                $latestMsgTimeFormatted = $latestMsgTime->format('l');
+            } elseif ($msgDifferenceDays <= 14 && $latestMsgTime->isSameMonth($now)) {
+                $latestMsgTimeFormatted = 'Last week';
+            } elseif ($latestMsgTime->month == $now->subMonths(1)->month) {
+                $latestMsgTimeFormatted = 'Last month';
+            } elseif ($latestMsgTime->isSameYear($now)) {
+                $latestMsgTimeFormatted = $latestMsgTime->format('M jS');
             } else {
-                $latestMsgTimeFormatted = $latestMsgTimeFormatted->format('M jS, Y'); // Older than current year, show month, day, and year
+                $latestMsgTimeFormatted = $latestMsgTime->format('M jS, Y');
             }
     
             return [
@@ -2496,35 +2471,38 @@ public function add_chat(Request $request)
                 'id' => $chat->id,
                 'user_id' => $chat->user_id,
                 'chat_user_id' => $chat->chat_user_id,
-                'name' => $chat_user->name, // Display chat_user name
-                'unique_name' => $chat_user->unique_name, // Display chat_user name
-                'points' => $chat_user->points, // Display chat_user name
-                'profile' => $imageUrl, // Display chat_user profile
-                'cover_img' => $coverImageUrl, // Display chat_user cover image
-                'online_status' => $chat_user->online_status, // Display chat_user online status
-                'verified' => $chat_user->verified, // Display chat_user verified status
+                'name' => $chat_user->name,
+                'unique_name' => $chat_user->unique_name,
+                'points' => $chat_user->points,
+                'profile' => $imageUrl,
+                'cover_img' => $coverImageUrl,
+                'online_status' => $chat_user->online_status,
+                'verified' => $chat_user->verified,
                 'friend' => $friendStatus,
-                'latest_message' => $latestMessage ? $latestMessage->latest_message : $chat->latest_message, // Use the fetched latest message
-                'latest_msg_time' => $latestMsgTimeFormatted, // Use the formatted latest message time
-                'msg_seen' => strval($chat->msg_seen), // Cast unread count to string
-                'unread' => strval($chat->unread), // Cast unread count to string
+                'latest_message' => $latestChatMessage && $latestUserMessage ? ($latestMsgTime->isSameMinute(Carbon::parse($latestChatMessage->datetime)) ? $latestChatMessage->latest_message : $latestUserMessage->latest_message) : ($latestChatMessage ? $latestChatMessage->latest_message : $latestUserMessage->latest_message),
+                'latest_msg_time' => $latestMsgTimeFormatted,
+                'latest_msg_time_display' =>$latestMsgTime->format('Y-m-d H:i:s'),
+                'msg_seen' => strval($chat->msg_seen),
+                'unread' => strval($chat->unread),
                 'datetime' => Carbon::parse($chat->datetime)->format('Y-m-d H:i:s'),
                 'updated_at' => Carbon::parse($chat->updated_at)->format('Y-m-d H:i:s'),
                 'created_at' => Carbon::parse($chat->created_at)->format('Y-m-d H:i:s'),
             ];
-        })->filter(); // Remove null values from the collection
-
-          // Sort chat details by the latest message time
-         $sortedChatDetails = $chatDetails->sortByDesc('latest_msg_time');
+        })->filter();
+    
+        // Sort chat details by actual datetime to ensure the most recent ones come first
+        $sortedChatDetails = $chatDetails->sortByDesc(function($chat) {
+            return Carbon::parse($chat['latest_msg_time_display']);
+        })->values()->all();
     
         return response()->json([
             'success' => true,
             'message' => 'Chat details listed successfully.',
             'total' => $totalChats,
-            'data' => $sortedChatDetails->values()->all(), // Reindex the array to prevent gaps
+            'data' => $sortedChatDetails, // Return the sorted chat details
         ], 200);
     }
-
+    
     
     public function read_chats(Request $request)
     {
@@ -5070,7 +5048,10 @@ public function send_msg_all(Request $request)
                 throw new \Exception('Failed to save Notification entry for recipient ID ' . $recipient->id);
             }
 
-            $this->sendNotifiToUser(strval($recipient->id), "{$user->name} messaged you");
+            // Save chat data to Firebase
+            $this->saveChatToFirebase($user_id, $recipient->id, $message, $currentTime);
+
+            $this->sendNotifiToallUser(strval($recipient->id), "{$user->name} messaged you");
         }
 
         // Commit the transaction
@@ -5092,7 +5073,6 @@ public function send_msg_all(Request $request)
     }
 }
 
-
 protected function sendNotifiToallUser($recipientId, $message)
 {
     // Check the online_status of the user
@@ -5113,6 +5093,53 @@ protected function sendNotifiToallUser($recipientId, $message)
             Log::error('Failed to send notification to user ID ' . $recipientId . ': ' . $e->getMessage());
         }
     }
+}
+
+private function saveChatToFirebase($userId, $recipientId, $message, $time)
+{
+    // Fetch user details
+    $user = Users::find($userId);
+    $recipientUser = Users::find($recipientId); // Fetch recipient by ID
+
+    if (!$user || !$recipientUser) {
+        // Handle the case where user or recipient details are not found
+        return;
+    }
+
+    $userName = $user->name;
+    $recipientName = $recipientUser->name;
+
+    // Get unique names
+    $userUniqueName = $user->unique_name; // Assuming the Users model has a `unique_name` attribute
+    $recipientUniqueName = $recipientUser->unique_name; // Same assumption
+
+    $firebase = (new \Kreait\Firebase\Factory())
+        ->withServiceAccount(base_path('storage/app/firebase-auth.json'))
+        ->withDatabaseUri('https://dudeways-c8f31-default-rtdb.asia-southeast1.firebasedatabase.app/')
+        ->createDatabase();
+
+    // Generate a random number between 100000 and 999999 for chatID
+    $randomNumber = random_int(100000, 999999);
+
+    // Prepare chat data with the required fields
+    $chatData = [
+        'attachmentType'=>"Text",
+        'chatID' => $randomNumber,
+        'dateTime' => $time->getTimestamp(), // Store as a Unix timestamp
+        'message' => $message,
+        'msgSeen' => false, // Assuming the message is not seen initially
+        'receiverID' => $recipientId,
+        'senderID' => $userId,
+        'sentBy' => $userName,
+        'type' => "Text",
+        'typing' => false,
+    ];
+
+    // Use unique names to construct the path
+    $path = 'CHATS_V2/' . $userUniqueName . '/' . $recipientUniqueName;
+
+    // Save chat data to Firebase
+    $firebase->getReference($path . '/' . $randomNumber)->set($chatData);
 }
 
 public function delete_profile(Request $request)
@@ -5151,4 +5178,184 @@ public function delete_profile(Request $request)
     ], 200);
 }
 
+public function send_msg_to_user(Request $request)
+{
+    $user_id = $request->input('user_id'); 
+    $chat_user_id = $request->input('chat_user_id');
+    $message = $request->input('message');
+
+    // Validate inputs
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 400);
+    }
+
+    if (empty($chat_user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'chat_user_id is empty.',
+        ], 400);
+    }
+
+    if (empty($message)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Message is empty.',
+        ], 400);
+    }
+
+    // Check for self-chat
+    if ($user_id == $chat_user_id) {
+        return response()->json([
+            'success' => false,
+            'message' => 'You cannot chat with yourself.',
+        ], 400);
+    }
+
+    // Validate users
+    $user = Users::find($user_id);
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User not found.',
+        ], 404);
+    }
+
+    $chat_user = Users::find($chat_user_id);
+    if (!$chat_user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Chat user not found.',
+        ], 404);
+    }
+
+    // Check for existing chat records
+    $existingChat1 = Chats::where('user_id', $user_id)
+                          ->where('chat_user_id', $chat_user_id)
+                          ->first();
+
+    $existingChat2 = Chats::where('user_id', $chat_user_id)
+                          ->where('chat_user_id', $user_id)
+                          ->first();
+
+    if ($existingChat1 || $existingChat2) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Chat already exists between these users.',
+        ], 400);
+    }
+
+    $currentTime = now();
+
+    // Create the chat entry for user_id to chat_user_id
+    $newChat1 = new Chats();
+    $newChat1->user_id = $user_id;
+    $newChat1->chat_user_id = $chat_user_id;
+    $newChat1->latest_message = $message;
+    $newChat1->unread = 0; // Assuming this user has seen the message
+    $newChat1->msg_seen = 1; // Assuming this user has seen the message
+    $newChat1->latest_msg_time = now();
+    $newChat1->datetime = now();
+    
+    // Create the chat entry for chat_user_id to user_id
+    $newChat2 = new Chats();
+    $newChat2->user_id = $chat_user_id;
+    $newChat2->chat_user_id = $user_id;
+    $newChat2->latest_message = $message;
+    $newChat2->unread = 1;
+    $newChat2->msg_seen = 0; // Assuming this user has not seen the message yet
+    $newChat2->latest_msg_time = now();
+    $newChat2->datetime = now();
+
+    if (!$newChat1->save() || !$newChat2->save()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to save Chat entries.',
+        ], 500);
+    }
+
+    // Add notification entry
+    $notification = new Notifications();
+    $notification->user_id = $chat_user_id;
+    $notification->notify_user_id = $user_id;
+    $notification->message = "{$user->name}, messaged you";
+    $notification->datetime = now();
+    $notification->save();
+    
+    $this->saveChatsToFirebase($user_id, $chat_user_id, $message, $currentTime);
+    $this->sendNotifiToParticularUser(strval($chat_user_id), "{$user->name} messaged you");
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Chat added successfully.',
+    ], 201);
+}
+
+
+
+protected function sendNotifiToParticularUser($chat_user_id, $message)
+{
+    // Check the online_status of the user
+    $user = Users::find($chat_user_id); // Assuming User is your model class
+    if ($user && $user->online_status == 0) {
+        // User is offline, send notification via OneSignal
+        $this->oneSignalClient->sendNotificationToExternalUser(
+            $message,
+            $chat_user_id,
+            $url = null,
+            $data = null,
+            $buttons = null,
+            $schedule = null
+        );
+    }
+}
+
+private function saveChatsToFirebase($userId, $chatUserId, $message, $time)
+{
+    // Fetch user details
+    $user = Users::find($userId);
+    $chatUser = Users::find($chatUserId); // Fetch recipient by ID
+
+    if (!$user || !$chatUser) {
+        // Handle the case where user or recipient details are not found
+        return;
+    }
+
+    $userName = $user->name;
+    $recipientName = $chatUser->name;
+
+    // Get unique names
+    $userUniqueName = $user->unique_name; // Assuming the Users model has a `unique_name` attribute
+    $recipientUniqueName = $chatUser->unique_name; // Same assumption
+
+    $firebase = (new \Kreait\Firebase\Factory())
+        ->withServiceAccount(base_path('storage/app/firebase-auth.json'))
+        ->withDatabaseUri('https://dudeways-c8f31-default-rtdb.asia-southeast1.firebasedatabase.app/')
+        ->createDatabase();
+
+    // Generate a random number between 100000 and 999999 for chatID
+    $randomNumber = random_int(100000, 999999);
+
+    // Prepare chat data with the required fields
+    $chatData = [
+        'attachmentType' => "Text",
+        'chatID' => $randomNumber,
+        'dateTime' => $time->getTimestamp(), // Store as a Unix timestamp
+        'message' => $message,
+        'msgSeen' => false, // Assuming the message is not seen initially
+        'receiverID' => $chatUserId,
+        'senderID' => $userId,
+        'sentBy' => $userName,
+        'type' => "Text",
+        'typing' => false,
+    ];
+
+    // Use unique names to construct the path
+    $path = 'CHATS_V2/' . $userUniqueName . '/' . $recipientUniqueName;
+
+    // Save chat data to Firebase
+    $firebase->getReference($path . '/' . $randomNumber)->set($chatData);
+}
 }

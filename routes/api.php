@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Http\Controllers;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
@@ -61,6 +63,7 @@ Route::post('recharge_user_list', [AuthController::class, 'recharge_user_list'])
 Route::post('online_reset', [AuthController::class, 'online_reset']);
 Route::post('send_msg_all', [AuthController::class, 'send_msg_all']);
 Route::post('delete_profile', [AuthController::class, 'delete_profile']);
+Route::post('send_msg_to_user', [AuthController::class, 'send_msg_to_user']);
 
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
