@@ -5136,7 +5136,7 @@ private function saveChatToFirebase($userId, $recipientId, $message, $time)
     ];
 
     // Use unique names to construct the path
-    $path = 'CHATS_V1/' . $userUniqueName . '/' . $recipientUniqueName;
+    $path = 'CHATS_V2/' . $userUniqueName . '/' . $recipientUniqueName;
 
     // Save chat data to Firebase
     $firebase->getReference($path . '/' . $randomNumber)->set($chatData);
