@@ -5231,69 +5231,74 @@ public function send_msg_to_user(Request $request)
         ], 404);
     }
 
-    // Check for existing chat records
-    $existingChat1 = Chats::where('user_id', $user_id)
-                          ->where('chat_user_id', $chat_user_id)
-                          ->first();
-
-    $existingChat2 = Chats::where('user_id', $chat_user_id)
-                          ->where('chat_user_id', $user_id)
-                          ->first();
-
-    if ($existingChat1 || $existingChat2) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Chat already exists between these users.',
-        ], 400);
-    }
-
     $currentTime = now();
 
-    // Create the chat entry for user_id to chat_user_id
-    $newChat1 = new Chats();
-    $newChat1->user_id = $user_id;
-    $newChat1->chat_user_id = $chat_user_id;
-    $newChat1->latest_message = $message;
-    $newChat1->unread = 0; // Assuming this user has seen the message
-    $newChat1->msg_seen = 1; // Assuming this user has seen the message
-    $newChat1->latest_msg_time = now();
-    $newChat1->datetime = now();
-    
-    // Create the chat entry for chat_user_id to user_id
-    $newChat2 = new Chats();
-    $newChat2->user_id = $chat_user_id;
-    $newChat2->chat_user_id = $user_id;
-    $newChat2->latest_message = $message;
-    $newChat2->unread = 1;
-    $newChat2->msg_seen = 0; // Assuming this user has not seen the message yet
-    $newChat2->latest_msg_time = now();
-    $newChat2->datetime = now();
+    // Check if a chat exists
+    $existingChat = Chats::where(function($query) use ($user_id, $chat_user_id) {
+        $query->where('user_id', $user_id)
+              ->where('chat_user_id', $chat_user_id);
+    })->orWhere(function($query) use ($user_id, $chat_user_id) {
+        $query->where('user_id', $user_id)
+              ->where('chat_user_id', $chat_user_id);
+    })->first();
 
-    if (!$newChat1->save() || !$newChat2->save()) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to save Chat entries.',
-        ], 500);
+    if ($existingChat) {
+
+        $currentTime = now();
+        // Update the existing chat
+        $existingChat->latest_message = $message;
+        $existingChat->latest_msg_time = $currentTime;
+        $existingChat->datetime = $currentTime;
+
+        if (!$existingChat->save()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update Chat.',
+            ], 500);
+        }
+
+        $responseMessage = 'Chat updated successfully.';
+    } else {
+        // Create new chat entries
+        $newChat1 = new Chats();
+        $newChat1->user_id = $user_id;
+        $newChat1->chat_user_id = $chat_user_id;
+        $newChat1->latest_message = $message;
+        $newChat1->latest_msg_time = $currentTime;
+        $newChat1->datetime = $currentTime;
+
+        $newChat2 = new Chats();
+        $newChat2->user_id = $chat_user_id;
+        $newChat2->chat_user_id = $user_id;
+        $newChat2->latest_message = $message;
+        $newChat2->latest_msg_time = $currentTime;
+        $newChat2->datetime = $currentTime;
+
+        if (!$newChat1->save() || !$newChat2->save()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to save new Chat entries.',
+            ], 500);
+        }
+
+        $responseMessage = 'Chat added successfully.';
     }
 
     // Add notification entry
     $notification = new Notifications();
     $notification->user_id = $chat_user_id;
     $notification->notify_user_id = $user_id;
-    $notification->message = "{$user->name}, messaged you";
-    $notification->datetime = now();
+    $notification->message = "{$user->name} messaged you";
+    $notification->datetime = $currentTime;
     $notification->save();
     
-    $this->saveChatsToFirebase($user_id, $chat_user_id, $message, $currentTime);
     $this->sendNotifiToParticularUser(strval($chat_user_id), "{$user->name} messaged you");
 
     return response()->json([
         'success' => true,
-        'message' => 'Chat added successfully.',
+        'message' => $responseMessage,
     ], 201);
 }
-
-
 
 protected function sendNotifiToParticularUser($chat_user_id, $message)
 {
