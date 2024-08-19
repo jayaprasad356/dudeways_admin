@@ -5465,6 +5465,75 @@ public function active_users_list(Request $request)
     ], 200);
 }
 
+public function users_list(Request $request)
+{
+    // Retrieve offset, limit, and user_id from the request, with default values
+    $offset = $request->input('offset', 0); // Default offset is 0
+    $limit = $request->input('limit', 10);  // Default limit is 10
+    $excludeUserId = $request->input('user_id'); // The user_id to exclude if online_status is 1
+
+    // Validate the user_id input
+    if (empty($excludeUserId)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 400);
+    }
+
+    // Check if the user_id exists in the Users table
+    $user = Users::find($excludeUserId);
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User not found.',
+        ], 404);
+    }
+
+    // Get the total count of users, excluding the specific user if necessary
+    $totalUsersQuery = Users::where('id', '!=', $excludeUserId);
+    $totalUsers = $totalUsersQuery->count();
+
+    // Fetch users, excluding the specific user if necessary,
+    // applying offset, limit, and ordering by datetime
+    $users = $totalUsersQuery->orderBy('datetime', 'desc')
+                             ->offset($offset)
+                             ->limit($limit)
+                             ->get();
+
+    // Check if any users are found
+    if ($users->isEmpty()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No users found.',
+        ], 404);
+    }
+
+    // Map through the users and prepare the data
+    $usersData = $users->map(function ($user) {
+        // Image URLs
+        $imageUrl = $user->profile ? asset('storage/app/public/users/' . $user->profile) : '';
+        $coverimageUrl = $user->cover_img ? asset('storage/app/public/users/' . $user->cover_img) : '';
+
+        return [
+            'id' => $user->id,
+            'name' => $user->name,
+            'unique_name' => $user->unique_name,
+            'email' => $user->email,
+            'mobile' => $user->mobile,
+            'gender' => $user->gender,
+            'profile' => $imageUrl,
+            'cover_img' => $coverimageUrl,
+            'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
+        ];
+    });
+
+    return response()->json([
+        'success' => true,
+        'message' => 'User details retrieved successfully.',
+        'total' => $totalUsers,
+        'data' => $usersData,
+    ], 200);
+}
 
 
 }
