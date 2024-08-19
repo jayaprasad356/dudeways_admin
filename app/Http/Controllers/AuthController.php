@@ -5292,6 +5292,7 @@ public function send_msg_to_user(Request $request)
     $notification->datetime = $currentTime;
     $notification->save();
     
+    $this->saveChatsToFirebase($user_id, $chat_user_id, $message, $currentTime);
     $this->sendNotifiToParticularUser(strval($chat_user_id), "{$user->name} messaged you");
 
     return response()->json([
