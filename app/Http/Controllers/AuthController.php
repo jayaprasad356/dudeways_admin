@@ -5364,4 +5364,55 @@ private function saveChatsToFirebase($userId, $chatUserId, $message, $time)
     // Save chat data to Firebase
     $firebase->getReference($path . '/' . $randomNumber)->set($chatData);
 }
+
+public function active_users_list(Request $request)
+{
+    // Retrieve offset and limit from request, with default values
+    $offset = $request->input('offset', 0); // Default offset is 0
+    $limit = $request->input('limit', 10);  // Default limit is 10
+
+    // Get the total count of active users with online_status = 1
+    $totalActiveUsers = Users::where('online_status', 1)->count();
+
+    // Fetch active users with online_status = 1, applying offset and limit
+    $activeUsers = Users::where('online_status', 1)
+                        ->offset($offset)
+                        ->limit($limit)
+                        ->get();
+
+    // Check if any active users are found
+    if ($activeUsers->isEmpty()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No active users found.',
+        ], 404);
+    }
+
+    // Map through the active users and prepare the data
+    $activeUsersData = $activeUsers->map(function ($user) {
+        // Image URLs
+        $imageUrl = $user->profile ? asset('storage/app/public/users/' . $user->profile) : '';
+        $coverimageUrl = $user->cover_img ? asset('storage/app/public/users/' . $user->cover_img) : '';
+
+        return [
+            'id' => $user->id,
+            'name' => $user->name,
+            'unique_name' => $user->unique_name,
+            'email' => $user->email,
+            'mobile' => $user->mobile,
+            'gender' => $user->gender,
+            'profile' => $imageUrl,
+            'cover_img' => $coverimageUrl,
+            'online_status' => $user->online_status, // This will be 1 for all returned users
+        ];
+    });
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Active Users details retrieved successfully.',
+        'total' => $totalActiveUsers,
+        'data' => $activeUsersData,
+    ], 200);
+}
+
 }

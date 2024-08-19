@@ -64,6 +64,7 @@ Route::post('online_reset', [AuthController::class, 'online_reset']);
 Route::post('send_msg_all', [AuthController::class, 'send_msg_all']);
 Route::post('delete_profile', [AuthController::class, 'delete_profile']);
 Route::post('send_msg_to_user', [AuthController::class, 'send_msg_to_user']);
+Route::post('active_users_list', [AuthController::class, 'active_users_list']);
 
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
