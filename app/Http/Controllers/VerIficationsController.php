@@ -46,6 +46,9 @@ class VerificationsController extends Controller
                   // Send notification to the user who posted the verification
                   $this->sendNotificationToUser(strval($user->id));
 
+                  $user->verified = 1;
+                  $user->save();
+                  
                 // Update verification status
                 $verification->status = 1;
                 $verification->payment_status = 1;
