@@ -48,6 +48,7 @@ class VerificationsController extends Controller
 
                 // Update verification status
                 $verification->status = 1;
+                $verification->payment_status = 1;
                 $verification->save();
             }
         }

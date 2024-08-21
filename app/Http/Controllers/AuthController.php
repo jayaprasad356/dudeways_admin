@@ -429,8 +429,11 @@ public function userdetails(Request $request)
 
     $online_status = $request->input('online_status', $user->online_status);
 
-    $user->online_status = $online_status;
-    $user->save();
+    // Only update if online_status is 1, otherwise leave it unchanged
+    if ($online_status === '1') {
+        $user->online_status = 1;
+        $user->save();
+    }
     $user->load('profession');
 
       // Get the sum of unread values
@@ -3741,7 +3744,7 @@ public function payment_image(Request $request)
             $verification->user_id = $userId;
             $message = 'Payment image added successfully.';
         } else {
-            $message = 'Payment image updated successfully.';
+            $message = 'Verification Sent for review Successfully.';
         }
         
         // Store the selfie image
