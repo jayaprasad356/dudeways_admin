@@ -60,13 +60,13 @@ Route::post('plan_list', [AuthController::class, 'plan_list']);
 Route::post('verification_list', [AuthController::class, 'verification_list']);
 Route::post('corn_verify', [AuthController::class, 'corn_verify']);
 Route::post('recharge_user_list', [AuthController::class, 'recharge_user_list']);
-Route::post('online_reset', [AuthController::class, 'online_reset']);
 Route::post('send_msg_all', [AuthController::class, 'send_msg_all']);
 Route::post('delete_profile', [AuthController::class, 'delete_profile']);
 Route::post('send_msg_to_user', [AuthController::class, 'send_msg_to_user']);
 Route::post('active_users_list', [AuthController::class, 'active_users_list']);
 Route::post('users_list', [AuthController::class, 'users_list']);
 Route::post('payment_image', [AuthController::class, 'payment_image']);
+Route::get('online_reset', [AuthController::class, 'online_reset']);
 
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
