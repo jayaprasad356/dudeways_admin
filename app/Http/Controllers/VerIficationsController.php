@@ -90,6 +90,9 @@ class VerificationsController extends Controller
         // Filter by verified status with default to 0
         $status = $request->input('status', 0); // Default to 0 if not provided
         $query->where('status', $status);
+
+        $payment_status = $request->input('payment_status', 0); // Default to 0 if not provided
+        $query->where('payment_status', $payment_status);
     
         // Check if the request is AJAX
         if ($request->wantsJson()) {

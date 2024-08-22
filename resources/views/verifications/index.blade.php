@@ -24,16 +24,27 @@
                 <!-- Verify Button -->
                 <button class="btn btn-primary mr-3" id="verifyButton">Verify</button>
 
+                </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-8 d-flex align-items-center">
                 <!-- Filter by Status -->
                 <div class="form-group mb-0 d-flex align-items-center">
-                    <label for="status-filter" class="mr-2 mb-0">Filter by status:</label>
+                    <label for="status-filter"  class="mr-1 mb-0 flex-shrink-0">Filter by status:</label>
                     <select name="status" id="status-filter" class="form-control">
                         <option value="0" {{ request()->input('status') === '0' ? 'selected' : '' }}>Pending</option>
                         <option value="1" {{ request()->input('status') === '1' ? 'selected' : '' }}>Verified</option>
                     </select>
                 </div>
+                <div class="form-group mb-0 d-flex align-items-center">
+                    <label for="payment_status-filter" class="mr-1 mb-0 flex-shrink-0">Filter by Payment status:</label>
+                    <select name="payment_status" id="payment_status-filter" class="form-control">
+                        <option value="0" {{ request()->input('payment_status') === '0' ? 'selected' : '' }}>Unpaid</option>
+                        <option value="1" {{ request()->input('payment_status') === '1' ? 'selected' : '' }}>Paid</option>
+                    </select>
+                </div>
             </div>
-
             <div class="col-md-4 text-md-right mt-3 mt-md-0">
                 <!-- Search Form -->
                 <form id="search-form" class="form-inline">
@@ -45,6 +56,7 @@
                     </div>
                 </form>
             </div>
+        </div>
         </div>
 
         <div class="table-responsive">
@@ -137,10 +149,15 @@
             filterVerifications();
         });
 
+        $('#payment_status-filter').change(function () {
+            filterVerifications();
+        });
+
         function filterVerifications() {
             let search = $('#search-input').val();
             let status = $('#status-filter').val();
-            let url = `{{ route('verifications.index') }}?search=${encodeURIComponent(search)}&status=${encodeURIComponent(status)}`;
+            let payment_status = $('#payment_status-filter').val();
+            let url = `{{ route('verifications.index') }}?search=${encodeURIComponent(search)}&status=${encodeURIComponent(status)}&payment_status=${encodeURIComponent(payment_status)}`;
             window.location.href = url;
         }
 
