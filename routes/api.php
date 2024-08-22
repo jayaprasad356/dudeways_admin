@@ -67,6 +67,7 @@ Route::post('active_users_list', [AuthController::class, 'active_users_list']);
 Route::post('users_list', [AuthController::class, 'users_list']);
 Route::post('payment_image', [AuthController::class, 'payment_image']);
 Route::get('online_reset', [AuthController::class, 'online_reset']);
+Route::post('msg_seen', [AuthController::class, 'msg_seen']);
 
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {

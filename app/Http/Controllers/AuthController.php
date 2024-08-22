@@ -5611,7 +5611,45 @@ public function users_list(Request $request)
         'total' => $totalUsers,
         'data' => $usersData,
     ], 200);
-}
+ 
+  } 
+  public function msg_seen(Request $request)
+    {
+        $user_id = $request->input('user_id');
+        $chat_user_id = $request->input('chat_user_id');
 
+        // Validate user_id
+        if (empty($user_id)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'user_id is empty.',
+            ], 400);
+        }
 
+        // Validate chat_user_id
+        if (empty($chat_user_id)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'chat_user_id is empty.',
+            ], 400);
+        }
+
+        // Find all chats where the user_id and chat_user_id match
+        $chats = Chats::where(function($query) use ($user_id, $chat_user_id) {
+            $query->where('user_id', $user_id)
+                ->where('chat_user_id', $chat_user_id);
+        })->get();
+
+        if ($chats->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No chats found.',
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'chats' => $chats,
+        ], 200);
+    }
 }
