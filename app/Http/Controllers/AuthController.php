@@ -427,12 +427,24 @@ public function userdetails(Request $request)
         ], 404);
     }
 
-    $online_status = $request->input('online_status', $user->online_status);
+    $gender = $user->gender;
 
-    // Only update if online_status is 1, otherwise leave it unchanged
-    if ($online_status === '1') {
-        $user->online_status = 1;
-        $user->save();
+    if ($gender === 'female') {
+        $online_status = $request->input('online_status', $user->online_status);
+
+        // Only update if online_status is 1, otherwise leave it unchanged
+        if ($online_status === '1') {
+            $user->online_status = 1;
+            $user->save();
+        }
+    } else {
+        $online_status = $request->input('online_status');
+
+        // Update online_status based on the provided value
+        if ($online_status === '0' || $online_status === '1') {
+            $user->online_status = $online_status;
+            $user->save();
+        }
     }
     $user->load('profession');
 
@@ -2114,7 +2126,7 @@ public function add_chat(Request $request)
                     $notification->datetime = $currentTime;
                     $notification->save();
                     
-                    $this->sendNotifiToUser(strval($chat_user_id), "{$user->name} messaged you");
+                    $this->sendNotificationsToUser(strval($chat_user_id), "{$user->name} messaged you");
 
                     // Update reverse chat entry if it exists
                         $reverseChat = Chats::where('user_id', $chat_user_id)
@@ -2213,7 +2225,7 @@ public function add_chat(Request $request)
         $notification->datetime = $currentTime;
         $notification->save();
         
-        $this->sendNotifiToUser(strval($chat_user_id), "{$user->name} messaged you");
+        $this->sendNotificationsToUser(strval($chat_user_id), "{$user->name} messaged you");
 
 
     // Update reverse chat entry if it exists
@@ -2294,7 +2306,7 @@ public function add_chat(Request $request)
     $notification->datetime = now();
     $notification->save();
     
-    $this->sendNotifiToUser(strval($chat_user_id), "{$user->name} messaged you");
+    $this->sendNotificationsToUser(strval($chat_user_id), "{$user->name} messaged you");
 
     // Return success response with new chat data
     return response()->json([
@@ -2337,7 +2349,7 @@ public function add_chat(Request $request)
     ], 201);
 }
 
-    protected function sendNotifiToUser($chat_user_id, $message)
+    protected function sendNotificationsToUser($chat_user_id, $message)
     {
         // Check the online_status of the user
         $user = Users::find($chat_user_id); // Assuming User is your model class
@@ -2368,7 +2380,7 @@ public function add_chat(Request $request)
     
         // Get offset and limit from request with default values
         $offset = $request->has('offset') ? $request->input('offset') : 0;
-        $limit = $request->has('limit') ? $request->input('limit') : 10;
+        $limit = $request->has('limit') ? $request->input('limit') : 15;
     
         // Validate offset and limit
         if (!is_numeric($offset) || !is_numeric($limit)) {
