@@ -427,17 +427,6 @@ public function userdetails(Request $request)
         ], 404);
     }
 
-    $gender = $user->gender;
-
-    if ($gender === 'female') {
-        $online_status = $request->input('online_status', $user->online_status);
-
-        // Only update if online_status is 1, otherwise leave it unchanged
-        if ($online_status === '1') {
-            $user->online_status = 1;
-            $user->save();
-        }
-    } else {
         $online_status = $request->input('online_status');
 
         // Update online_status based on the provided value
@@ -445,7 +434,6 @@ public function userdetails(Request $request)
             $user->online_status = $online_status;
             $user->save();
         }
-    }
     $user->load('profession');
 
       // Get the sum of unread values
