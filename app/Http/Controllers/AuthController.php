@@ -2531,8 +2531,8 @@ public function add_chat(Request $request)
     
         // Find all chats where the user_id and chat_user_id match
         $chats = Chats::where(function($query) use ($user_id, $chat_user_id) {
-            $query->where('user_id', $user_id)
-                  ->where('chat_user_id', $chat_user_id);
+            $query->where('user_id', $chat_user_id)
+                  ->where('chat_user_id', $user_id);
         })->get();
     
         // Update unread field and optionally msg_seen field for these chats
