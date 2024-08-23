@@ -2529,35 +2529,44 @@ public function add_chat(Request $request)
             ], 400);
         }
     
-        // Find all chats where the user_id and chat_user_id match
-        $chats = Chats::where(function($query) use ($user_id, $chat_user_id) {
-            $query->where('user_id', $chat_user_id)
-                  ->where('chat_user_id', $user_id);
-        })->get();
+        // Update unread field for the first scenario
+        $updatedUnreadChats = Chats::where('user_id', $user_id)
+                                   ->where('chat_user_id', $chat_user_id)
+                                   ->get();
     
-        // Update unread field and optionally msg_seen field for these chats
-        foreach ($chats as $chat) {
-            // Always update unread to 0
+        foreach ($updatedUnreadChats as $chat) {
             $chat->unread = 0;
-            
-            // Update msg_seen only if it is provided and valid
-            if (isset($msg_seen) && in_array($msg_seen, [0, 1])) {
-                $chat->msg_seen = $msg_seen;
-            }
-    
             if (!$chat->save()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Failed to update some chats.',
+                    'message' => 'Failed to update unread status for some chats.',
                 ], 500);
+            }
+        }
+    
+        // Update msg_seen field for the second scenario
+        if (isset($msg_seen) && in_array($msg_seen, [0, 1])) {
+            $updatedMsgSeenChats = Chats::where('user_id', $chat_user_id)
+                                        ->where('chat_user_id', $user_id)
+                                        ->get();
+    
+            foreach ($updatedMsgSeenChats as $chat) {
+                $chat->msg_seen = $msg_seen;
+                if (!$chat->save()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Failed to update msg_seen status for some chats.',
+                    ], 500);
+                }
             }
         }
     
         return response()->json([
             'success' => true,
-            'message' => 'Chats marked as read successfully.',
+            'message' => 'Read Chats updated successfully.',
         ], 200);
     }
+    
 public function delete_chat(Request $request)
 {
     $user_id = $request->input('user_id');
