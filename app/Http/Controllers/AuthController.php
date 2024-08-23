@@ -2274,7 +2274,7 @@ public function add_chat(Request $request)
     $newChat2->user_id = $chat_user_id;
     $newChat2->chat_user_id = $user_id;
     $newChat2->latest_message = $message;
-    $newChat2->unread = 1;
+    $newChat2->unread = $unread;
     $newChat2->msg_seen = 0; // Assuming this user has not seen the message yet
     $newChat2->latest_msg_time = $currentTime;
     $newChat2->datetime = $currentTime;
