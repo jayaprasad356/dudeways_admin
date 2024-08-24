@@ -2340,7 +2340,7 @@ public function add_chat(Request $request)
     {
         // Check the online_status of the user
         $user = Users::find($chat_user_id); // Assuming User is your model class
-        if ($user && $user->online_status == 0) {
+        if ($user) {
             // User is offline, send notification via OneSignal
             $this->oneSignalClient->sendNotificationToExternalUser(
                 $message,
