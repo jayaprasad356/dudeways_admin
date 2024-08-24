@@ -42,8 +42,9 @@ class HomeController extends Controller
         ->whereDate('datetime', $today)
         ->sum('points');
         $pending_trips_count = Trips::where('trip_status', 0)->count();
-        $pending_verification_count = Verifications::where('status', 0)
-        ->where('payment_status', 1)
+        $pending_verification_count = Verifications::where('payment_status', 0)
+        ->whereNotNull('payment_image')
+        ->where('payment_image', '<>', '')
         ->count();
         
         // Optional: Count of pending profiles and cover images
