@@ -25,10 +25,21 @@
                 <button class="btn btn-primary mr-3" id="verifyButton">Verify</button>
 
                 </div>
+                <div class="col-md-4 text-md-right mt-3 mt-md-0">
+                <!-- Search Form -->
+                <form id="search-form" class="form-inline">
+                    <div class="input-group">
+                        <input type="text" id="search-input" name="search" class="form-control" placeholder="Search by...." autocomplete="off" value="{{ request()->input('search') }}">
+                        <div class="input-group-append">
+                            <button type="submit" class="btn btn-outline-secondary" style="display: none;">Search</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
 
         <div class="row mb-4">
-            <div class="col-md-8 d-flex align-items-center">
+            <div class="col-md-12 d-flex align-items-center">
                 <!-- Filter by Status -->
                 <div class="form-group mb-0 d-flex align-items-center">
                     <label for="status-filter"  class="mr-1 mb-0 flex-shrink-0">Filter by status:</label>
@@ -44,17 +55,14 @@
                         <option value="1" {{ request()->input('payment_status') === '1' ? 'selected' : '' }}>Paid</option>
                     </select>
                 </div>
-            </div>
-            <div class="col-md-4 text-md-right mt-3 mt-md-0">
-                <!-- Search Form -->
-                <form id="search-form" class="form-inline">
-                    <div class="input-group">
-                        <input type="text" id="search-input" name="search" class="form-control" placeholder="Search by...." autocomplete="off" value="{{ request()->input('search') }}">
-                        <div class="input-group-append">
-                            <button type="submit" class="btn btn-outline-secondary" style="display: none;">Search</button>
-                        </div>
-                    </div>
-                </form>
+                <div class="form-group mb-0 d-flex align-items-center">
+                    <label for="payment_image-filter" class="mr-1 mb-0 flex-shrink-0">Filter by Payment Image:</label>
+                    <select name="payment_image" id="payment_image-filter" class="form-control">
+                        <option value="yes" {{ request()->input('payment_image', 'yes') === 'yes' ? 'selected' : '' }}>Yes</option>
+                        <option value="no" {{ request()->input('payment_image') === 'no' ? 'selected' : '' }}>No</option>
+                    </select>
+                </div>
+
             </div>
         </div>
         </div>
@@ -152,12 +160,19 @@
         $('#payment_status-filter').change(function () {
             filterVerifications();
         });
+        
+        $('#payment_image-filter').change(function () {
+            filterVerifications();
+        });
 
         function filterVerifications() {
             let search = $('#search-input').val();
             let status = $('#status-filter').val();
             let payment_status = $('#payment_status-filter').val();
-            let url = `{{ route('verifications.index') }}?search=${encodeURIComponent(search)}&status=${encodeURIComponent(status)}&payment_status=${encodeURIComponent(payment_status)}`;
+            let payment_image = $('#payment_image-filter').val() || 'yes'; // Default to 'yes'
+            
+            let url = `{{ route('verifications.index') }}?search=${encodeURIComponent(search)}&status=${encodeURIComponent(status)}&payment_status=${encodeURIComponent(payment_status)}&payment_image=${encodeURIComponent(payment_image)}`;
+            
             window.location.href = url;
         }
 

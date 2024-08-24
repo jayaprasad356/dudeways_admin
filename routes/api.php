@@ -54,6 +54,7 @@ Route::post('create_verification', [AuthController::class, 'create_verification'
 Route::post('verification_status', [AuthController::class, 'verification_status']);
 Route::post('privacy_policy', [AuthController::class, 'privacy_policy']);
 Route::post('terms_conditions', [AuthController::class, 'terms_conditions']);
+Route::post('refund_policy', [AuthController::class, 'refund_policy']);
 Route::post('appsettings_list', [AuthController::class, 'appsettings_list']);
 Route::post('fakechat_list', [AuthController::class, 'fakechat_list']);
 Route::post('plan_list', [AuthController::class, 'plan_list']);

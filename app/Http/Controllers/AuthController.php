@@ -4057,6 +4057,32 @@ public function terms_conditions(Request $request)
     ], 200);
 }
 
+public function refund_policy(Request $request)
+{
+    // Retrieve all news settings
+    $news = News::all();
+
+    if ($news->isEmpty()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No Refund policy found.',
+        ], 404);
+    }
+
+    $newsData = [];
+    foreach ($news as $item) {
+        $newsData[] = [
+            'id' => $item->id,
+            'refund_policy' => $item->refund_policy,
+        ];
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Refund Policy listed successfully.',
+        'data' => $newsData,
+    ], 200);
+}
 
 public function profile_view(Request $request)
 {

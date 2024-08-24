@@ -22,6 +22,7 @@ class NewsController extends Controller
             'upi_id' => 'required|string|max:255',
             'privacy_policy' => 'required|string',
             'terms_conditions' => 'required|string',
+            'refund_policy' => 'required|string',
         ]);
 
         $news = News::findOrFail(1); // Again, assuming ID 1 for simplicity
@@ -30,6 +31,7 @@ class NewsController extends Controller
         $news->upi_id = $request->input('upi_id');
         $news->privacy_policy = $request->input('privacy_policy');
         $news->terms_conditions = $request->input('terms_conditions');
+        $news->refund_policy = $request->input('refund_policy');
     
 
         if ($news->save()) {

@@ -38,6 +38,11 @@
                 <textarea name="terms_conditions" id="terms_conditions" class="form-control ckeditor-content" rows="10" required>{!! $news->terms_conditions !!}</textarea>
             </div>
 
+            <div class="form-group">
+                <label for="refund_policy">Refund Policy</label>
+                <textarea name="refund_policy" id="refund_policy" class="form-control ckeditor-content" rows="10" required>{!! $news->refund_policy !!}</textarea>
+            </div>
+
             <div class="box-footer">
                 <button type="submit" class="btn btn-primary">Update</button>
             </div>
@@ -52,6 +57,9 @@
             extraPlugins: 'colorbutton'
         });
         CKEDITOR.replace('terms_conditions', {
+            extraPlugins: 'colorbutton'
+        });
+        CKEDITOR.replace('refund_policy', {
             extraPlugins: 'colorbutton'
         });
     });

@@ -90,9 +90,17 @@ class VerificationsController extends Controller
         // Filter by verified status with default to 0
         $status = $request->input('status', 0); // Default to 0 if not provided
         $query->where('status', $status);
-
+    
         $payment_status = $request->input('payment_status', 0); // Default to 0 if not provided
         $query->where('payment_status', $payment_status);
+    
+        // Filter by payment_image presence, default to 'yes'
+        $paymentImageFilter = $request->input('payment_image', 'yes'); // Default to 'yes' if not provided
+        if ($paymentImageFilter === 'yes') {
+            $query->whereNotNull('payment_image');
+        } elseif ($paymentImageFilter === 'no') {
+            $query->whereNull('payment_image');
+        }
     
         // Check if the request is AJAX
         if ($request->wantsJson()) {
@@ -106,6 +114,7 @@ class VerificationsController extends Controller
     
         return view('verifications.index', compact('verifications', 'users', 'plans')); // Pass verifications, users, and plans to the view
     }
+    
     public function edit(Verifications $verifications)
     {
         $users = Users::all(); // Fetch all users
