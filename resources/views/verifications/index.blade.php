@@ -13,6 +13,7 @@
 @section('content')
 <div class="card">
     <div class="card-body">
+        <!-- Filters and Actions -->
         <div class="row mb-4">
             <div class="col-md-8 d-flex align-items-center">
                 <!-- Checkbox for Select All -->
@@ -23,9 +24,8 @@
 
                 <!-- Verify Button -->
                 <button class="btn btn-primary mr-3" id="verifyButton">Verify</button>
-
-                </div>
-                <div class="col-md-4 text-md-right mt-3 mt-md-0">
+            </div>
+            <div class="col-md-4 text-md-right mt-3 mt-md-0">
                 <!-- Search Form -->
                 <form id="search-form" class="form-inline">
                     <div class="input-group">
@@ -38,35 +38,41 @@
             </div>
         </div>
 
+        <!-- Responsive Filters -->
         <div class="row mb-4">
-            <div class="col-md-12 d-flex align-items-center">
-                <!-- Filter by Status -->
-                <div class="form-group mb-0 d-flex align-items-center">
-                    <label for="status-filter"  class="mr-1 mb-0 flex-shrink-0">Filter by status:</label>
-                    <select name="status" id="status-filter" class="form-control">
-                        <option value="0" {{ request()->input('status') === '0' ? 'selected' : '' }}>Pending</option>
-                        <option value="1" {{ request()->input('status') === '1' ? 'selected' : '' }}>Verified</option>
-                    </select>
+            <div class="col-md-12">
+                <div class="form-row">
+                    <!-- Filter by Status -->
+                    <div class="form-group col-md-4 mb-2">
+                        <label for="status-filter" class="mr-1 mb-0">Filter by status:</label>
+                        <select name="status" id="status-filter" class="form-control">
+                            <option value="0" {{ request()->input('status') === '0' ? 'selected' : '' }}>Pending</option>
+                            <option value="1" {{ request()->input('status') === '1' ? 'selected' : '' }}>Verified</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Filter by Payment Status -->
+                    <div class="form-group col-md-4 mb-2">
+                        <label for="payment_status-filter" class="mr-1 mb-0">Filter by Payment status:</label>
+                        <select name="payment_status" id="payment_status-filter" class="form-control">
+                            <option value="0" {{ request()->input('payment_status') === '0' ? 'selected' : '' }}>Unpaid</option>
+                            <option value="1" {{ request()->input('payment_status') === '1' ? 'selected' : '' }}>Paid</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Filter by Payment Image -->
+                    <div class="form-group col-md-4 mb-2">
+                        <label for="payment_image-filter" class="mr-1 mb-0">Filter by Payment Image:</label>
+                        <select name="payment_image" id="payment_image-filter" class="form-control">
+                            <option value="yes" {{ request()->input('payment_image', 'yes') === 'yes' ? 'selected' : '' }}>Yes</option>
+                            <option value="no" {{ request()->input('payment_image') === 'no' ? 'selected' : '' }}>No</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="form-group mb-0 d-flex align-items-center">
-                    <label for="payment_status-filter" class="mr-1 mb-0 flex-shrink-0">Filter by Payment status:</label>
-                    <select name="payment_status" id="payment_status-filter" class="form-control">
-                        <option value="0" {{ request()->input('payment_status') === '0' ? 'selected' : '' }}>Unpaid</option>
-                        <option value="1" {{ request()->input('payment_status') === '1' ? 'selected' : '' }}>Paid</option>
-                    </select>
-                </div>
-                <div class="form-group mb-0 d-flex align-items-center">
-                    <label for="payment_image-filter" class="mr-1 mb-0 flex-shrink-0">Filter by Payment Image:</label>
-                    <select name="payment_image" id="payment_image-filter" class="form-control">
-                        <option value="yes" {{ request()->input('payment_image', 'yes') === 'yes' ? 'selected' : '' }}>Yes</option>
-                        <option value="no" {{ request()->input('payment_image') === 'no' ? 'selected' : '' }}>No</option>
-                    </select>
-                </div>
-
             </div>
         </div>
-        </div>
 
+        <!-- Table Content -->
         <div class="table-responsive">
             <table class="table table-bordered table-hover">
                 <thead class="thead-dark">

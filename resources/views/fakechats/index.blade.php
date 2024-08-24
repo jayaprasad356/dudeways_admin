@@ -13,28 +13,34 @@
 @section('content')
 <div class="card">
     <div class="card-body">
+        <!-- Action Buttons and Filters -->
         <div class="row mb-4">
-            <div class="col-md-8 d-flex align-items-center">
+            <!-- Left side (Select All and Buttons) -->
+            <div class="col-lg-8 col-md-12 d-flex align-items-center flex-wrap">
                 <!-- Checkbox for Select All -->
-                <div class="form-check mr-3">
+                <div class="form-check mr-3 mb-2 mb-lg-0">
                     <input type="checkbox" class="form-check-input" id="checkAll">
                     <label class="form-check-label" for="checkAll">Select All</label>
                 </div>
                 
-                <!-- Verify Button -->
-                <button class="btn btn-danger mr-3" id="verifyButton">Add Fake</button>
-                <button class="btn btn-primary mr-3" id="NotFakeButton">Add Not-Fake</button>
+                <!-- Action Buttons -->
+                <div class="d-flex flex-wrap align-items-center">
+                    <button class="btn btn-danger mr-2 mb-2 mb-lg-0" id="verifyButton">Add Fake</button>
+                    <button class="btn btn-primary mr-2 mb-2 mb-lg-0" id="NotFakeButton">Add Not-Fake</button>
+                </div>
+                
                 <!-- Filter by Status -->
-                <div class="form-group mb-0 d-flex align-items-center">
+                <div class="form-group mb-0 d-flex align-items-center ml-3">
                     <label for="status-filter" class="mr-2 mb-0">Filter by status:</label>
                     <select name="status" id="status-filter" class="form-control">
-                    <option value="0" {{ request()->input('status') === '0' ? 'selected' : '' }}>Not-Fake</option>
+                        <option value="0" {{ request()->input('status') === '0' ? 'selected' : '' }}>Not-Fake</option>
                         <option value="1" {{ request()->input('status') === '1' ? 'selected' : '' }}>Fake</option>
                     </select>
                 </div>
             </div>
             
-            <div class="col-md-4 text-md-right mt-3 mt-md-0">
+            <!-- Right side (Search) -->
+            <div class="col-lg-4 col-md-12 mt-3 mt-lg-0 text-md-right">
                 <!-- Search Form -->
                 <form action="{{ route('fakechats.index') }}" method="GET" class="form-inline">
                     <div class="input-group">
@@ -46,11 +52,13 @@
                 </form>
             </div>
         </div>
+
+        <!-- Fakechats Table -->
         <div class="table-responsive">
             <table class="table table-bordered table-hover">
                 <thead class="thead-dark">
                     <tr>
-                    <th>Actions</th>
+                        <th>Actions</th>
                         <th>Checkbox</th>
                         <th>ID <i class="fas fa-sort"></i></th>
                         <th>User Profile <i class="fas fa-sort"></i></th>
@@ -62,8 +70,8 @@
                 <tbody>
                     @foreach ($fakechats as $fakechat)
                     <tr>
-                    <td>
-                            <button class="btn btn-danger btn-delete" data-url="{{route('fakechats.destroy', $fakechat)}}"><i class="fas fa-trash"></i></button>
+                        <td>
+                            <button class="btn btn-danger btn-delete" data-url="{{ route('fakechats.destroy', $fakechat) }}"><i class="fas fa-trash"></i></button>
                         </td>
                         <td><input type="checkbox" class="checkbox" data-id="{{ $fakechat->id }}"></td>
                         <td>{{ $fakechat->id }}</td>
@@ -84,17 +92,18 @@
                                 {{ $fakechat->status == 1 ? 'Fake' : 'Not-Fake' }}
                             </span>
                         </td>
-
                     </tr>
                     @endforeach
                 </tbody>
             </table>
         </div>
+
+        <!-- Pagination Links -->
         {{ $fakechats->render() }}
     </div>
 </div>
-
 @endsection
+
 @section('js')
     <script src="{{ asset('plugins/sweetalert2/sweetalert2.min.js') }}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>

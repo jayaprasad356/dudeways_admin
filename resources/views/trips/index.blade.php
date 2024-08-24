@@ -1,3 +1,4 @@
+
 @extends('layouts.admin')
 
 @section('title', 'Trips Management')
@@ -5,32 +6,38 @@
 @section('content-actions')
     <a href="{{ route('trips.create') }}" class="btn btn-success"><i class="fas fa-plus"></i> Add New Trip</a>
 @endsection
+
 @section('css')
     <link rel="stylesheet" href="{{ asset('plugins/sweetalert2/sweetalert2.min.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css">
 @endsection
+
 @section('content')
 <div class="card">
     <div class="card-body">
+        <!-- Action Buttons and Search -->
         <div class="row mb-4">
-            <div class="col-md-8 d-flex align-items-center">
+            <!-- Left side (Checkbox and Buttons) -->
+            <div class="col-lg-8 col-md-12 d-flex align-items-center flex-wrap">
                 <!-- Checkbox for Select All -->
-                <div class="form-check mr-3">
+                <div class="form-check mr-3 mb-2 mb-lg-0">
                     <input type="checkbox" class="form-check-input" id="checkAll">
                     <label class="form-check-label" for="checkAll">Select All</label>
                 </div>
                 
-                <!-- Verify Button -->
-                <button class="btn btn-primary mr-3" id="pendingButton">Pending</button>
-                <button class="btn btn-success mr-3" id="verifyButton">Approved</button>
-                <button class="btn btn-danger mr-3" id="cancelButton">Cancelled</button>
-                
+                <!-- Status Buttons -->
+                <div class="d-flex flex-wrap align-items-center">
+                    <button class="btn btn-primary mr-2 mb-2 mb-lg-0" id="pendingButton">Pending</button>
+                    <button class="btn btn-success mr-2 mb-2 mb-lg-0" id="verifyButton">Approved</button>
+                    <button class="btn btn-danger mb-2 mb-lg-0" id="cancelButton">Cancelled</button>
+                </div>
             </div>
             
-            <div class="col-md-4 text-right">
+            <!-- Right side (Search) -->
+            <div class="col-lg-4 col-md-12 mt-3 mt-lg-0">
                 <!-- Search Form -->
                 <form action="{{ route('trips.index') }}" method="GET">
-                <div class="input-group">
+                    <div class="input-group">
                         <input type="text" id="search-input" name="search" class="form-control" placeholder="Search by..." autocomplete="off" value="{{ request()->input('search') }}">
                         <div class="input-group-append">
                             <button class="btn btn-primary" type="submit" style="display: none;">Search</button>
@@ -40,13 +47,12 @@
             </div>
         </div>
 
-        <div class="row">
+        <!-- Filters -->
+        <div class="row mb-4">
             <div class="col-md-12">
-                <!-- Filter Form -->
                 <form id="filter-form" action="{{ route('trips.index') }}" method="GET">
                     <div class="form-row">
-
-                        <div class="form-group col-md-3">
+                        <div class="form-group col-md-4">
                             <label for="status-filter">Filter by Status:</label>
                             <select name="trip_status" id="trip_status-filter" class="form-control">
                                 <option value="0" {{ request()->input('trip_status') === '0' ? 'selected' : '' }}>Pending</option>
@@ -54,17 +60,17 @@
                                 <option value="2" {{ request()->input('trip_status') === '2' ? 'selected' : '' }}>Cancelled</option>
                             </select>
                         </div>
-
                     </div>
                 </form>
             </div>
         </div>
 
+        <!-- Trips Table -->
         <div class="table-responsive">
             <table class="table table-bordered table-hover">
                 <thead class="thead-dark">
                     <tr>
-                        <th>Checkbox</th>
+                        <th><input type="checkbox" id="checkAll"></th>
                         <th>Actions</th>
                         <th>ID <i class="fas fa-sort"></i></th>
                         <th>Trip Image</th>
@@ -73,10 +79,10 @@
                         <th>Location <i class="fas fa-sort"></i></th>
                         <th>From Date <i class="fas fa-sort"></i></th>
                         <th>To Date <i class="fas fa-sort"></i></th>
-                        <th>Trip Title<i class="fas fa-sort"></i></th>
-                        <th>Trip Description<i class="fas fa-sort"></i></th>
+                        <th>Trip Title <i class="fas fa-sort"></i></th>
+                        <th>Trip Description <i class="fas fa-sort"></i></th>
                         <th>Trip Status</th>
-                        <th>Trip DateTime<i class="fas fa-sort"></i></th>
+                        <th>Trip DateTime <i class="fas fa-sort"></i></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -115,11 +121,11 @@
                 </tbody>
             </table>
         </div>
+        <!-- Pagination Links -->
         {{ $trips->appends(request()->query())->links() }}
     </div>
 </div>
 @endsection
-
 @section('js')
 <script src="{{ asset('plugins/sweetalert2/sweetalert2.min.js') }}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
