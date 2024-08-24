@@ -1387,7 +1387,6 @@ public function trip_list(Request $request)
 
     $currentDate = Carbon::now()->toDateString();
     $tripsQuery = Trips::where('trip_status', 1)
-                ->whereDate('from_date', '>=', $currentDate)
                 ->join('users', 'trips.user_id', '=', 'users.id')
                 ->select('trips.*');
 
