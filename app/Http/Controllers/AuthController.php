@@ -5624,6 +5624,7 @@ public function users_list(Request $request)
     $offset = $request->input('offset', 0); // Default offset is 0
     $limit = $request->input('limit', 10);  // Default limit is 10
     $excludeUserId = $request->input('user_id'); // The user_id to exclude if online_status is 1
+    $gender = $request->input('gender'); // The gender to filter the users
 
     // Validate the user_id input
     if (empty($excludeUserId)) {
@@ -5644,14 +5645,21 @@ public function users_list(Request $request)
 
     // Get the total count of users, excluding the specific user if necessary
     $totalUsersQuery = Users::where('id', '!=', $excludeUserId);
+
+    // Apply gender filter if provided
+    if (!empty($gender) && $gender !== 'all') {
+        $totalUsersQuery->where('gender', $gender);
+    }
+
     $totalUsers = $totalUsersQuery->count();
 
     // Fetch users, excluding the specific user if necessary,
     // applying offset, limit, and ordering by datetime
-    $users = $totalUsersQuery->orderBy('datetime', 'desc')
-                             ->offset($offset)
-                             ->limit($limit)
-                             ->get();
+    $usersQuery = $totalUsersQuery->orderBy('datetime', 'desc')
+                                 ->offset($offset)
+                                 ->limit($limit);
+
+    $users = $usersQuery->get();
 
     // Check if any users are found
     if ($users->isEmpty()) {
@@ -5689,8 +5697,7 @@ public function users_list(Request $request)
         'total' => $totalUsers,
         'data' => $usersData,
     ], 200);
- 
-  } 
+}
   public function msg_seen(Request $request)
     {
         $user_id = $request->input('user_id');
@@ -5728,6 +5735,40 @@ public function users_list(Request $request)
         return response()->json([
             'success' => true,
             'chats' => $chats,
+        ], 200);
+    }
+
+    public function unread_all(Request $request)
+    {
+        $user_id = $request->input('user_id');
+
+        // Validate user_id
+        if (empty($user_id)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'user_id is empty.',
+            ], 400);
+        }
+
+        // Find all chats where the user_id matches
+        $chats = Chats::where('user_id', $user_id)->get();
+
+        if ($chats->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No chats found.',
+            ], 404);
+        }
+
+        // Update the unread value to 0 for all chats
+        $chats->each(function ($chat) {
+            $chat->unread = 0;
+            $chat->save();
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Unread all successfully.',
         ], 200);
     }
 }
