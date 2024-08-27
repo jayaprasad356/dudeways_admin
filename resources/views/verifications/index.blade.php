@@ -27,14 +27,14 @@
             </div>
             <div class="col-md-4 text-md-right mt-3 mt-md-0">
                 <!-- Search Form -->
-                <form id="search-form" class="form-inline">
+                <form id="search-form" action="{{ route('verifications.index') }}" method="GET">
                     <div class="input-group">
-                        <input type="text" id="search-input" name="search" class="form-control" placeholder="Search by...." autocomplete="off" value="{{ request()->input('search') }}">
+                        <input type="text" id="search-input" name="search" class="form-control" placeholder="Search by..." autocomplete="off" value="{{ request()->input('search') }}">
                         <div class="input-group-append">
-                            <button type="submit" class="btn btn-outline-secondary" style="display: none;">Search</button>
-                        </div>
-                    </div>
-                </form>
+                         <button class="btn btn-primary" type="submit" style="display: none;">Search</button>
+                 </div>
+             </div>
+        </form>
             </div>
         </div>
 
@@ -151,36 +151,41 @@
 @section('js')
 <script src="{{ asset('plugins/sweetalert2/sweetalert2.min.js') }}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
+@section('js')
+<script src="{{ asset('plugins/sweetalert2/sweetalert2.min.js') }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
 <script>
     $(document).ready(function () {
-        // Handle search input
-        $('#search-input').on('input', function () {
-            filterVerifications();
-        });
-
-        // Handle status filter change
-        $('#status-filter').change(function () {
-            filterVerifications();
-        });
-
-        $('#payment_status-filter').change(function () {
-            filterVerifications();
-        });
-        
-        $('#payment_image-filter').change(function () {
-            filterVerifications();
-        });
-
+        // Function to filter verifications based on search and filters
         function filterVerifications() {
             let search = $('#search-input').val();
             let status = $('#status-filter').val();
             let payment_status = $('#payment_status-filter').val();
             let payment_image = $('#payment_image-filter').val() || 'yes'; // Default to 'yes'
-            
+
+            // Construct the URL with query parameters
             let url = `{{ route('verifications.index') }}?search=${encodeURIComponent(search)}&status=${encodeURIComponent(status)}&payment_status=${encodeURIComponent(payment_status)}&payment_image=${encodeURIComponent(payment_image)}`;
-            
+
+            // Redirect to the filtered URL
             window.location.href = url;
         }
+
+        let debounceTimer;
+
+        // Debounce function to limit the frequency of function execution
+        function debounceFilterVerifications() {
+            clearTimeout(debounceTimer);
+
+            debounceTimer = setTimeout(function() {
+                filterVerifications();
+            }, 500); // Adjust the delay (in milliseconds) as needed
+        }
+
+        // Attach event handlers for input and filter changes
+        $('#search-input').on('input', debounceFilterVerifications);
+        $('#status-filter').change(filterVerifications);
+        $('#payment_status-filter').change(filterVerifications);
+        $('#payment_image-filter').change(filterVerifications);
 
         // Handle delete button click
         $(document).on('click', '.btn-delete', function () {

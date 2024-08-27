@@ -38,6 +38,11 @@ class TransactionsController extends Controller
             });
         }
 
+        // Check if the request is AJAX
+        if ($request->wantsJson()) {
+            return response($query->get());
+        }
+        
         // Paginate the results
         $transactions = $query->latest()->paginate(10);
 

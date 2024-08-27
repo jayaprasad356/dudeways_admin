@@ -25,6 +25,22 @@ class ChatsController extends Controller
             $query->where('user_id', $user_id);
         }
 
+        if ($request->has('search') && !empty($request->input('search'))) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('id', 'like', "%$search%")
+                  ->orWhereHas('user', function ($q) use ($search) {
+                      $q->where('name', 'like', "%$search%");
+                  });
+            });
+        }
+
+           // Check if the request is AJAX
+           if ($request->wantsJson()) {
+            return response($query->get());
+
+        }
+
         $chats = $query->latest()->paginate(10); // Paginate the results
 
         $users = Users::all(); // Fetch all users for the filter dropdown

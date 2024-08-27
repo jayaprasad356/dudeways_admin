@@ -211,16 +211,20 @@
         filterUsers();
     });
 
-    function filterUsers() {
+    let debounceTimer;
+
+function filterUsers() {
+    clearTimeout(debounceTimer);
+
+    debounceTimer = setTimeout(function() {
         let search = $('#search-input').val();
         let verified = $('#verified-filter').val();
 
-        if (search.length >= 4) { // Adjust this number as needed
-            window.location.search = `search=${encodeURIComponent(search)}&verified=${encodeURIComponent(verified)}`;
-        } else if (search.length === 0) { // If search input is cleared, keep URL parameters
-            window.location.search = `search=${encodeURIComponent(search)}&verified=${encodeURIComponent(verified)}`;
-        }
-    }
+        window.location.search = `search=${encodeURIComponent(search)}&verified=${encodeURIComponent(verified)}`;
+    }, 500); // Adjust the delay (in milliseconds) as needed
+}
+
+$('#search-input').on('input', filterUsers);
         // Handle delete button click
         $(document).on('click', '.btn-delete', function () {
             $this = $(this);

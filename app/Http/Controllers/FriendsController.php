@@ -14,10 +14,20 @@ class FriendsController extends Controller
     {
         $query = Friends::query()->with('user'); // Eager load the user relationship
 
-        // Filter by user if user_id is provided
-        if ($request->has('user_id')) {
-            $user_id = $request->input('user_id');
-            $query->where('user_id', $user_id);
+        if ($request->has('search') && !empty($request->input('search'))) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('id', 'like', "%$search%")
+                  ->orWhereHas('user', function ($q) use ($search) {
+                      $q->where('name', 'like', "%$search%");
+                  });
+            });
+        }
+
+           // Check if the request is AJAX
+           if ($request->wantsJson()) {
+            return response($query->get());
+
         }
 
         $friends = $query->latest()->paginate(10); // Paginate the results

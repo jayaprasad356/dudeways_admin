@@ -13,9 +13,12 @@
     <div class="card-body">
     <div class="row mb-4">
         <div class="ml-auto">
-                <form action="{{ route('points.index') }}" method="GET">
+        <form id="search-form" action="{{ route('points.index') }}" method="GET">
                     <div class="input-group">
-                        <input type="text" name="search" class="form-control" placeholder="Search by....">
+                        <input type="text" id="search-input" name="search" class="form-control" placeholder="Search by..." autocomplete="off" value="{{ request()->input('search') }}">
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" type="submit" style="display: none;">Search</button>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -49,7 +52,7 @@
                 </tbody>
             </table>
         </div>
-        {{ $points->render() }}
+        {{ $points->appends(request()->query())->links() }}
     </div>
 </div>
 
@@ -57,73 +60,109 @@
 
 @section('js')
     <script src="{{ asset('plugins/sweetalert2/sweetalert2.min.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        $(document).ready(function () {
-            $(document).on('click', '.btn-delete', function () {
-                $this = $(this);
-                const swalWithBootstrapButtons = Swal.mixin({
-                    customClass: {
-                        confirmButton: 'btn btn-success',
-                        cancelButton: 'btn btn-danger'
-                    },
-                    buttonsStyling: false
-                })
-
-                swalWithBootstrapButtons.fire({
-                    title: 'Are you sure?',
-                    text: "Do you really want to delete this customer?",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Yes, delete it!',
-                    cancelButtonText: 'No',
-                    reverseButtons: true
-                }).then((result) => {
-                    if (result.value) {
-                        $.post($this.data('url'), {_method: 'DELETE', _token: '{{csrf_token()}}'}, function (res) {
-                            $this.closest('tr').fadeOut(500, function () {
-                                $(this).remove();
-                            })
-                        })
-                    }
-                })
-            })
-        })
-    </script>
-
-<script>
-        $(document).ready(function() {
-            $('.table th').click(function() {
-                var table = $(this).parents('table').eq(0);
-                var index = $(this).index();
-                var rows = table.find('tr:gt(0)').toArray().sort(comparer(index));
-                this.asc = !this.asc;
-                if (!this.asc) {
-                    rows = rows.reverse();
-                }
-                for (var i = 0; i < rows.length; i++) {
-                    table.append(rows[i]);
-                }
-                // Update arrows
-                updateArrows(table, index, this.asc);
-            });
-
-            function comparer(index) {
-                return function(a, b) {
-                    var valA = getCellValue(a, index),
-                        valB = getCellValue(b, index);
-                    return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.localeCompare(valB);
-                };
-            }
-
-            function getCellValue(row, index) {
-                return $(row).children('td').eq(index).text();
-            }
-
-            function updateArrows(table, index, asc) {
-                table.find('.arrow').remove();
-                var arrow = asc ? '<i class="fas fa-arrow-up arrow"></i>' : '<i class="fas fa-arrow-down arrow"></i>';
-                table.find('th').eq(index).append(arrow);
-            }
+   $(document).ready(function () {
+    // Function to get URL parameters
+    function getQueryParams() {
+        const params = {};
+        window.location.search.substring(1).split("&").forEach(function (pair) {
+            const [key, value] = pair.split("=");
+            params[key] = decodeURIComponent(value);
         });
+        return params;
+    }
+
+    // Load initial parameters
+    const queryParams = getQueryParams();
+    $('#search-input').val(queryParams.search || '');
+
+    // Handle search input with debounce
+    let debounceTimeout;
+    $('#search-input').on('input', function () {
+        clearTimeout(debounceTimeout);
+        debounceTimeout = setTimeout(function () {
+            filterUsers();
+        }, 300); // Adjust delay as needed
+    });
+
+    let debounceTimer;
+
+function filterUsers() {
+    clearTimeout(debounceTimer);
+
+    debounceTimer = setTimeout(function() {
+        let search = $('#search-input').val();
+
+        window.location.search = `search=${encodeURIComponent(search)}`;
+    }, 500); // Adjust the delay (in milliseconds) as needed
+}
+
+$('#search-input').on('input', filterUsers);
+        // Handle delete button click
+        $(document).on('click', '.btn-delete', function () {
+            $this = $(this);
+            const swalWithBootstrapButtons = Swal.mixin({
+                customClass: {
+                    confirmButton: 'btn btn-success',
+                    cancelButton: 'btn btn-danger'
+                },
+                buttonsStyling: false
+            })
+
+            swalWithBootstrapButtons.fire({
+                title: 'Are you sure?',
+                text: "Do you really want to delete this user?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'No',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.value) {
+                    $.post($this.data('url'), {_method: 'DELETE', _token: '{{csrf_token()}}'}, function (res) {
+                        $this.closest('tr').fadeOut(500, function () {
+                            $(this).remove();
+                        })
+                    })
+                }
+            })
+        });
+
+        // Handle table sorting
+        $('.table th').click(function () {
+            var table = $(this).parents('table').eq(0);
+            var index = $(this).index();
+            var rows = table.find('tr:gt(0)').toArray().sort(comparer(index));
+            this.asc = !this.asc;
+            if (!this.asc) {
+                rows = rows.reverse();
+            }
+            for (var i = 0; i < rows.length; i++) {
+                table.append(rows[i]);
+            }
+            // Update arrows
+            updateArrows(table, index, this.asc);
+        });
+
+        function comparer(index) {
+            return function (a, b) {
+                var valA = getCellValue(a, index),
+                    valB = getCellValue(b, index);
+                return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.localeCompare(valB);
+            };
+        }
+
+        function getCellValue(row, index) {
+            return $(row).children('td').eq(index).text();
+        }
+
+        function updateArrows(table, index, asc) {
+            table.find('.arrow').remove();
+            var arrow = asc ? '<i class="fas fa-arrow-up arrow"></i>' : '<i class="fas fa-arrow-down arrow"></i>';
+            table.find('th').eq(index).append(arrow);
+        }
+    });
     </script>
 @endsection

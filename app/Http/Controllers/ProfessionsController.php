@@ -18,14 +18,14 @@ class ProfessionsController extends Controller
     {
         $query = Professions::query();
     
-        if ($request->has('search')) {
-            $search = $request->input('search');
-            $query->where('profession', 'like', "%$search%")
-                  ->orWhere('phone', 'like', "%$search%");
+        if ($request->has('search') && !empty($request->search)) {
+            $query->where('profession', 'like', '%' . $request->search . '%');
         }
     
-        if ($request->wantsJson()) {
+         // Check if the request is AJAX
+         if ($request->wantsJson()) {
             return response($query->get());
+
         }
     
         $professions = $query->latest()->paginate(10);

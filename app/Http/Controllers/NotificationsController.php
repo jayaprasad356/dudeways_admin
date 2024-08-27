@@ -26,6 +26,26 @@ class NotificationsController extends Controller
             $query->where('user_id', $request->input('user_id'));
         }
 
+        // Search functionality
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where(function ($query) use ($search) {
+                $query->where('id', 'like', "%{$search}%")
+                      ->orWhereHas('user', function ($query) use ($search) {
+                          $query->where('name', 'like', "%{$search}%");
+                      })
+                      ->orWhereHas('NotifyUser', function ($query) use ($search) {
+                          $query->where('id', 'like', "%{$search}%");
+                      });
+            });
+        }
+
+           // Check if the request is AJAX
+           if ($request->wantsJson()) {
+            return response($query->get());
+
+        }
+
         $notifications = $query->latest()->paginate(10);
         $users = Users::all();
 

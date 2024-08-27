@@ -18,15 +18,14 @@ class PointsController extends Controller
     {
         $query = Points::query();
         
-        // Check if there's a search query
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where('points', 'like', "%$search%");
+        if ($request->has('search') && !empty($request->search)) {
+            $query->where('points', 'like', '%' . $request->search . '%');
         }
-        
-        // Check if the request is AJAX
-        if ($request->wantsJson()) {
+    
+         // Check if the request is AJAX
+         if ($request->wantsJson()) {
             return response($query->get());
+
         }
         
         // Retrieve all points if there's no search query

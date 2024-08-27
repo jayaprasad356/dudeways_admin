@@ -32,7 +32,10 @@
                 <!-- Search Form -->
                 <form id="search-form" action="{{ route('transactions.index') }}" method="GET">
                     <div class="input-group">
-                        <input type="text" name="search" id="search-input" class="form-control" placeholder="Search by..." value="{{ request()->input('search') }}">
+                        <input type="text" id="search-input" name="search" class="form-control" placeholder="Search by..." autocomplete="off" value="{{ request()->input('search') }}">
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" type="submit" style="display: none;">Search</button>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -61,86 +64,93 @@
                 </tbody>
             </table>
         </div>
-        {{ $transactions->links() }}
+        {{ $transactions->appends(request()->query())->links() }}
     </div>
 </div>
-
 @endsection
 
 @section('js')
-    <script src="{{ asset('plugins/sweetalert2/sweetalert2.min.js') }}"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
-    <script>
-        $(document).ready(function () {
-            // Handle type filter change
-            $('#type-filter').change(function () {
-                updateFilters();
-            });
-
-            // Handle search input change with a delay
-            let typingTimer;
-            const typingInterval = 500; // 500ms delay
-
-            $('#search-input').on('keyup', function () {
-                clearTimeout(typingTimer);
-                typingTimer = setTimeout(updateFilters, typingInterval);
-            });
-
-            $('#search-input').on('keydown', function () {
-                clearTimeout(typingTimer);
-            });
-
-            function updateFilters() {
-                var type = $('#type-filter').val();
-                var search = $('#search-input').val();
-                var url = "{{ route('transactions.index') }}";
-
-                var queryParams = [];
-                if (type) {
-                    queryParams.push('type=' + type);
-                }
-                if (search) {
-                    queryParams.push('search=' + search);
-                }
-                if (queryParams.length > 0) {
-                    url += '?' + queryParams.join('&');
-                }
-
-                window.location.href = url;
-            }
-
-            // Sorting functionality
-            $('.table th').click(function() {
-                var table = $(this).parents('table').eq(0);
-                var index = $(this).index();
-                var rows = table.find('tr:gt(0)').toArray().sort(comparer(index));
-                this.asc = !this.asc;
-                if (!this.asc) {
-                    rows = rows.reverse();
-                }
-                for (var i = 0; i < rows.length; i++) {
-                    table.append(rows[i]);
-                }
-                updateArrows(table, index, this.asc);
-            });
-
-            function comparer(index) {
-                return function(a, b) {
-                    var valA = getCellValue(a, index),
-                        valB = getCellValue(b, index);
-                    return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.localeCompare(valB);
-                };
-            }
-
-            function getCellValue(row, index) {
-                return $(row).children('td').eq(index).text();
-            }
-
-            function updateArrows(table, index, asc) {
-                table.find('.arrow').remove();
-                var arrow = asc ? '<i class="fas fa-arrow-up arrow"></i>' : '<i class="fas fa-arrow-down arrow"></i>';
-                table.find('th').eq(index).append(arrow);
-            }
+<script src="{{ asset('plugins/sweetalert2/sweetalert2.min.js') }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function () {
+    // Function to get URL parameters
+    function getQueryParams() {
+        const params = {};
+        window.location.search.substring(1).split("&").forEach(function (pair) {
+            const [key, value] = pair.split("=");
+            params[key] = decodeURIComponent(value);
         });
-    </script>
+        return params;
+    }
+
+    // Load initial parameters
+    const queryParams = getQueryParams();
+    $('#search-input').val(queryParams.search || '');
+    $('#type-filter').val(queryParams.type || '');
+
+    // Handle search input with debounce
+    let debounceTimeout;
+    $('#search-input').on('input', function () {
+        clearTimeout(debounceTimeout);
+        debounceTimeout = setTimeout(function () {
+            updateUrlParams();
+        }, 300); // Adjust delay as needed
+    });
+
+    // Handle type filter change
+    $('#type-filter').change(function () {
+        updateUrlParams();
+    });
+
+    function updateUrlParams() {
+        const search = $('#search-input').val();
+        const type = $('#type-filter').val();
+        const queryParams = { search };
+        
+        // Add type parameter only if it is not 'All'
+        if (type && type !== '') {
+            queryParams.type = type;
+        }
+
+        const queryString = new URLSearchParams(queryParams).toString();
+        window.location.search = queryString;
+    }
+
+    // Sorting functionality
+    $('.table th').click(function() {
+        var table = $(this).parents('table').eq(0);
+        var index = $(this).index();
+        var rows = table.find('tr:gt(0)').toArray().sort(comparer(index));
+        this.asc = !this.asc;
+        if (!this.asc) {
+            rows = rows.reverse();
+        }
+        for (var i = 0; i < rows.length; i++) {
+            table.append(rows[i]);
+        }
+        updateArrows(table, index, this.asc);
+    });
+
+    function comparer(index) {
+        return function(a, b) {
+            var valA = getCellValue(a, index),
+                valB = getCellValue(b, index);
+            return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.localeCompare(valB);
+        };
+    }
+
+    function getCellValue(row, index) {
+        return $(row).children('td').eq(index).text();
+    }
+
+    function updateArrows(table, index, asc) {
+        table.find('.arrow').remove();
+        var arrow = asc ? '<i class="fas fa-arrow-up arrow"></i>' : '<i class="fas fa-arrow-down arrow"></i>';
+        table.find('th').eq(index).append(arrow);
+    }
+});
+</script>
+
 @endsection
