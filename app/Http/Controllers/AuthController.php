@@ -329,7 +329,7 @@ public function register(Request $request)
 
         $viewDatetime = now();
         $increments = [5, 7, 16, 25, 52]; // minutes to add for each record
-        
+
         foreach ($femaleUserIds as $index => $femaleUserId) {
             AutoViewProfile::create([
                 'user_id' => $user_id,
@@ -2406,7 +2406,7 @@ public function add_chat(Request $request)
             $this->oneSignalClient->sendNotificationToExternalUser(
                 $message,
                 $chat_user_id,
-                $url = null,
+                $url = 'https://www.dudeways.com/path/to/userid?='. $user->user_id . '&chatid=' . $chat_user_id,
                 $data = null,
                 $buttons = null,
                 $schedule = null
