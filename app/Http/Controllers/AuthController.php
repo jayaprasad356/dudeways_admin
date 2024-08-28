@@ -335,7 +335,6 @@ public function register(Request $request)
                 'user_id' => $user_id,
                 'view_user_id' => $femaleUserId,
                 'view_datetime' => $viewDatetime->copy()->addMinutes($increments[$index]),
-                'status' => 0,
             ]);
     
             // Update the viewDatetime for the next entry
@@ -5801,4 +5800,67 @@ public function users_list(Request $request)
             'message' => 'Unread all successfully.',
         ], 200);
     }
+
+    public function auto_view_profile(Request $request)
+    {
+        // Get the current time (hour and minute only)
+        $currentHourMinute = now()->format('Y-m-d H:i');
+    
+        // Fetch the records from auto_view_profile where view_datetime matches the current hour and minute
+        $autoViewProfiles = AutoViewProfile::whereRaw("DATE_FORMAT(view_datetime, '%Y-%m-%d %H:%i') = ?", [$currentHourMinute])->get();
+    
+        // Iterate through each record and send notifications
+        foreach ($autoViewProfiles as $autoViewProfile) {
+            $user_id = $autoViewProfile->user_id; // The user who is viewing the profile
+            $view_user_id = $autoViewProfile->view_user_id; // The user whose profile is being viewed
+    
+            // Fetch the user who is viewing the profile
+            $user = Users::find($user_id);
+            if (!$user) {
+                continue; // Skip if the user doesn't exist
+            }
+    
+            // Fetch the user whose profile is being viewed
+            $view_user = Users::find($view_user_id);
+            if (!$view_user) {
+                continue; // Skip if the viewed user doesn't exist
+            }
+    
+            // Create and save the notification
+            $notification = new Notifications();
+            $notification->user_id = $user_id;
+            $notification->notify_user_id = $view_user_id;
+            $notification->message = "{$view_user->name}, viewed your profile";
+            $notification->datetime = now();
+    
+            if (!$notification->save()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to save notification for some profiles.',
+                ], 500);
+            }
+    
+            // Send notification to the profile user
+            $this->sendNotificationToprofileUser(strval($user_id), "{$view_user->name} viewed your profile");
+        }
+    
+        return response()->json([
+            'success' => true,
+            'message' => 'Notifications sent successfully.',
+        ], 201);
+    }
+    
+    protected function sendNotificationToprofileUser($user_id, $message)
+    {
+        $this->oneSignalClient->sendNotificationToExternalUser(
+            $message,
+            $user_id,
+            $url = null,
+            $data = null,
+            $buttons = null,
+            $schedule = null
+        );
+    }
+    
+    
 }

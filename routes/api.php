@@ -70,6 +70,7 @@ Route::post('payment_image', [AuthController::class, 'payment_image']);
 Route::get('online_reset', [AuthController::class, 'online_reset']);
 Route::post('msg_seen', [AuthController::class, 'msg_seen']);
 Route::post('unread_all', [AuthController::class, 'unread_all']);
+Route::get('auto_view_profile', [AuthController::class, 'auto_view_profile']);
 
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
