@@ -13,9 +13,12 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('professions', function (Blueprint $table) {
+        Schema::create('auto_view_profile', function (Blueprint $table) {
             $table->id();
-            $table->string('profession'); 
+            $table->string('user_id'); 
+            $table->string('view_user_id'); 
+            $table->dateTime('view_datetime'); 
+            $table->boolean('status'); 
             $table->timestamps();
         });
     }
@@ -27,6 +30,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('professions');
+        Schema::dropIfExists('auto_view_profile');
     }
 };

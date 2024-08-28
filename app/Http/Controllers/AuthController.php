@@ -16,6 +16,7 @@ use App\Models\Verifications;
 use App\Models\Transaction; 
 use App\Models\Feedback;
 use App\Models\Fakechats; 
+use App\Models\AutoViewProfile; 
 use App\Models\Professions; 
 use App\Models\RechargeTrans;
 use App\Models\VerificationTrans;
@@ -323,12 +324,31 @@ public function register(Request $request)
         'status' => '0',
     ]);
 
+        // Insert into auto_view_profile table
+        $femaleUserIds = Users::where('gender', 'female')->inRandomOrder()->take(5)->pluck('id');
+
+        $viewDatetime = now();
+        $increments = [2, 3, 16, 25, 52]; // minutes to add for each record
+    
+        foreach ($femaleUserIds as $index => $femaleUserId) {
+            AutoViewProfile::create([
+                'user_id' => $user_id,
+                'view_user_id' => $femaleUserId,
+                'view_datetime' => $viewDatetime->copy()->addMinutes($increments[$index]),
+                'status' => 0,
+            ]);
+    
+            // Update the viewDatetime for the next entry
+            $viewDatetime = $viewDatetime->addMinutes($increments[$index]);
+        }
+
     $user->load('profession');
 
      // Add notification entries for female users
      if ($gender === 'male') {
         $this->addNotificationsForFemaleUsers($user_id, "{$user->name} registered In App.");
     }
+
 
     // Image URL
     $imageUrl = asset('storage/app/public/users/' . $user->profile);
@@ -5093,7 +5113,6 @@ public function recharge_user_list(Request $request)
 
 public function online_reset(Request $request)
 {
-    // Get 4 random female users and 2 random male users to exclude from setting online_status to 0
     $excludedFemaleIds = Users::where('gender', 'female')->inRandomOrder()->take(4)->pluck('id');
     $excludedMaleIds = Users::where('gender', 'male')->inRandomOrder()->take(2)->pluck('id');
 
