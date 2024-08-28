@@ -5090,15 +5090,29 @@ public function recharge_user_list(Request $request)
         'data' => $professionData,
     ], 200);
 }
+
 public function online_reset(Request $request)
 {
-    Users::where('gender', 'male')->update(['online_status' => 0]);
+    // Get 4 random female users and 2 random male users to exclude from setting online_status to 0
+    $excludedFemaleIds = Users::where('gender', 'female')->inRandomOrder()->take(4)->pluck('id');
+    $excludedMaleIds = Users::where('gender', 'male')->inRandomOrder()->take(2)->pluck('id');
+
+    // Merge the excluded user IDs
+    $excludedIds = $excludedFemaleIds->merge($excludedMaleIds);
+
+    // Update online_status to 0 for all users except the excluded ones
+    Users::whereNotIn('id', $excludedIds)->update(['online_status' => 0]);
+
+    // Update online_status to 1 for the excluded female and male users
+    Users::whereIn('id', $excludedIds)->update(['online_status' => 1]);
 
     return response()->json([
         'success' => true,
         'message' => 'Online Status Reset successfully.',
     ], 200);
 }
+
+
 
 public function send_msg_all(Request $request)
 {
