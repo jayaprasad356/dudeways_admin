@@ -328,8 +328,8 @@ public function register(Request $request)
         $femaleUserIds = Users::where('gender', 'female')->inRandomOrder()->take(5)->pluck('id');
 
         $viewDatetime = now();
-        $increments = [2, 3, 16, 25, 52]; // minutes to add for each record
-    
+        $increments = [5, 7, 16, 25, 52]; // minutes to add for each record
+        
         foreach ($femaleUserIds as $index => $femaleUserId) {
             AutoViewProfile::create([
                 'user_id' => $user_id,
