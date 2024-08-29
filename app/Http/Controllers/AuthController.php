@@ -2194,6 +2194,9 @@ public function add_chat(Request $request)
                             }
                         }
 
+                        // Construct the link for existing chat
+$chatLink = url("/path/to/userid") . '?userid=' . strval($user_id) . '&chatid=' . strval($chat_user_id);
+
 
                     // Return success response with updated chat data
                     return response()->json([
@@ -2215,7 +2218,8 @@ public function add_chat(Request $request)
                             'datetime' => $currentTime->format('Y-m-d H:i:s'),
                             'updated_at' => $currentTime->format('Y-m-d H:i:s'),
                             'created_at' => Carbon::parse($existingChat->created_at)->format('Y-m-d H:i:s'),
-                        ]],
+                            'link' => $chatLink, // Include the link
+                            ]],
                     ], 200);
                 }
             }
@@ -2293,6 +2297,9 @@ public function add_chat(Request $request)
             ], 500);
         }
     }
+   // Construct the link for existing chat
+$chatLink = url("/path/to/userid") . '?userid=' . strval($user_id) . '&chatid=' . strval($chat_user_id);
+
 
         // Return success response with updated chat data
         return response()->json([
@@ -2314,7 +2321,8 @@ public function add_chat(Request $request)
                 'datetime' => $currentTime->format('Y-m-d H:i:s'),
                 'updated_at' => $currentTime->format('Y-m-d H:i:s'),
                 'created_at' => Carbon::parse($existingChat->created_at)->format('Y-m-d H:i:s'),
-            ]],
+                'link' => $chatLink, // Include the link
+                ]],
         ], 200);
     }
 
@@ -2406,7 +2414,7 @@ public function add_chat(Request $request)
             $this->oneSignalClient->sendNotificationToExternalUser(
                 $message,
                 $chat_user_id,
-                $url = 'https://www.dudeways.com/path/to/userid?='. $user->user_id . '&chatid=' . $chat_user_id,
+                $url = 'https://www.dudeways.com/path/to/userid?='. strval($user->user_id) . '&chatid=' . strval($chat_user_id),
                 $data = null,
                 $buttons = null,
                 $schedule = null
@@ -5862,5 +5870,34 @@ public function users_list(Request $request)
         );
     }
     
+    public function delete_account(Request $request)
+    {
+        $user_id = $request->input('user_id');
+
+        if (empty($user_id)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'user_id is empty.',
+            ], 400);
+        }
+
+        $user = Users::find($user_id);
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found.',
+            ], 404);
+        }
+
+        // Delete the user from the database
+        $user->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'User deleted successfully.',
+        ], 200);
+    }
+
     
 }

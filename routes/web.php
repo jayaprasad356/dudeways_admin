@@ -92,6 +92,7 @@ Route::prefix('admin')->middleware('auth')->group(function () {
      Route::delete('/chats/{chats}', [ChatsController::class, 'destroy'])->name('chats.destroy');
      Route::put('/chats/{chats}', [ChatsController::class, 'update'])->name('chats.update');
      Route::post('/chats', [ChatsController::class, 'store'])->name('chats.store');
+     
 
       //Points  
       Route::get('/points', [PointsController::class, 'index'])->name('points.index');
@@ -109,6 +110,7 @@ Route::prefix('admin')->middleware('auth')->group(function () {
         Route::put('/chat_points/{chat_points}', [Chat_pointsController::class, 'update'])->name('chat_points.update');
         Route::post('/chat_points', [Chat_pointsController::class, 'store'])->name('chat_points.store');
 
+        
 
       //Points  
       Route::get('/plans', [PlansController::class, 'index'])->name('plans.index');
