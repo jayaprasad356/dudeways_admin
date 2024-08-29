@@ -2194,9 +2194,8 @@ public function add_chat(Request $request)
                             }
                         }
 
-                        // Construct the link for existing chat
-$chatLink = url("/path/to/userid") . '?userid=' . strval($user_id) . '&chatid=' . strval($chat_user_id);
-
+                    // Construct the link for existing chat
+                    $chatLink = "https://www.dudeways.com/path/to/userid?userid=" . strval($chat_user_id) . '&chatid=' . strval($user_id);
 
                     // Return success response with updated chat data
                     return response()->json([
@@ -2297,8 +2296,8 @@ $chatLink = url("/path/to/userid") . '?userid=' . strval($user_id) . '&chatid=' 
             ], 500);
         }
     }
-   // Construct the link for existing chat
-$chatLink = url("/path/to/userid") . '?userid=' . strval($user_id) . '&chatid=' . strval($chat_user_id);
+ // Construct the link for existing chat
+ $chatLink = "https://www.dudeways.com/path/to/userid?userid=" . strval($chat_user_id) . '&chatid=' . strval($user_id);
 
 
         // Return success response with updated chat data
@@ -2414,7 +2413,7 @@ $chatLink = url("/path/to/userid") . '?userid=' . strval($user_id) . '&chatid=' 
             $this->oneSignalClient->sendNotificationToExternalUser(
                 $message,
                 $chat_user_id,
-                $url = 'https://www.dudeways.com/path/to/userid?='. strval($user->user_id) . '&chatid=' . strval($chat_user_id),
+                $url = 'https://www.dudeways.com/path/to/userid?='. strval($chat_user_id) . '&chatid=' . strval($user->user_id),
                 $data = null,
                 $buttons = null,
                 $schedule = null
