@@ -541,6 +541,7 @@ public function userdetails(Request $request)
             'cover_img_verified' => $user->cover_img_verified,
             'latitude' => $user->latitude,
             'longtitude' => $user->longtitude,
+            'balance' => $user->balance ?? '',
             'unread_count' => strval($unreadMessagesSum), // Cast unread count to string
             'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
@@ -619,6 +620,7 @@ public function other_userdetails(Request $request)
             'view_notify' => $otherUser->view_notify,
             'profile_verified' => $otherUser->profile_verified,
             'cover_img_verified' => $otherUser->cover_img_verified,
+            'balance' => $otherUser->balance ?? '',
             'last_seen' => Carbon::parse($otherUser->last_seen)->format('Y-m-d H:i:s'),
             'datetime' => Carbon::parse($otherUser->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($otherUser->updated_at)->format('Y-m-d H:i:s'),
