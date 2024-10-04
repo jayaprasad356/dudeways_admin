@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Users; 
+use App\Models\Wallets; 
+use App\Models\Withdrawals; 
 use App\Models\BankDetails; 
 use App\Models\Chats; 
 use App\Models\Chat_points; 
@@ -5987,6 +5989,133 @@ public function users_list(Request $request)
             'message' => 'Bank details added successfully.',
         ], 200);
     }
+}
+public function withdrawals(Request $request)
+{
+    $user_id = $request->input('user_id');
+    $amount = $request->input('amount');
+
+    // Check if user_id is provided
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 400);
+    }
+
+    // Check if the amount is provided
+    if (empty($amount)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Amount is empty.',
+        ], 400);
+    }
+
+    // Check if the user exists in the Users table
+    $user = Users::find($user_id);
+
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User not found in Users table.',
+        ], 404);
+    }
+
+    // Get the user's balance from the Users table
+    $user_balance = $user->balance;
+
+    // Check if the amount is greater than the minimum withdrawal limit (50)
+    if ($amount < 50) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Minimum withdrawal amount should be 50.',
+        ], 400);
+    }
+
+    // Check if the amount exceeds the user's available balance
+    if ($amount > $user_balance) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Insufficient balance.',
+        ], 400);
+    }
+
+    // Check if the user has bank details
+    $bankDetail = BankDetails::where('user_id', $user_id)->first();
+
+    if (!$bankDetail) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Please update your bank details before making a withdrawal.',
+        ], 400);
+    }
+
+    // Deduct the withdrawal amount from the Users table balance
+    $user->balance -= $amount;
+    $user->save(); // Save the updated user balance
+
+    // Check if the user exists in the Wallets table
+    $wallet = Wallets::where('user_id', $user_id)->first();
+
+    if ($wallet) {
+        // If user exists in Wallets, update their balance
+        $wallet->balance = $user->balance; // Update with the new balance from Users
+        $wallet->save();
+    } else {
+        // If user doesn't exist in Wallets, create a new record
+        Wallets::create([
+            'user_id' => $user_id,
+            'balance' => $user->balance, // Set balance to the current balance from Users
+        ]);
+    }
+
+    // Insert the withdrawal into the Withdrawals table with specific withdrawal_date
+    Withdrawals::create([
+        'user_id' => $user_id,
+        'amount' => $amount,
+        'datetime' => now(), // Set the current datetime
+    ]);
+
+    // Return response with the updated user balance
+    return response()->json([
+        'success' => true,
+        'message' => 'Withdrawal successfully.',
+    ], 200);
+}
+
+public function withdrawals_list(Request $request)
+{
+    // Retrieve user_id from request
+    $user_id = $request->input('user_id');
+
+
+    // Retrieve all withdrawals for the given user_id
+    $withdrawals = Withdrawals::where('user_id', $user_id)->get();
+
+    // Check if any withdrawals exist for this user
+    if ($withdrawals->isEmpty()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No withdrawals found for this user.',
+        ], 404);
+    }
+
+    // Prepare the withdrawal data
+    $withdrawalsData = [];
+    foreach ($withdrawals as $withdrawal) {
+        $withdrawalsData[] = [
+            'id' => $withdrawal->id,
+            'user_id' => $withdrawal->user_id,
+            'amount' => $withdrawal->amount,
+            'datetime' => $withdrawal->datetime, // Assuming this field exists
+        ];
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Withdrawals listed successfully.',
+        'data' => $withdrawalsData,
+    ], 200);
 }
 
 }

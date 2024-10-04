@@ -29,6 +29,7 @@ use App\Http\Controllers\ProfessionsController;
 use App\Http\Controllers\TransactionsController;
 use App\Http\Controllers\BulkUserController;
 use App\Http\Controllers\WalletsController;
+use App\Http\Controllers\WithdrawalsController;
 use App\Models\UserNotifications;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -195,6 +196,10 @@ Route::prefix('admin')->middleware('auth')->group(function () {
                     
                     Route::get('/wallets', [WalletsController::class, 'index'])->name('wallets.index');
                     Route::delete('/wallets/{wallets}', [WalletsController::class, 'destroy'])->name('wallets.destroy');
+                    
+                      
+                    Route::get('/withdrawals', [WithdrawalsController::class, 'index'])->name('withdrawals.index');
+                    Route::delete('/withdrawals/{withdrawals}', [WithdrawalsController::class, 'destroy'])->name('withdrawals.destroy');
                     
                
 

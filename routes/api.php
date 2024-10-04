@@ -73,7 +73,8 @@ Route::post('unread_all', [AuthController::class, 'unread_all']);
 Route::get('auto_view_profile', [AuthController::class, 'auto_view_profile']);
 Route::post('delete_account', [AuthController::class, 'delete_account']);
 Route::post('update_bank', [AuthController::class, 'update_bank']);
-
+Route::post('withdrawals', [AuthController::class, 'withdrawals']);
+Route::post('withdrawals_list', [AuthController::class, 'withdrawals_list']);
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
