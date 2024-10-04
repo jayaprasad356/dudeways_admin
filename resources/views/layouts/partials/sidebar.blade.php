@@ -137,6 +137,13 @@
                 </li>
                
                 <li class="nav-item has-treeview">
+                <a href="{{ route('wallets.index') }}" class="nav-link {{ activeSegment('wallets') }}">
+                    <i class="nav-icon fas fa-wallet"></i>
+                        <p>Wallets</p>
+                    </a>
+                </li>
+
+                <li class="nav-item has-treeview">
                     <a href="{{ route('appsettings.edit', 1) }}" class="nav-link {{ activeSegment('appsettings') }}">
                         <i class="nav-icon fas fa-gear"></i>
                         <p>App Settings</p>

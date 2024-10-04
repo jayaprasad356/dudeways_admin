@@ -13,12 +13,14 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('auto_view_profile', function (Blueprint $table) {
+        Schema::create('bank_detail', function (Blueprint $table) {
             $table->id();
-            $table->string('user_id'); 
-            $table->string('view_user_id'); 
-            $table->dateTime('view_datetime'); 
-            $table->boolean('status'); 
+            $table->string('user_id');
+            $table->string('account_holder_name');
+            $table->string('account_number');
+            $table->string('ifsc_code');
+            $table->string('bank_name');
+            $table->string('branch_name');
             $table->timestamps();
         });
     }
@@ -30,6 +32,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('auto_view_profile');
+        Schema::dropIfExists('bank_details');
     }
 };

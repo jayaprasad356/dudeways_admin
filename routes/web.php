@@ -28,6 +28,7 @@ use App\Http\Controllers\Verification_transController;
 use App\Http\Controllers\ProfessionsController;
 use App\Http\Controllers\TransactionsController;
 use App\Http\Controllers\BulkUserController;
+use App\Http\Controllers\WalletsController;
 use App\Models\UserNotifications;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -191,6 +192,9 @@ Route::prefix('admin')->middleware('auth')->group(function () {
                     //Feedbacks  
                     Route::get('/verification_trans', [Verification_transController::class, 'index'])->name('verification_trans.index');
                     Route::delete('/verification_trans/{verification_trans}', [Verification_transController::class, 'destroy'])->name('verification_trans.destroy');
+                    
+                    Route::get('/wallets', [WalletsController::class, 'index'])->name('wallets.index');
+                    Route::delete('/wallets/{wallets}', [WalletsController::class, 'destroy'])->name('wallets.destroy');
                     
                
 

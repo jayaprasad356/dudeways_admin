@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Users; 
+use App\Models\BankDetails; 
 use App\Models\Chats; 
 use App\Models\Chat_points; 
 use App\Models\Trips;
@@ -5898,5 +5899,94 @@ public function users_list(Request $request)
         ], 200);
     }
 
-    
+    public function update_bank(Request $request)
+{
+    $user_id = $request->input('user_id');
+
+    // Check if user_id is provided
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 400);
+    }
+
+    // Check if the user exists in the Users table
+    $user = Users::find($user_id);
+
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User not found in Users table.',
+        ], 404);
+    }
+
+    // Manually check each field and return custom messages if they are missing
+    if (empty($request->input('account_holder_name'))) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Account holder name is empty.',
+        ], 400);
+    }
+
+    if (empty($request->input('account_number'))) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Account number is empty.',
+        ], 400);
+    }
+
+    if (empty($request->input('ifsc_code'))) {
+        return response()->json([
+            'success' => false,
+            'message' => 'IFSC code is empty.',
+        ], 400);
+    }
+
+    if (empty($request->input('bank_name'))) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Bank name is empty.',
+        ], 400);
+    }
+
+    if (empty($request->input('branch_name'))) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Branch name is empty.',
+        ], 400);
+    }
+
+    // Prepare the data for updating or inserting
+    $data = [
+        'account_holder_name' => $request->input('account_holder_name'),
+        'account_number' => $request->input('account_number'),
+        'ifsc_code' => $request->input('ifsc_code'),
+        'bank_name' => $request->input('bank_name'),
+        'branch_name' => $request->input('branch_name'),
+    ];
+
+    // Check if the user exists in the BankDetails table
+    $bankDetail = BankDetails::where('user_id', $user_id)->first();
+
+    if ($bankDetail) {
+        // If user exists in BankDetails, update their bank information
+        $bankDetail->update($data);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Bank details updated successfully.',
+        ], 200);
+    } else {
+        // If user doesn't exist in BankDetails, insert a new record
+        $data['user_id'] = $user_id;
+        BankDetails::create($data);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Bank details added successfully.',
+        ], 200);
+    }
+}
+
 }
