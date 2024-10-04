@@ -54,6 +54,8 @@ if (isset($incomingData['status']) && $incomingData['status'] === 'Credit') {
         'parsed_data' => [
             'user_id' => $user_id,
             'points_id' => $points_id
+
+            
         ]
     ];
     echo json_encode($response);

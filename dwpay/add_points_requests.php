@@ -86,7 +86,7 @@ if (isset($tokenData['access_token'])) {
         'phone' => $phone,
         'redirect_url' => 'https://gmix.graymatterworks.com/path/to/serid/123',
         'send_email' => 'True',
-        'webhook' => 'https://gateway.graymatterworks.com/api/webhook.php',
+        'webhook' => 'https://dudeways.com/dwpay/webhook.php',
         'allow_repeated_payments' => 'False',
     ];
 
