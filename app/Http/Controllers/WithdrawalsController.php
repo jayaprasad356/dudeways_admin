@@ -28,6 +28,16 @@ class WithdrawalsController extends Controller
                       });
             });
         }
+          
+           // Filter by verified status
+    if ($request->filled('status')) {
+        $status = $request->input('status');
+        $query->where('status', $status);
+    }
+        // Check if the request is AJAX
+        if ($request->wantsJson()) {
+            return response($query->get());
+        }
         $withdrawals = $query->latest()->paginate(10); // Paginate the results
 
         $users = Users::all(); // Fetch all users for the filter dropdown

@@ -6071,19 +6071,22 @@ public function withdrawals(Request $request)
         ]);
     }
 
-    // Insert the withdrawal into the Withdrawals table with specific withdrawal_date
+    // Insert the withdrawal into the Withdrawals table with specific withdrawal_date and status = 0
     Withdrawals::create([
         'user_id' => $user_id,
         'amount' => $amount,
         'datetime' => now(), // Set the current datetime
+        'status' => 0, // Set status to 0
     ]);
 
     // Return response with the updated user balance
     return response()->json([
         'success' => true,
-        'message' => 'Withdrawal successfully.',
+        'message' => 'Withdrawal successful.',
+        'balance' => $user->balance,
     ], 200);
 }
+
 
 public function withdrawals_list(Request $request)
 {
@@ -6109,6 +6112,7 @@ public function withdrawals_list(Request $request)
             'id' => $withdrawal->id,
             'user_id' => $withdrawal->user_id,
             'amount' => $withdrawal->amount,
+            'status' => $withdrawal->status,
             'datetime' => $withdrawal->datetime, // Assuming this field exists
         ];
     }
