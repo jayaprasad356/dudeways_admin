@@ -18,5 +18,16 @@
         "B4:0E:CF:18:71:D4:8F:6E:B9:8A:33:FF:D0:A9:2C:62:1A:A7:1B:DA:B7:3E:FC:09:8E:4B:2E:68:23:EA:52:4A"
       ]
     }
+  },
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.gmwapp.dudeways",
+      "sha256_cert_fingerprints": [
+        "C4:6C:2D:91:6A:80:59:E0:D7:82:C6:A6:AA:A8:29:6B:0F:00:5B:4C:CA:90:98:1D:C3:F2:05:0D:B4:BD:13:2C"
+      ]
+    }
   }
+  
 ]
