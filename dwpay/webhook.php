@@ -14,26 +14,19 @@ if (isset($incomingData['status']) && $incomingData['status'] === 'Credit') {
         $purposeParts = explode('-', $incomingData['purpose']);
         
         $user_id = isset($purposeParts[0]) ? $purposeParts[0] : null;
-        $address_id = isset($purposeParts[1]) ? $purposeParts[1] : null;
-        $product_id = isset($purposeParts[2]) ? $purposeParts[2] : null;
-        $quantity = isset($purposeParts[3]) ? $purposeParts[3] : null;
+        $points_id = isset($purposeParts[1]) ? $purposeParts[1] : null;
 
         // Log the parsed data
         $logData .= "Parsed Purpose Data: \n";
         $logData .= "User ID: $user_id\n";
-        $logData .= "Address ID: $address_id\n";
-        $logData .= "Product ID: $product_id\n";
-        $logData .= "Quantity: $quantity\n";
+        $logData .= "Point ID: $points_id\n";
 
         // Call the external API with form data if status is Credit
-        $apiUrl = 'https://testgmix.graymatterworks.com/api/place_order';
+        $apiUrl = 'https://dudeways.com/api/add_points';
 
         $formData = [
             'user_id' => $user_id,
-            'address_id' => $address_id,
-            'product_id' => $product_id,
-            'payment_mode' => 'Prepaid',
-            'quantity' => $quantity
+            'points_id' => $points_id
         ];
 
         // Initialize cURL
@@ -60,9 +53,9 @@ if (isset($incomingData['status']) && $incomingData['status'] === 'Credit') {
         'message' => 'Webhook received, status is Credit, purpose parsed, order placed, and logged',
         'parsed_data' => [
             'user_id' => $user_id,
-            'address_id' => $address_id,
-            'product_id' => $product_id,
-            'quantity' => $quantity
+            'points_id' => $points_id
+
+            
         ]
     ];
     echo json_encode($response);
