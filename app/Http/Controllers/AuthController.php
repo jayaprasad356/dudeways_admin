@@ -2148,6 +2148,7 @@ public function add_chat(Request $request)
     $pointsRequired = 10;
     $userGender = $user->gender;
     $currentTime = Carbon::now();
+    
 
     if ($userGender !== 'female') {
         // Check for last points deduction
@@ -2230,13 +2231,24 @@ public function add_chat(Request $request)
         }
 
         if ($user->points >= $pointsRequired) {
-            // Deduct points from the user
             $user->points -= $pointsRequired;
             if (!$user->save()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Failed to update user points.',
                 ], 500);
+            }
+
+           // Add points to female user's balance if chat_user_id is female
+           if ($chat_user->gender === 'female') {
+            $pointsToCredit = floor($pointsRequired * 0.60); // Calculate 60% of 10 points
+            $chat_user->balance += $pointsToCredit;
+            if (!$chat_user->save()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Failed to update female user balance.',
+                    ], 500);
+                }
             }
 
             // Create a new chat points record
