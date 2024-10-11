@@ -187,8 +187,8 @@ public function register(Request $request)
     $profession_id = $request->input('profession_id');
     $referred_by = $request->input('referred_by');
     $introduction = $request->input('introduction');
-    $points = $request->input('points', 25);
-    $total_points = $request->input('total_points', 25);
+    $points = $request->input('points', 0);
+    $total_points = $request->input('total_points', 0);
     $mobile = $request->input('mobile', '0000000000');
 
     if (empty($state)) {
@@ -433,7 +433,7 @@ private function generateReferCode()
 
     return $refer_code;
 }
-private function addNotificationsForFemaleUsers($newUserId, $message)
+/*private function addNotificationsForFemaleUsers($newUserId, $message)
 {
     // Fetch female users
     $femaleUserIds = Users::where('gender', 'female')->pluck('id');
@@ -470,7 +470,7 @@ protected function sendNotificationsToFemaleUser($femaleUserId, $message)
             $schedule = null
         );
     }
-}
+}*/
 
 public function userdetails(Request $request)
 {
