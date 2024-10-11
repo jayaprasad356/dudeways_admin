@@ -60,6 +60,7 @@
                     <th>Refer Code <i class="fas fa-sort"></i></th>
                     <th>Referred By <i class="fas fa-sort"></i></th>
                     <th>Points <i class="fas fa-sort"></i></th>
+                    <th>Balance <i class="fas fa-sort"></i></th>
                     <th>Total Points <i class="fas fa-sort"></i></th>
                     <th>Introduction <i class="fas fa-sort"></i></th>
                     <th>Verified <i class="fas fa-sort"></i></th>
@@ -116,6 +117,7 @@
                         <td>{{$user->refer_code}}</td>
                         <td>{{$user->referred_by}}</td>
                         <td>{{$user->points}}</td>
+                        <td>{{$user->balance}}</td>
                         <td>{{$user->total_points}}</td>
                         <td>{{$user->introduction}}</td>
                         <td>
