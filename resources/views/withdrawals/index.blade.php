@@ -53,6 +53,7 @@
                 @foreach ($withdrawals as $withdrawal)
                 <tr>
                     <td>
+                    <a href="{{ route('withdrawals.edit', $withdrawal) }}" class="btn btn-primary"><i class="fas fa-edit"></i></a>
                         <button class="btn btn-danger btn-delete" data-url="{{route('withdrawals.destroy', $withdrawal)}}"><i class="fas fa-trash"></i></button>
                     </td>
                     <td>{{$withdrawal->id}}</td>
@@ -65,7 +66,7 @@
                                 {{ $withdrawal->status == 2 ? 'text-cancelled' : '' }}
                             ">
                                 {{ $withdrawal->status == 0 ? 'Pending' : '' }}
-                                {{ $withdrawal->status == 1 ? 'Verified' : '' }}
+                                {{ $withdrawal->status == 1 ? 'Paid' : '' }}
                                 {{ $withdrawal->status == 2 ? 'Cancelled' : '' }}
                             </span>
                         </td>

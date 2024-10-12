@@ -43,6 +43,11 @@
                 <textarea name="refund_policy" id="refund_policy" class="form-control ckeditor-content" rows="10" required>{!! $news->refund_policy !!}</textarea>
             </div>
 
+            <div class="form-group">
+                <label for="recharge_points">Recharge Points</label>
+                <input type="number" class="form-control" id="recharge_points" name="recharge_points" value="{{ $news->recharge_points }}" required>
+            </div>
+
             <div class="box-footer">
                 <button type="submit" class="btn btn-primary">Update</button>
             </div>

@@ -201,8 +201,10 @@ Route::prefix('admin')->middleware('auth')->group(function () {
                     
                       
                     Route::get('/withdrawals', [WithdrawalsController::class, 'index'])->name('withdrawals.index');
-                    Route::delete('/withdrawals/{withdrawals}', [WithdrawalsController::class, 'destroy'])->name('withdrawals.destroy');
-                    
+                    Route::delete('/withdrawals/{withdrawal}', [WithdrawalsController::class, 'destroy'])->name('withdrawals.destroy');
+                    Route::get('/withdrawals/{withdrawal}/edit', [WithdrawalsController::class, 'edit'])->name('withdrawals.edit');
+                    Route::put('/withdrawals/{withdrawal}', [WithdrawalsController::class, 'update'])->name('withdrawals.update');
+
                     Route::get('/bankdetails', [BankDetailsController::class, 'index'])->name('bankdetails.index');
                  
                     

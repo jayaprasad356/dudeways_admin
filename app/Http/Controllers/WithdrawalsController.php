@@ -44,14 +44,34 @@ class WithdrawalsController extends Controller
 
         return view('withdrawals.index', compact('withdrawals', 'users')); // Pass friends and users to the view
     }
-
-    public function destroy(Withdrawals $withdrawals)
+    public function edit(Withdrawals $withdrawal)
     {
-        $withdrawals->delete();
+        return view('withdrawals.edit', compact('withdrawal'));
+    }
+
+    public function update(Request $request, Withdrawals $withdrawal)
+    {
+        $request->validate([
+            'status' => 'required|integer|in:0,1,2',
+        ]);
+
+        $withdrawal->status = $request->input('status');
+
+        if ($withdrawal->save()) {
+            return redirect()->route('withdrawals.edit', $withdrawal->id)
+                ->with('success', 'Success, withdrawals have been updated.');
+        } else {
+            return redirect()->back()
+                ->with('error', 'Sorry, something went wrong while updating the withdrawal.');
+        }
+    }
+
+    public function destroy(Withdrawals $withdrawal)
+    {
+        $withdrawal->delete();
 
         return response()->json([
             'success' => true,
         ]);
     }
 }
-

@@ -187,9 +187,19 @@ public function register(Request $request)
     $profession_id = $request->input('profession_id');
     $referred_by = $request->input('referred_by');
     $introduction = $request->input('introduction');
-    $points = $request->input('points', 50);
-    $total_points = $request->input('total_points', 50);
     $mobile = $request->input('mobile', '0000000000');
+
+    $points = $request->input('points'); 
+    $total_points = $request->input('total_points'); 
+
+    $recharge_points = DB::table('news')
+    ->orderBy('updated_at', 'desc') 
+    ->value('recharge_points');
+
+    $recharge_points = $recharge_points ?? 0;
+
+    $points += $recharge_points;
+    $total_points += $recharge_points;
 
     if (empty($state)) {
         return response()->json([
@@ -433,7 +443,7 @@ private function generateReferCode()
 
     return $refer_code;
 }
-/*private function addNotificationsForFemaleUsers($newUserId, $message)
+private function addNotificationsForFemaleUsers($newUserId, $message)
 {
     // Fetch female users
     $femaleUserIds = Users::where('gender', 'female')->pluck('id');
@@ -470,7 +480,7 @@ protected function sendNotificationsToFemaleUser($femaleUserId, $message)
             $schedule = null
         );
     }
-}*/
+}
 
 public function userdetails(Request $request)
 {

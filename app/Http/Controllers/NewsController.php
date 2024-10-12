@@ -23,6 +23,7 @@ class NewsController extends Controller
             'privacy_policy' => 'required|string',
             'terms_conditions' => 'required|string',
             'refund_policy' => 'required|string',
+            'recharge_points' => 'required|string',
         ]);
 
         $news = News::findOrFail(1); // Again, assuming ID 1 for simplicity
@@ -32,6 +33,7 @@ class NewsController extends Controller
         $news->privacy_policy = $request->input('privacy_policy');
         $news->terms_conditions = $request->input('terms_conditions');
         $news->refund_policy = $request->input('refund_policy');
+        $news->recharge_points = $request->input('recharge_points');
     
 
         if ($news->save()) {
