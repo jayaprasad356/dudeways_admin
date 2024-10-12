@@ -19,8 +19,9 @@
                         <label for="status-filter" class="mr-2">Filter by Status:</label>
                         <select name="status" id="status-filter" class="form-control">
                             <option value="">All</option>
-                            <option value="1" {{ request()->input('status') === '1' ? 'selected' : '' }}>Verified</option>
+                            <option value="1" {{ request()->input('status') === '1' ? 'selected' : '' }}>Paid</option>
                             <option value="0" {{ request()->input('status') === '0' ? 'selected' : '' }}>Pending</option>
+                            <option value="2" {{ request()->input('status') === '2' ? 'selected' : '' }}>Cancelled</option>
                         </select>
                     </div>
                 </form>
