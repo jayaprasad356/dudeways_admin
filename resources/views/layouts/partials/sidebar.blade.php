@@ -135,6 +135,13 @@
                         <p>Verification Trans</p>
                     </a>
                 </li>
+
+                <li class="nav-item has-treeview">
+                <a href="{{ route('bankdetails.index') }}" class="nav-link {{ activeSegment('bankdetails') }}">
+                    <i class="nav-icon fas fa-bank"></i>
+                        <p>Bank Details</p>
+                    </a>
+                </li>
                
                 <li class="nav-item has-treeview">
                 <a href="{{ route('wallets.index') }}" class="nav-link {{ activeSegment('wallets') }}">

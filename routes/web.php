@@ -7,6 +7,7 @@ use App\Http\Controllers\PointsController;
 use App\Http\Controllers\PlansController;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\TripsController;
+use App\Http\Controllers\BankDetailsController;
 use App\Http\Controllers\ChatsController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\HomeController;    
@@ -30,6 +31,7 @@ use App\Http\Controllers\TransactionsController;
 use App\Http\Controllers\BulkUserController;
 use App\Http\Controllers\WalletsController;
 use App\Http\Controllers\WithdrawalsController;
+use App\Models\BankDetails;
 use App\Models\UserNotifications;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -200,6 +202,9 @@ Route::prefix('admin')->middleware('auth')->group(function () {
                       
                     Route::get('/withdrawals', [WithdrawalsController::class, 'index'])->name('withdrawals.index');
                     Route::delete('/withdrawals/{withdrawals}', [WithdrawalsController::class, 'destroy'])->name('withdrawals.destroy');
+                    
+                    Route::get('/bankdetails', [BankDetailsController::class, 'index'])->name('bankdetails.index');
+                 
                     
                
 
