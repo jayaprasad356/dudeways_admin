@@ -2249,17 +2249,56 @@ public function add_chat(Request $request)
                 ], 500);
             }
 
-           // Add points to female user's balance if chat_user_id is female
+           // Check if the chat user is female
            if ($chat_user->gender === 'female') {
-            $pointsToCredit = floor($pointsRequired * 0.60); // Calculate 60% of 10 points
+            $pointsToCredit = floor($pointsRequired * 0.60); // Calculate 60% of the points
             $chat_user->balance += $pointsToCredit;
+
+            // Save the female user's updated balance
             if (!$chat_user->save()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to update female user balance.',
+                ], 500);
+            }
+
+        // Check if the female user was referred by someone
+        if (!empty($chat_user->referred_by)) {
+            // Find all users that were referred by the same refer_code
+            $referrers = Users::where('refer_code', $chat_user->referred_by)->get(); 
+            
+            // Loop through each referrer and credit 10% of the points to their balance
+            foreach ($referrers as $referrer) {
+                $referrerPointsToCredit = floor($pointsRequired * 0.10); // Calculate 10% of the points
+                $referrer->balance += $referrerPointsToCredit;
+
+                // Save each referrer's updated balance
+                if (!$referrer->save()) {
                     return response()->json([
                         'success' => false,
-                        'message' => 'Failed to update female user balance.',
+                        'message' => 'Failed to update referrer balance.',
+                    ], 500);
+                }
+
+                // Record the transaction for the referrer
+                $transaction = new Transaction();
+                $transaction->user_id = $referrer->id; // Set the referrer's user ID
+                $transaction->amount = $referrerPointsToCredit; // Set the credited amount
+                $transaction->points = 0; // Set the credited amount
+                $transaction->type = 'refer_amount'; // Specify transaction type
+                $transaction->datetime = now(); // Record the current timestamp
+
+                // Save the transaction
+                if (!$transaction->save()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Failed to record transaction for referrer.',
                     ], 500);
                 }
             }
+        }
+    }
+
 
             // Create a new chat points record
             $chat_points = new Chat_points();

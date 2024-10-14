@@ -14,6 +14,7 @@ class Transaction extends Model
         'type',
         'points',
         'datetime',
+        'amount',
     ];
 
     public function user()
