@@ -2544,6 +2544,9 @@ public function add_chat(Request $request)
                 'chat_status' => '0',
             ], 404);
         }
+        $unreadMessagesSum = Chats::where('user_id', $user_id)
+        ->where('unread', '>', 0)  // Assuming 'unread' is a numeric field
+        ->sum('unread');
     
         // Prepare chat details
         $chatDetails = $chats->map(function ($chat) use ($user_id) {
@@ -2641,6 +2644,7 @@ public function add_chat(Request $request)
             'success' => true,
             'message' => 'Chat details listed successfully.',
             'total' => $totalChats,
+            'unread_count' => strval($unreadMessagesSum), // Cast unread count to string
             'data' => $sortedChatDetails, // Return the sorted chat details
         ], 200);
     }
