@@ -2472,20 +2472,22 @@ public function add_chat(Request $request)
     ], 201);
 }
 
-    protected function sendNotificationsToUser($chat_user_id, $message)
-    {
-        $user = Users::find($chat_user_id);
-        if ($user) {
-            $this->oneSignalClient->sendNotificationToExternalUser(
-                $message,
-                $chat_user_id,
-                $url = 'https://www.dudeways.com/path/to/userid?='. strval($chat_user_id) . '&chatid=' . strval($user->user_id),
-                $data = null,
-                $buttons = null,
-                $schedule = null
-            );
+      protected function sendNotificationsToUser($chat_user_id, $message)
+        {
+            $user = Users::find($chat_user_id);
+            
+            if ($user && $user->online_status == 0) {
+                $this->oneSignalClient->sendNotificationToExternalUser(
+                    $message,
+                    $chat_user_id,
+                    $url = 'https://www.dudeways.com/path/to/userid?='. strval($chat_user_id) . '&chatid=' . strval($user->user_id),
+                    $data = null,
+                    $buttons = null,
+                    $schedule = null
+                );
+            }
         }
-    }
+
     
     public function chat_list(Request $request)
     {
@@ -3412,6 +3414,7 @@ public function add_points(Request $request)
 
     // Get points from the points entry
     $points = $points_entry->points;
+    $price = $points_entry->price;
 
     // Add points to the user's points field
     $user->points += $points;
@@ -3428,6 +3431,7 @@ public function add_points(Request $request)
     $transaction->user_id = $user_id;
     $transaction->points = $points;
     $transaction->type = 'add_points';
+    $transaction->amount = $price;
     $transaction->datetime = now();
 
     if (!$transaction->save()) {

@@ -38,9 +38,9 @@ class HomeController extends Controller
         $today_reward_count = Transactions::where('type', 'reward_points')
         ->whereDate('datetime', $today)
         ->count();
-        $today_recharge_points = Transactions::where('type', 'add_points')
+        $today_recharge_amount = Transactions::where('type', 'add_points')
         ->whereDate('datetime', $today)
-        ->sum('points');
+        ->sum('amount');
         $pending_trips_count = Trips::where('trip_status', 0)->count();
         $pending_verification_count = Verifications::where('payment_status', 0)
         ->whereNotNull('payment_image')
@@ -55,7 +55,7 @@ class HomeController extends Controller
             'trips_count' => $trips_count,
             'today_registration_count' => $today_registration_count,
             'today_reward_count' => $today_reward_count,
-            'today_recharge_points' => $today_recharge_points,
+            'today_recharge_amount' => $today_recharge_amount,
             'pending_trips_count' => $pending_trips_count,
             'pending_verification_count' => $pending_verification_count,
         ]);
