@@ -133,7 +133,7 @@ public function check_email(Request $request)
         $response['success'] = true;
         $response['registered'] = false;
         $response['message'] = 'Email not registered.';
-        return response()->json($response, 404);
+        return response()->json($response, 200);
     }
 // Image URL
 $imageUrl = asset('storage/app/public/users/' . $user->profile);
@@ -5862,6 +5862,9 @@ public function users_list(Request $request)
                 'message' => 'No chats found.',
             ], 404);
         }
+        $unreadMessagesSum = Chats::where('user_id', $user_id)
+        ->where('unread', '>', 0)  // Assuming 'unread' is a numeric field
+        ->sum('unread');
 
         // Update the unread value to 0 for all chats
         $chats->each(function ($chat) {
@@ -5872,6 +5875,7 @@ public function users_list(Request $request)
         return response()->json([
             'success' => true,
             'message' => 'Unread all successfully.',
+            'unread_count' => strval($unreadMessagesSum),
         ], 200);
     }
 
