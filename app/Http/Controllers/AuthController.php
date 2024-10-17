@@ -205,67 +205,67 @@ public function register(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'state is empty.',
-        ], 400);
+        ], 200);
     }
     if (empty($city)) {
         return response()->json([
             'success' => false,
             'message' => 'city is empty.',
-        ], 400);
+        ], 200);
     }
     if (empty($introduction)) {
         return response()->json([
             'success' => false,
             'message' => 'introduction is empty.',
-        ], 400);
+        ], 200);
     }
     if (empty($age)) {
         return response()->json([
             'success' => false,
             'message' => 'Age is empty.',
-        ], 400);
+        ], 420);
     } elseif ($age < 18 || $age > 60) {
         return response()->json([
             'success' => false,
             'message' => 'Age should be between 18 and 60.',
-        ], 400);
+        ], 200);
     }
 
     if (empty($name)) {
         return response()->json([
             'success' => false,
             'message' => 'Name is empty.',
-        ], 400);
+        ], 200);
     } elseif (strlen($name) < 4 || strlen($name) > 18) {
         return response()->json([
             'success' => false,
             'message' => 'Name should be between 4 and 18 characters.',
-        ], 400);
+        ], 200);
     }
 
     if (empty($gender)) {
         return response()->json([
             'success' => false,
             'message' => 'Gender is empty.',
-        ], 400);
+        ], 200);
     } 
     if (empty($profession_id)) {
         return response()->json([
             'success' => false,
             'message' => 'profession_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     if (empty($email)) {
         return response()->json([
             'success' => false,
             'message' => 'Email is empty.',
-        ], 400);
+        ], 200);
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         return response()->json([
             'success' => false,
             'message' => 'Invalid email format.',
-        ], 400);
+        ], 200);
     }
 
     $existingUser = Users::where('unique_name', $unique_name)->first();
@@ -273,7 +273,7 @@ public function register(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'User already exists with this Unique Name.',
-        ], 409);
+        ], 200);
     }
     $profession = Professions::find($profession_id);
 
@@ -289,7 +289,7 @@ public function register(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'User already exists with this email.',
-        ], 409);
+        ], 200);
     }
     // Generate a refer_code automatically
     $refer_code = $this->generateReferCode();
