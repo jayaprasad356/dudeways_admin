@@ -9,8 +9,8 @@
             <div class="col-lg-4 col-6">
               <div class="small-box bg-green">
                     <div class="inner">
-                        <h3>{{ $today_recharge_points }}</h3>
-                        <p>Today Recharge Points</p>
+                        <h3>{{ $today_recharge_amount }}</h3>
+                        <p>Today Recharge Amount</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-user-clock"></i> <!-- Example of a different icon -->
