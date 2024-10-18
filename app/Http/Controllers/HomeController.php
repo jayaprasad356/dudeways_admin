@@ -42,7 +42,7 @@ class HomeController extends Controller
         $pending_withdrawals_count = Withdrawals::where('status', 0)
         ->whereDate('datetime', $today)
         ->sum('amount');
-        $today_recharge_amount = Transactions::where('type', 'recharge')
+        $today_recharge_amount = Transactions::where('type', 'add_points')
         ->whereDate('datetime', $today)
         ->sum('amount');
         $pending_trips_count = Trips::where('trip_status', 0)->count();
