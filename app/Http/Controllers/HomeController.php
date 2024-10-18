@@ -41,7 +41,7 @@ class HomeController extends Controller
         ->count();
         $pending_withdrawals_count = Withdrawals::where('status', 0)
         ->whereDate('datetime', $today)
-        ->count();
+        ->sum('amount');
         $pending_trips_count = Trips::where('trip_status', 0)->count();
         $pending_verification_count = Verifications::where('payment_status', 0)
         ->whereNotNull('payment_image')
