@@ -9,22 +9,8 @@
             <div class="col-lg-4 col-6">
               <div class="small-box bg-red">
                     <div class="inner">
-                        <h3>{{ $pending_withdrawals_count }}</h3>
-                        <p>Pending Withdrawals Count</p>
-                    </div>
-                    <div class="icon">
-                        <i class="fas fa-user-clock"></i> <!-- Example of a different icon -->
-                    </div>
-                    <a href="{{ route('withdrawals.index') }}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
-                </div>
-            </div>
-
-            <div class="col-lg-4 col-6">
-                <!-- small box -->
-                <div class="small-box bg-yellow">
-                    <div class="inner">
-                        <h3>{{ $today_reward_count }}</h3>
-                        <p>Today Rewards Count</p>
+                        <h3>{{ $today_recharge_points }}</h3>
+                        <p>Today Recharge Points</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-user-clock"></i> <!-- Example of a different icon -->
@@ -48,16 +34,15 @@
             </div>
 
             <div class="col-lg-4 col-6">
-                <!-- small box -->
-                <div class="small-box bg-green">
+              <div class="small-box bg-red">
                     <div class="inner">
-                        <h3>{{ $pending_verification_count }}</h3>
-                        <p>Pending Verification</p>
+                        <h3>{{ $pending_withdrawals_count }}</h3>
+                        <p>Pending Withdrawals Count</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-user-clock"></i> <!-- Example of a different icon -->
                     </div>
-                    <a href="{{ route('verifications.index') }}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                    <a href="{{ route('withdrawals.index') }}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
             </div>
 
