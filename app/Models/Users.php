@@ -27,6 +27,10 @@ class Users extends Authenticatable
     {
         return $this->belongsTo(Professions::class);
     }
+    public function bankDetails()
+    {
+        return $this->hasOne(BankDetails::class, 'user_id');
+    }
     public $timestamps = true;
 
     protected $hidden = [

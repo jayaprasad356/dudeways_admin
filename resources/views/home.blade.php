@@ -9,13 +9,13 @@
             <div class="col-lg-4 col-6">
               <div class="small-box bg-red">
                     <div class="inner">
-                        <h3>{{ $today_recharge_amount }}</h3>
-                        <p>Today Recharge Amount</p>
+                        <h3>{{ $pending_withdrawals_count }}</h3>
+                        <p>Pending Withdrawals Count</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-user-clock"></i> <!-- Example of a different icon -->
                     </div>
-                    <a href="{{ route('transactions.index') }}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                    <a href="{{ route('withdrawals.index') }}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
             </div>
 

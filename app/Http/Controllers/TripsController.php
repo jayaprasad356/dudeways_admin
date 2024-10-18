@@ -116,6 +116,11 @@ if ($request->filled('trip_status')) {
     $trip_status = $request->input('trip_status');
     $query->where('trip_status', $trip_status);
 }
+  // Single Date Filter
+  if ($request->filled('filter_date')) {
+    $filterDate = $request->input('filter_date');
+    $query->whereDate('trip_datetime', $filterDate);
+}
 
 // Default sorting: Show pending trips first, then other statuses
 $query->orderByRaw('CASE WHEN trip_status = 0 THEN 1 ELSE 2 END')

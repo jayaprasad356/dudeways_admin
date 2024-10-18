@@ -4,20 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Models\Users;
 use App\Models\Withdrawals;
-use App\Http\Controllers\Controller;
+use App\Models\BankDetails;
 use Illuminate\Http\Request;
 
 class WithdrawalsController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Withdrawals::query()->with('user'); // Eager load the user relationship
-
-         // Filter by user if user_id is provided
-         if ($request->has('user_id')) {
+        $query = Withdrawals::query()->with(['user', 'user.bankDetails']); // Eager load the user and their bank details
+    
+        // Filter by user if user_id is provided
+        if ($request->has('user_id')) {
             $user_id = $request->input('user_id');
             $query->where('user_id', $user_id);
         }
+    
+        // Filter by search
         if ($request->has('search')) {
             $search = $request->input('search');
             $query->where(function ($query) use ($search) {
@@ -28,22 +30,32 @@ class WithdrawalsController extends Controller
                       });
             });
         }
-          
-           // Filter by verified status
-    if ($request->filled('status')) {
-        $status = $request->input('status');
-        $query->where('status', $status);
-    }
+    
+        // Filter by verified status
+        if ($request->filled('status')) {
+            $status = $request->input('status');
+            $query->where('status', $status);
+        }
+    
+        // Single Date Filter
+        if ($request->filled('filter_date')) {
+            $filterDate = $request->input('filter_date');
+            $query->whereDate('datetime', $filterDate);
+        }
+    
         // Check if the request is AJAX
         if ($request->wantsJson()) {
-            return response($query->get());
+            return response()->json($query->get());
         }
+    
         $withdrawals = $query->latest()->paginate(10); // Paginate the results
-
+        $bankdetails = BankDetails::all();  // Fetch all bank details for the filter dropdown
         $users = Users::all(); // Fetch all users for the filter dropdown
-
-        return view('withdrawals.index', compact('withdrawals', 'users')); // Pass friends and users to the view
+    
+        return view('withdrawals.index', compact('withdrawals', 'users', 'bankdetails')); // Pass withdrawals, users, and bankdetails to the view
     }
+    
+
     public function edit(Withdrawals $withdrawal)
     {
         return view('withdrawals.edit', compact('withdrawal'));

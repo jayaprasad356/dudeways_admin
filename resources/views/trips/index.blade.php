@@ -51,19 +51,25 @@
         <div class="row mb-4">
             <div class="col-md-12">
                 <form id="filter-form" action="{{ route('trips.index') }}" method="GET">
-                    <div class="form-row">
+                    <div class="form-row align-items-end">
                         <div class="form-group col-md-4">
-                            <label for="status-filter">Filter by Status:</label>
+                            <label for="trip_status-filter">Filter by Status:</label>
                             <select name="trip_status" id="trip_status-filter" class="form-control">
                                 <option value="0" {{ request()->input('trip_status') === '0' ? 'selected' : '' }}>Pending</option>
                                 <option value="1" {{ request()->input('trip_status') === '1' ? 'selected' : '' }}>Approved</option>
                                 <option value="2" {{ request()->input('trip_status') === '2' ? 'selected' : '' }}>Cancelled</option>
                             </select>
                         </div>
+
+                        <div class="form-group col-md-3">
+                            <label for="filter-date">Filter by Date:</label>
+                            <input type="date" id="filter-date" name="filter_date" class="form-control" value="{{ request()->input('filter_date') }}">
+                        </div>
                     </div>
                 </form>
             </div>
         </div>
+
 
         <!-- Trips Table -->
         <div class="table-responsive">
@@ -146,6 +152,11 @@
         const queryParams = getQueryParams();
         $('#search-input').val(queryParams.search || '');
         $('#trip_status-filter').val(queryParams.trip_status || '');
+        $('#filter-date').val(queryParams.filter_date || '');
+
+        $('#filter-date').change(function () {
+            $('#filter-form').submit(); // Automatically submit form when date changes
+        })
 
         // Handle search input
         $('#search-input').on('input', function () {
@@ -156,7 +167,7 @@
         $('#trip_status-filter').change(function () {
             filterUsers();
         });
-
+      
         let debounceTimer;
 
 function filterUsers() {
@@ -165,8 +176,10 @@ function filterUsers() {
     debounceTimer = setTimeout(function() {
         let search = $('#search-input').val();
         let verified = $('#trip_status-filter').val();
+        let filterDate = $('#filter-date').val();
 
-        window.location.search = `search=${encodeURIComponent(search)}&trip_status=${encodeURIComponent(verified)}`;
+// Redirect to the same page with the parameters
+window.location.search = `search=${encodeURIComponent(search)}&trip_status=${encodeURIComponent(verified)}&filter_date=${encodeURIComponent(filterDate)}`;
     }, 500); // Adjust the delay (in milliseconds) as needed
 }
        
