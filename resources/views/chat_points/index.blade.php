@@ -15,9 +15,9 @@
             <div class="col-md-8">
                 <div class="col-md-4">
                     <!-- Input for User ID -->
-                    <form id="user-id-form" action="{{ route('chat_points.index') }}" method="GET">
+                    <form id="chat_user-id-form" action="{{ route('chat_points.index') }}" method="GET">
                         <div class="input-group">
-                            <input type="text" id="user-id-input" name="user_id" class="form-control" placeholder="Enter User ID" autocomplete="off" value="{{ request()->input('user_id') }}">
+                            <input type="text" id="chat_user-id-input" name="chat_user_id" class="form-control" placeholder="Enter User ID" autocomplete="off" value="{{ request()->input('chat_user_id') }}">
                         </div>
                     </form>
                 </div>
@@ -109,9 +109,9 @@
         }
 
         // Automatically submit user ID filter on input change with debounce
-        $('#user-id-input').on('input', debounce(function () {
-            const userId = $(this).val();
-            window.location.search = userId ? `user_id=${encodeURIComponent(userId)}` : ''; // Clear if empty
+        $('#chat_user-id-input').on('input', debounce(function () {
+            const chatuserId = $(this).val();
+            window.location.search = chatuserId ? `chat_user_id=${encodeURIComponent(chatuserId)}` : ''; // Clear if empty
         }, 500)); // 5000 milliseconds = 5 seconds
 
             function filterUsers() {
