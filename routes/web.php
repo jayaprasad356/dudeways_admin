@@ -25,6 +25,7 @@ use App\Http\Controllers\FakechatsController;
 use App\Http\Controllers\Chat_pointsController;
 use App\Http\Controllers\FeedbacksController;
 use App\Http\Controllers\Recharge_transController;
+use App\Http\Controllers\UserReportsController;
 use App\Http\Controllers\Verification_transController;
 use App\Http\Controllers\ProfessionsController;
 use App\Http\Controllers\TransactionsController;
@@ -114,7 +115,7 @@ Route::prefix('admin')->middleware('auth')->group(function () {
         Route::put('/chat_points/{chat_points}', [Chat_pointsController::class, 'update'])->name('chat_points.update');
         Route::post('/chat_points', [Chat_pointsController::class, 'store'])->name('chat_points.store');
 
-        
+    
 
       //Points  
       Route::get('/plans', [PlansController::class, 'index'])->name('plans.index');
@@ -204,6 +205,8 @@ Route::prefix('admin')->middleware('auth')->group(function () {
                     Route::delete('/withdrawals/{withdrawal}', [WithdrawalsController::class, 'destroy'])->name('withdrawals.destroy');
                     Route::get('/withdrawals/{withdrawal}/edit', [WithdrawalsController::class, 'edit'])->name('withdrawals.edit');
                     Route::put('/withdrawals/{withdrawal}', [WithdrawalsController::class, 'update'])->name('withdrawals.update');
+                    Route::post('/withdrawals/verify', [WithdrawalsController::class, 'verify'])->name('withdrawals.verify');
+                    Route::get('withdrawals/export', [WithdrawalsController::class, 'export'])->name('withdrawals.export');
 
                     Route::get('/bankdetails', [BankDetailsController::class, 'index'])->name('bankdetails.index');
                  

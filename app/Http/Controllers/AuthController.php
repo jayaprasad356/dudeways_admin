@@ -640,6 +640,7 @@ public function other_userdetails(Request $request)
     ], 200);
 }
 
+
 public function update_image(Request $request)
 {
     $user_id = $request->input('user_id');
@@ -656,28 +657,34 @@ public function update_image(Request $request)
     if (!$user) {
         return response()->json([
             'success' => false,
-            'message' => 'user not found.',
+            'message' => 'User not found.',
         ], 404);
+    }
+
+    if (!$request->hasFile('profile')) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Profile image is empty.',
+        ], 400);
     }
 
     $profile = $request->file('profile');
 
-    if ($profile !== null) {
+    if ($profile->isValid()) {
         $imagePath = $profile->store('users', 'public');
         $user->profile = basename($imagePath);
         $user->profile_verified = 1; 
         $user->datetime = now(); 
         $user->save();
-        // Image URL
 
         $user->load('profession');
+
         $imageUrl = asset('storage/app/public/users/' . $user->profile);
         $coverimageUrl = asset('storage/app/public/users/' . $user->cover_img);
-      
 
         return response()->json([
             'success' => true,
-            'message' => 'User Profile updated successfully.',
+            'message' => 'User profile updated successfully.',
             'data' => [
                 'id' => $user->id,
                 'name' => $user->name,
@@ -711,10 +718,10 @@ public function update_image(Request $request)
     } else {
         return response()->json([
             'success' => false,
-            'message' => 'profile image is empty.',
+            'message' => 'Invalid profile image file.',
         ], 400);
     }
-}
+} 
 
 
 public function update_cover_img(Request $request)
@@ -1060,43 +1067,43 @@ public function add_trip(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Trip Type is empty.',
-        ], 400);
+        ], 200);
     }
     if (empty($from_date)) {
         return response()->json([
             'success' => false,
             'message' => 'From Date is empty.',
-        ], 400);
+        ], 200);
     }
     if (empty($to_date)) {
         return response()->json([
             'success' => false,
             'message' => 'To Date is empty.',
-        ], 400);
+        ], 200);
     }
     if (empty($trip_title)) {
         return response()->json([
             'success' => false,
             'message' => 'Trip Title is empty.',
-        ], 400);
+        ], 200);
     }
     if (empty($trip_description)) {
         return response()->json([
             'success' => false,
             'message' => 'Trip Description is empty.',
-        ], 400);
+        ], 200);
     }
     if (empty($location)) {
         return response()->json([
             'success' => false,
             'message' => 'Location is empty.',
-        ], 400);
+        ], 200);
     }
     if (empty($user_id)) {
         return response()->json([
             'success' => false,
             'message' => 'User ID is empty.',
-        ], 400);
+        ], 200);
     }
 
     // Check if the user exists
@@ -1117,7 +1124,7 @@ public function add_trip(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'You already have a pending trip. Please wait until it is approved before adding a new one.',
-        ], 403);
+        ], 200);
     }
 
         // Check if the user is verified and gender is male
@@ -1125,7 +1132,7 @@ public function add_trip(Request $request)
             return response()->json([
                 'success' => false,
                 'message' => 'Please Verify your profile then post trip.',
-            ], 403);
+            ], 200);
            }
 
 
@@ -6118,6 +6125,17 @@ public function withdrawals(Request $request)
         ], 400);
     }
 
+    $pendingWithdrawal = Withdrawals::where('user_id', $user_id)
+                                     ->where('status', 0) 
+                                     ->first();
+
+    if ($pendingWithdrawal) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Please wait, your existing withdrawal is pending.',
+        ], 400);
+    }
+
     // Deduct the withdrawal amount from the Users table balance
     $user->balance -= $amount;
     $user->save(); // Save the updated user balance
@@ -6152,6 +6170,7 @@ public function withdrawals(Request $request)
         'balance' => $user->balance,
     ], 200);
 }
+
 
 
 public function withdrawals_list(Request $request)

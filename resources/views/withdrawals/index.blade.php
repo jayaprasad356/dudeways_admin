@@ -10,7 +10,25 @@
     @endsection
     @section('content')
     <div class="card">
-        <div class="card-body">
+    <div class="card-body">
+    <div class="row mb-4">
+    <div class="col-md-8 d-flex align-items-center">
+        <!-- Checkbox for Select All -->
+        <div class="form-check mr-3">
+            <input type="checkbox" class="form-check-input" id="checkAll">
+            <label class="form-check-label" for="checkAll">Select All</label>
+        </div>
+        <!-- Verify Button -->
+        <button class="btn btn-primary mr-3" id="verifyButton">Paid</button>
+    </div>
+    <div class="col-md-4 text-right d-flex flex-column">
+        <!-- Export Button -->
+        <form action="{{ route('withdrawals.export') }}" method="GET" class="mt-2 mt-md-0">
+            <button type="submit" class="btn btn-success">Export Withdrawals</button>
+        </form>
+    </div>
+</div>
+
             <div class="row mb-4">
                 <div class="col-md-8">
                     <!-- User Filter Dropdowns -->
@@ -46,6 +64,7 @@
             <table class="table table-bordered table-hover">
                 <thead class="thead-dark">
                     <tr>
+                    <th>Checkbox</th>
                         <th>Actions</th>
                         <th>ID <i class="fas fa-sort"></i></th>
                         <th>User Name <i class="fas fa-sort"></i></th>
@@ -62,6 +81,7 @@
                 <tbody>
                     @foreach ($withdrawals as $withdrawal)
                     <tr>
+                    <td><input type="checkbox" class="checkbox" data-id="{{ $withdrawal->id }}"></td>
                         <td>
                         <a href="{{ route('withdrawals.edit', $withdrawal) }}" class="btn btn-primary"><i class="fas fa-edit"></i></a>
                             <button class="btn btn-danger btn-delete" data-url="{{route('withdrawals.destroy', $withdrawal)}}"><i class="fas fa-trash"></i></button>
@@ -215,7 +235,43 @@
                     var arrow = asc ? '<i class="fas fa-arrow-up arrow"></i>' : '<i class="fas fa-arrow-down arrow"></i>';
                     table.find('th').eq(index).append(arrow);
                 }
-            });
+             // Handle "Select All" checkbox
+        $('#checkAll').change(function() {
+            $('.checkbox').prop('checked', $(this).prop('checked'));
         });
+
+        // Handle Verify Button click
+        $('#verifyButton').click(function() {
+            var withdrawalIds = [];
+            $('.checkbox:checked').each(function() {
+                withdrawalIds.push($(this).data('id'));
+            });
+
+            if (withdrawalIds.length > 0) {
+                // AJAX call to backend
+                $.ajax({
+                    url: "{{ route('withdrawals.verify') }}",
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        withdrawal_ids: withdrawalIds
+                    },
+                    success: function(response) {
+                        // Handle success response
+                        alert('Paid successfully!');
+                        location.reload(); // Reload the page or update UI as needed
+                    },
+                    error: function(xhr, status, error) {
+                        // Handle error response
+                        console.error(error);
+                        alert('Error updating withdrawals. Please try again.');
+                    }
+                });
+            } else {
+                alert('Please select at least one withdrawals.');
+            }
+        });
+    });
+});
         </script>
     @endsection

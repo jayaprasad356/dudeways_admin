@@ -78,65 +78,7 @@ class Chat_pointsController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Chat_pointsStoreRequest $request)
-    {
-        $chat_points = Chat_points::create([
-            'user_id' => $request->user_id,
-            'chat_user_id' => $request->chat_user_id,
-            'points' => $request->points,
-            'datetime' => now(),
-        ]);
-
-        if (!$chat_points) {
-            return redirect()->back()->with('error', 'Sorry, something went wrong while creating the chat.');
-        }
-
-        return redirect()->route('chat_points.index')->with('success', 'Success, new chat Points has been added successfully!');
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Chats  $chats
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Chat_points $chat_points)
-    {
-        // Implement show logic if needed
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Chats  $chats
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Chat_points $chat_points)
-    {
-        $users = Users::all(); // Fetch all users
-        return view('chat_points.edit', compact('chat_points', 'users'));
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Chats  $chats
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Chat_points $chat_points)
-    {
-        $chat_points->user_id = $request->user_id;
-        $chat_points->chat_user_id = $request->chat_user_id;
-        $chat_points->points = $request->points;
-        $chat_points->datetime = now();
-
-        if (!$chat_points->save()) {
-            return redirect()->back()->with('error', 'Sorry, something went wrong while updating the chat.');
-        }
-
-        return redirect()->route('chat_points.edit', $chat_points->id)->with('success', 'Success, Chat Points has been updated.');
-    }
+   
 
     public function destroy(Chat_points $chat_points)
     {
