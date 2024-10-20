@@ -49,7 +49,7 @@ class AuthController extends Controller
         if (empty($mobile)) {
             $response['success'] = false;
             $response['message'] = 'mobile is empty.';
-            return response()->json($response, 400);
+            return response()->json($response, 200);
         }
     
         // Remove non-numeric characters from the phone number
@@ -59,7 +59,7 @@ class AuthController extends Controller
         if (strlen($mobile) !== 10) {
             $response['success'] = false;
             $response['message'] = "mobile number should be exactly 10 digits";
-            return response()->json($response, 400);
+            return response()->json($response, 200);
         }
     
     
@@ -117,12 +117,12 @@ public function check_email(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Email is empty.',
-        ], 400);
+        ], 200);
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         return response()->json([
             'success' => false,
             'message' => 'Invalid email format.',
-        ], 400);
+        ], 200);
     }
 
     // Check if a customer with the given phone number exists in the database
@@ -301,7 +301,7 @@ public function register(Request $request)
             return response()->json([
                 'success' => false,
                 'message' => 'Invalid referred_by.',
-            ], 400);
+            ], 200);
         }
     }
 
@@ -490,7 +490,7 @@ public function userdetails(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'user_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     // Fetch the user details from the database based on the provided user_id
@@ -571,13 +571,13 @@ public function other_userdetails(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'user_id is empty.',
-        ], 400);
+        ], 200);
     }
     if (empty($other_user_id)) {
         return response()->json([
             'success' => false,
             'message' => 'other_user_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     // Fetch the other user's details from the database based on the provided other_user_id
@@ -649,7 +649,7 @@ public function update_image(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'user_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     $user = Users::find($user_id);
@@ -665,7 +665,7 @@ public function update_image(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Profile image is empty.',
-        ], 400);
+        ], 200);
     }
 
     $profile = $request->file('profile');
@@ -719,7 +719,7 @@ public function update_image(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Invalid profile image file.',
-        ], 400);
+        ], 200);
     }
 } 
 
@@ -732,7 +732,7 @@ public function update_cover_img(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'user_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     $user = Users::find($user_id);
@@ -795,7 +795,7 @@ public function update_cover_img(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Cover img is empty.',
-        ], 400);
+        ], 200);
     }
 }
 
@@ -808,7 +808,7 @@ public function update_users(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'user_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     $user = Users::find($user_id);
@@ -835,7 +835,7 @@ public function update_users(Request $request)
             return response()->json([
                 'success' => false,
                 'message' => 'Age should be between 18 and 60.',
-            ], 400);
+            ], 200);
         }
     }
 
@@ -845,7 +845,7 @@ public function update_users(Request $request)
             return response()->json([
                 'success' => false,
                 'message' => 'Name should be between 4 and 18 characters.',
-            ], 400);
+            ], 200);
         }
     }
 
@@ -855,7 +855,7 @@ public function update_users(Request $request)
             return response()->json([
                 'success' => false,
                 'message' => 'Invalid email format.',
-            ], 400);
+            ], 200);
         }
     }
 
@@ -866,7 +866,7 @@ public function update_users(Request $request)
             return response()->json([
                 'success' => false,
                 'message' => 'Invalid profession_id.',
-            ], 400);
+            ], 200);
         }
     }
 
@@ -949,7 +949,7 @@ public function update_location(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'user_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     $user = Users::find($user_id);
@@ -968,14 +968,14 @@ public function update_location(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'latitude is empty.',
-        ], 400);
+        ], 200);
     }
 
     if (is_null($longtitude)) {
         return response()->json([
             'success' => false,
             'message' => 'longtitude is empty.',
-        ], 400);
+        ], 200);
     }
 
     // Update user location details
@@ -1000,7 +1000,7 @@ public function update_notify(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'user_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     $user = Users::find($user_id);
@@ -1020,21 +1020,21 @@ public function update_notify(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Message Notify is empty.',
-        ], 400);
+        ], 200);
     }
 
     if (is_null($add_friend_notify)) {
         return response()->json([
             'success' => false,
             'message' => 'Add Friend Notify is empty.',
-        ], 400);
+        ], 200);
     }
 
     if (is_null($view_notify)) {
         return response()->json([
             'success' => false,
             'message' => 'View Notify is empty.',
-        ], 400);
+        ], 200);
     }
 
 
@@ -1224,7 +1224,7 @@ public function update_trip_image(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'trip_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     // Fetch the trip
@@ -1255,7 +1255,7 @@ public function update_trip_image(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Trip image is empty.',
-        ], 400);
+        ], 200);
     }
 }
 
@@ -1267,7 +1267,7 @@ public function update_trip(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'trip_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     // Retrieve the trip
@@ -1306,7 +1306,7 @@ public function update_trip(Request $request)
             return response()->json([
                 'success' => false,
                 'message' => 'Trip Type is empty.',
-            ], 400);
+            ], 200);
         }
         $trip->trip_type = $trip_type;
     }
@@ -1315,7 +1315,7 @@ public function update_trip(Request $request)
             return response()->json([
                 'success' => false,
                 'message' => 'From Date is empty.',
-            ], 400);
+            ], 200);
         }
         $trip->from_date = Carbon::parse($from_date)->format('Y-m-d');
     }
@@ -1324,7 +1324,7 @@ public function update_trip(Request $request)
             return response()->json([
                 'success' => false,
                 'message' => 'To Date is empty.',
-            ], 400);
+            ], 200);
         }
         $trip->to_date = Carbon::parse($to_date)->format('Y-m-d');
     }
@@ -1333,7 +1333,7 @@ public function update_trip(Request $request)
             return response()->json([
                 'success' => false,
                 'message' => 'Trip Title is empty.',
-            ], 400);
+            ], 200);
         }
         $trip->trip_title = $trip_title;
     }
@@ -1342,7 +1342,7 @@ public function update_trip(Request $request)
             return response()->json([
                 'success' => false,
                 'message' => 'Trip Description is empty.',
-            ], 400);
+            ], 200);
         }
         $trip->trip_description = $trip_description;
     }
@@ -1352,7 +1352,7 @@ public function update_trip(Request $request)
             return response()->json([
                 'success' => false,
                 'message' => 'Location is empty.',
-            ], 400);
+            ], 200);
         }
         $trip->location = $location;
     }
@@ -1419,7 +1419,7 @@ public function trip_list(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'User ID is required.',
-        ], 400);
+        ], 200);
     }
 
     $userId = $request->input('user_id');
@@ -1429,7 +1429,7 @@ public function trip_list(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Invalid User ID.',
-        ], 400);
+        ], 200);
     }
 
     // Get user latitude and longitude
@@ -1441,7 +1441,7 @@ public function trip_list(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Type is required.',
-        ], 400);
+        ], 200);
     }
 
     $type = $request->input('type');
@@ -1455,7 +1455,7 @@ public function trip_list(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Offset is empty.',
-        ], 400);
+        ], 200);
     }
 
     // Validate limit
@@ -1463,7 +1463,7 @@ public function trip_list(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Limit is empty.',
-        ], 400);
+        ], 200);
     }
 
     // Convert offset and limit to integers
@@ -1496,14 +1496,14 @@ public function trip_list(Request $request)
             return response()->json([
                 'success' => false,
                 'message' => 'Date is required.',
-            ], 400);
+            ], 200);
         }
         $fromDate = $request->input('date');
         if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $fromDate)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Invalid date format. Expected format: YYYY-MM-DD.',
-            ], 400);
+            ], 200);
         }
 
         $totalTrips = $tripsQuery->whereDate('from_date', $fromDate)->count();
@@ -1528,7 +1528,7 @@ public function trip_list(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Invalid type provided',
-        ], 400);
+        ], 200);
     }
 
     if ($trips->isEmpty()) {
@@ -1670,7 +1670,7 @@ public function my_trip_list(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Offset is empty.',
-        ], 400);
+        ], 200);
     }
 
     // Validate limit
@@ -1678,7 +1678,7 @@ public function my_trip_list(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Limit is empty.',
-        ], 400);
+        ], 200);
     }
 
     // Convert offset and limit to integers
@@ -1777,7 +1777,7 @@ public function trip_date(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Date is empty.',
-        ], 400);
+        ], 200);
     }
 
     // Check if the date is in a valid format (YYYY-MM-DD)
@@ -1785,7 +1785,7 @@ public function trip_date(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Invalid date format. Expected format: YYYY-MM-DD.',
-        ], 400);
+        ], 200);
     }
 
     // Fetch trips for the specific date from the database, comparing only the date part of the datetime field
@@ -1870,7 +1870,7 @@ public function latest_trip(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Type is empty.',
-        ], 400);
+        ], 200);
     }
 
     if ($type == 'latest') {
@@ -1950,7 +1950,7 @@ public function recent_trip(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Invalid offset value.',
-        ], 400);
+        ], 200);
     }
 
     // Validate limit
@@ -1958,7 +1958,7 @@ public function recent_trip(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Invalid limit value.',
-        ], 400);
+        ], 200);
     }
 
     $tripsQuery = Trips::orderBy('created_at', 'desc');
@@ -2059,7 +2059,7 @@ public function delete_trip(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'trip_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     // Fetch the offer from the database based on the provided offer_id
@@ -2093,28 +2093,28 @@ public function add_chat(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'user_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     if (empty($chat_user_id)) {
         return response()->json([
             'success' => false,
             'message' => 'chat_user_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     if (empty($message)) {
         return response()->json([
             'success' => false,
             'message' => 'Message is empty.',
-        ], 400);
+        ], 200);
     }
 
     if (!isset($unread)) {
         return response()->json([
             'success' => false,
             'message' => 'unread is not provided.',
-        ], 400);
+        ], 200);
     }
 
     // Check for self-chat
@@ -2122,7 +2122,7 @@ public function add_chat(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'You cannot chat with yourself.',
-        ], 400);
+        ], 200);
     }
 
     // Validate users
@@ -2324,7 +2324,7 @@ public function add_chat(Request $request)
                 'success' => false,
                 'message' => 'You don\'t have sufficient points to chat.',
                 'chat_status' => '0',
-            ], 400);
+            ], 200);
         }
     }
 
@@ -2509,7 +2509,7 @@ public function add_chat(Request $request)
             return response()->json([
                 'success' => false,
                 'message' => 'user_id is empty.',
-            ], 400);
+            ], 200);
         }
     
         // Get offset and limit from request with default values
@@ -2521,7 +2521,7 @@ public function add_chat(Request $request)
             return response()->json([
                 'success' => false,
                 'message' => 'Offset or limit is empty.',
-            ], 400);
+            ], 200);
         }
     
         // Convert offset and limit to integers
@@ -2668,7 +2668,7 @@ public function add_chat(Request $request)
             return response()->json([
                 'success' => false,
                 'message' => 'user_id is empty.',
-            ], 400);
+            ], 200);
         }
     
         // Validate chat_user_id
@@ -2676,7 +2676,7 @@ public function add_chat(Request $request)
             return response()->json([
                 'success' => false,
                 'message' => 'chat_user_id is empty.',
-            ], 400);
+            ], 200);
         }
     
         // Update unread field for the first scenario
@@ -2727,7 +2727,7 @@ public function delete_chat(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'user_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     // Validate chat_user_id
@@ -2735,7 +2735,7 @@ public function delete_chat(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'chat_user_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     // Find the chat entries where user_id and chat_user_id match in either direction
@@ -2786,7 +2786,7 @@ public function blocked_chat(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'user_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     // Validate chat_user_id
@@ -2794,7 +2794,7 @@ public function blocked_chat(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'chat_user_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     
@@ -2802,7 +2802,7 @@ public function blocked_chat(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'chat_blocked is empty.',
-        ], 400);
+        ], 200);
     }
 
 
@@ -2811,7 +2811,7 @@ public function blocked_chat(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'chat_blocked should be either 0 or 1.',
-        ], 400);
+        ], 200);
     }
 
     // Check if the chat record exists
@@ -2854,7 +2854,7 @@ public function add_friends(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'user_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     // Validate friend_user_id
@@ -2862,7 +2862,7 @@ public function add_friends(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'friend_user_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     // Check if user_id and friend_user_id are the same
@@ -2870,7 +2870,7 @@ public function add_friends(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'You cannot add yourself as a friend.',
-        ], 400);
+        ], 200);
     }
 
     // Validate friend action
@@ -2878,7 +2878,7 @@ public function add_friends(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'friend is empty.',
-        ], 400);
+        ], 200);
     }
 
     // Check if user exists
@@ -2928,7 +2928,7 @@ public function add_friends(Request $request)
             return response()->json([
                 'success' => false,
                 'message' => 'You have already added this friend.',
-            ], 400);
+            ], 200);
         }
 
         // Create a new friend instance
@@ -2971,7 +2971,7 @@ public function add_friends(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Invalid friend action.',
-        ], 400);
+        ], 200);
     }
 }
 
@@ -2984,7 +2984,7 @@ public function friends_list(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'user_id is empty.',
-        ], 400);
+        ], 200);
     }
   // Get offset and limit from request with default values
   $offset = $request->has('offset') ? $request->input('offset') : 0; // Default offset is 0 if not provided
@@ -2995,7 +2995,7 @@ public function friends_list(Request $request)
       return response()->json([
           'success' => false,
           'message' => 'Offset is empty.',
-      ], 400);
+      ], 200);
   }
 
   // Validate limit
@@ -3003,7 +3003,7 @@ public function friends_list(Request $request)
       return response()->json([
           'success' => false,
           'message' => 'Limit is empty.',
-      ], 400);
+      ], 200);
   }
 
   // Convert offset and limit to integers
@@ -3118,7 +3118,7 @@ public function add_notifications(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'user_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     // Validate notify_user_id
@@ -3126,7 +3126,7 @@ public function add_notifications(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'notify_user_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     // Validate message
@@ -3134,7 +3134,7 @@ public function add_notifications(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Message is empty.',
-        ], 400);
+        ], 200);
     }
 
     // Check if user exists
@@ -3203,7 +3203,7 @@ public function notification_list(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'user_id is empty.',
-        ], 400);
+        ], 200);
     }
 
      // Get offset and limit from request with default values
@@ -3215,7 +3215,7 @@ public function notification_list(Request $request)
       return response()->json([
           'success' => false,
           'message' => 'Offset is empty.',
-      ], 400);
+      ], 200);
   }
 
   // Validate limit
@@ -3223,7 +3223,7 @@ public function notification_list(Request $request)
       return response()->json([
           'success' => false,
           'message' => 'Limit is empty.',
-      ], 400);
+      ], 200);
   }
 
   // Convert offset and limit to integers
@@ -3326,25 +3326,25 @@ public function verifications(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'user_id is empty.',
-        ], 400);
+        ], 200);
     }
     if (empty($selfie_image)) {
         return response()->json([
             'success' => false,
             'message' => 'Selfie Image is empty.',
-        ], 400);
+        ], 200);
     }
     if (empty($front_image)) {
         return response()->json([
             'success' => false,
             'message' => 'Front Image is empty.',
-        ], 400);
+        ], 200);
     }
     if (empty($back_image)) {
         return response()->json([
             'success' => false,
             'message' => 'Back Image is empty.',
-        ], 400);
+        ], 200);
     }
 
     // Check if user exists
@@ -3398,7 +3398,7 @@ public function add_points(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'user_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     // Validate points_id
@@ -3406,7 +3406,7 @@ public function add_points(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'points_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     // Check if user exists
@@ -3477,7 +3477,7 @@ public function reward_points(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'user_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     // Validate points
@@ -3485,7 +3485,7 @@ public function reward_points(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'points is empty.',
-        ], 400);
+        ], 200);
     }
 
     // Check if user exists
@@ -3545,7 +3545,7 @@ public function spin_points(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'user_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     // Validate points
@@ -3553,7 +3553,7 @@ public function spin_points(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'points is empty.',
-        ], 400);
+        ], 200);
     }
 
     // Check if user exists
@@ -3586,7 +3586,7 @@ public function spin_points(Request $request)
             return response()->json([
                 'success' => false,
                 'message' => $timeLeftMessage,
-            ], 400);
+            ], 200);
         }
     }
 
@@ -3669,7 +3669,7 @@ public function verify_front_image(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'user_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     $user = Users::find($userId);
@@ -3726,7 +3726,7 @@ public function verify_front_image(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Front image is empty.',
-        ], 400);
+        ], 200);
     }
 }
 
@@ -3738,7 +3738,7 @@ public function verify_back_image(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'user_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     $user = Users::find($userId);
@@ -3795,7 +3795,7 @@ public function verify_back_image(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Back image is empty.',
-        ], 400);
+        ], 200);
     }
 }
 
@@ -3807,7 +3807,7 @@ public function verify_selfie_image(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'user_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     $user = Users::find($userId);
@@ -3864,7 +3864,7 @@ public function verify_selfie_image(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'selfie image is empty.',
-        ], 400);
+        ], 200);
     }
 }
 
@@ -3876,7 +3876,7 @@ public function payment_image(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'user_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     $user = Users::find($userId);
@@ -3933,7 +3933,7 @@ public function payment_image(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Payment image is empty.',
-        ], 400);
+        ], 200);
     }
 }
 
@@ -3946,7 +3946,7 @@ public function verification_list(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'user_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     // Get offset and limit from request with default values
@@ -3958,7 +3958,7 @@ public function verification_list(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Invalid offset.',
-        ], 400);
+        ], 200);
     }
 
     // Validate limit
@@ -3966,7 +3966,7 @@ public function verification_list(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Invalid limit.',
-        ], 400);
+        ], 200);
     }
 
     // Convert offset and limit to integers
@@ -4032,14 +4032,14 @@ public function add_feedback(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'user_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     if (empty($feedbackContent)) {
         return response()->json([
             'success' => false,
             'message' => 'feedback is empty.',
-        ], 400);
+        ], 200);
     }
 
     // Check if user exists
@@ -4247,14 +4247,14 @@ public function profile_view(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'user_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     if (empty($profile_user_id)) {
         return response()->json([
             'success' => false,
             'message' => 'profile_user_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     // Check if user and profile_user exist
@@ -4355,21 +4355,21 @@ public function send_notification(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'user_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     if (empty($message)) {
         return response()->json([
             'success' => false,
             'message' => 'message is empty.',
-        ], 400);
+        ], 200);
     }
 
     if (empty($title)) {
         return response()->json([
             'success' => false,
             'message' => 'title is empty.',
-        ], 400);
+        ], 200);
     }
     
     // Attempt to send notification using your OneSignal client
@@ -4410,7 +4410,7 @@ public function send_notification(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'user_id, message, or title is empty.',
-        ], 400);
+        ], 200);
     }
 
     // Prepare the data for the request
@@ -4953,7 +4953,7 @@ public function verification_status(Request $request)
             return response()->json([
                 'success' => false,
                 'message' => 'Invalid Plan ID',
-            ], 400);
+            ], 200);
         }
 
         $validity = $planEntry->validity;
@@ -5000,7 +5000,7 @@ public function verification_status(Request $request)
             return response()->json([
                 'success' => false,
                 'message' => 'User ID does not match the transaction ID',
-            ], 400);
+            ], 200);
         }
 
         // Check current status before updating
@@ -5039,7 +5039,7 @@ public function verification_status(Request $request)
             return response()->json([
                 'success' => false,
                 'message' => 'Verification already added',
-            ], 400);
+            ], 200);
         }
     } catch (\Exception $e) {
         // Handle any exceptions
@@ -5223,14 +5223,14 @@ public function send_msg_all(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'user_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     if (empty($message)) {
         return response()->json([
             'success' => false,
             'message' => 'Message is empty.',
-        ], 400);
+        ], 200);
     }
 
     // Validate the sender user
@@ -5413,7 +5413,7 @@ public function delete_profile(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'user_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     // Fetch the user from the database based on the provided user_id
@@ -5452,21 +5452,21 @@ public function send_msg_to_user(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'user_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     if (empty($chat_user_id)) {
         return response()->json([
             'success' => false,
             'message' => 'chat_user_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     if (empty($message)) {
         return response()->json([
             'success' => false,
             'message' => 'Message is empty.',
-        ], 400);
+        ], 200);
     }
 
     // Check for self-chat
@@ -5474,7 +5474,7 @@ public function send_msg_to_user(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'You cannot chat with yourself.',
-        ], 400);
+        ], 200);
     }
 
     // Validate users
@@ -5671,7 +5671,7 @@ public function active_users_list(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'user_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     // Check if the user_id exists in the Users table
@@ -5741,7 +5741,7 @@ public function users_list(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'user_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     // Check if the user_id exists in the Users table
@@ -5818,7 +5818,7 @@ public function users_list(Request $request)
             return response()->json([
                 'success' => false,
                 'message' => 'user_id is empty.',
-            ], 400);
+            ], 200);
         }
 
         // Validate chat_user_id
@@ -5826,7 +5826,7 @@ public function users_list(Request $request)
             return response()->json([
                 'success' => false,
                 'message' => 'chat_user_id is empty.',
-            ], 400);
+            ], 200);
         }
 
         // Find all chats where the user_id and chat_user_id match
@@ -5857,7 +5857,7 @@ public function users_list(Request $request)
             return response()->json([
                 'success' => false,
                 'message' => 'user_id is empty.',
-            ], 400);
+            ], 200);
         }
 
         // Find all chats where the user_id matches
@@ -5955,7 +5955,7 @@ public function users_list(Request $request)
             return response()->json([
                 'success' => false,
                 'message' => 'user_id is empty.',
-            ], 400);
+            ], 200);
         }
 
         $user = Users::find($user_id);
@@ -5985,7 +5985,7 @@ public function users_list(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'user_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     // Check if the user exists in the Users table
@@ -6003,35 +6003,35 @@ public function users_list(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Account holder name is empty.',
-        ], 400);
+        ], 200);
     }
 
     if (empty($request->input('account_number'))) {
         return response()->json([
             'success' => false,
             'message' => 'Account number is empty.',
-        ], 400);
+        ], 200);
     }
 
     if (empty($request->input('ifsc_code'))) {
         return response()->json([
             'success' => false,
             'message' => 'IFSC code is empty.',
-        ], 400);
+        ], 200);
     }
 
     if (empty($request->input('bank_name'))) {
         return response()->json([
             'success' => false,
             'message' => 'Bank name is empty.',
-        ], 400);
+        ], 200);
     }
 
     if (empty($request->input('branch_name'))) {
         return response()->json([
             'success' => false,
             'message' => 'Branch name is empty.',
-        ], 400);
+        ], 200);
     }
 
     // Prepare the data for updating or inserting
@@ -6075,7 +6075,7 @@ public function withdrawals(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'user_id is empty.',
-        ], 400);
+        ], 200);
     }
 
     // Check if the amount is provided
@@ -6083,7 +6083,7 @@ public function withdrawals(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Amount is empty.',
-        ], 400);
+        ], 200);
     }
 
     // Check if the user exists in the Users table
@@ -6104,7 +6104,7 @@ public function withdrawals(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Minimum withdrawal amount should be 50.',
-        ], 400);
+        ], 200);
     }
 
     // Check if the amount exceeds the user's available balance
@@ -6112,7 +6112,7 @@ public function withdrawals(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Insufficient balance.',
-        ], 400);
+        ], 200);
     }
 
     // Check if the user has bank details
@@ -6122,7 +6122,7 @@ public function withdrawals(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Please update your bank details before making a withdrawal.',
-        ], 400);
+        ], 200);
     }
 
     $pendingWithdrawal = Withdrawals::where('user_id', $user_id)
@@ -6133,7 +6133,7 @@ public function withdrawals(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Please wait, your existing withdrawal is pending.',
-        ], 400);
+        ], 200);
     }
 
     // Deduct the withdrawal amount from the Users table balance
