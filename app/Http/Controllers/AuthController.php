@@ -71,7 +71,7 @@ class AuthController extends Controller
             $response['success'] = true;
             $response['registered'] = false;
             $response['message'] = 'mobile not registered.';
-            return response()->json($response, 404);
+            return response()->json($response, 200);
         }
 
     // Image URL
@@ -281,7 +281,7 @@ public function register(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'profession not found.',
-        ], 404);
+        ], 200);
     }
     // Check if the user with the given email already exists
     $existingEmail = Users::where('email', $email)->first();
@@ -500,7 +500,7 @@ public function userdetails(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'User not found.',
-        ], 404);
+        ], 200);
     }
 
         $online_status = $request->input('online_status');
@@ -587,7 +587,7 @@ public function other_userdetails(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Other user not found.',
-        ], 404);
+        ], 200);
     }
 
     $otherUser->load('profession');
@@ -658,7 +658,7 @@ public function update_image(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'User not found.',
-        ], 404);
+        ], 200);
     }
 
     if (!$request->hasFile('profile')) {
@@ -741,7 +741,7 @@ public function update_cover_img(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'user not found.',
-        ], 404);
+        ], 200);
     }
 
     $cover_img = $request->file('cover_img');
@@ -817,7 +817,7 @@ public function update_users(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'user not found.',
-        ], 404);
+        ], 200);
     }
 
     $name = $request->input('name');
@@ -958,7 +958,7 @@ public function update_location(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'user not found.',
-        ], 404);
+        ], 200);
     }
 
     $latitude = $request->input('latitude');
@@ -1009,7 +1009,7 @@ public function update_notify(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'user not found.',
-        ], 404);
+        ], 200);
     }
 
     $message_notify = $request->input('message_notify');
@@ -1112,7 +1112,7 @@ public function add_trip(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'User not found.',
-        ], 404);
+        ], 200);
     }
 
     // Check if the user already has a pending trip
@@ -1234,7 +1234,7 @@ public function update_trip_image(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Trip not found.',
-        ], 404);
+        ], 200);
     }
 
   
@@ -1277,7 +1277,7 @@ public function update_trip(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Trip not found.',
-        ], 404);
+        ], 200);
     }
 
     $user_id = $request->input('user_id'); 
@@ -1297,7 +1297,7 @@ public function update_trip(Request $request)
             return response()->json([
                 'success' => false,
                 'message' => 'User not found.',
-            ], 404);
+            ], 200);
         }
         $trip->user_id = $user_id;
     }
@@ -1535,7 +1535,7 @@ public function trip_list(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'No trips found.',
-        ], 404);
+        ], 200);
     }
 
     $tripsWithDistance = [];
@@ -1558,7 +1558,7 @@ public function trip_list(Request $request)
             return response()->json([
                 'success' => false,
                 'message' => 'No trips found.',
-            ], 404);
+            ], 200);
         }
 
         usort($tripsWithDistance, function ($a, $b) {
@@ -1576,7 +1576,7 @@ public function trip_list(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'No trips found.',
-        ], 404);
+        ], 200);
     }
 
     $tripDetailsFormatted = [];
@@ -1704,7 +1704,7 @@ public function my_trip_list(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'No trips found.',
-        ], 404);
+        ], 200);
     }
 
     $tripDetails = [];
@@ -1795,7 +1795,7 @@ public function trip_date(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'No trips found for this date.',
-        ], 404);
+        ], 200);
     }
 
     $tripDetails = [];
@@ -1885,7 +1885,7 @@ public function latest_trip(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'No trips found.',
-        ], 404);
+        ], 200);
     }
 
     $user = Users::find($trip->user_id);
@@ -1973,7 +1973,7 @@ public function recent_trip(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'No trips found.',
-        ], 404);
+        ], 200);
     }
 
     // Assuming the current user's latitude and longtitude are available in the request
@@ -2069,7 +2069,7 @@ public function delete_trip(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'trip not found.',
-        ], 404);
+        ], 200);
     }
 
     // Delete the offer
@@ -2131,7 +2131,7 @@ public function add_chat(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'User not found.',
-        ], 404);
+        ], 200);
     }
 
     $chat_user = Users::find($chat_user_id);
@@ -2139,7 +2139,7 @@ public function add_chat(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Chat user not found.',
-        ], 404);
+        ], 200);
     }
 
     // Check if chat is blocked
@@ -2549,7 +2549,7 @@ public function add_chat(Request $request)
                 'message' => 'No chats found.',
                 'total' => 0,
                 'chat_status' => '0',
-            ], 404);
+            ], 200);
         }
         $unreadMessagesSum = Chats::where('user_id', $user_id)
         ->where('unread', '>', 0)  // Assuming 'unread' is a numeric field
@@ -2754,7 +2754,7 @@ public function delete_chat(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Chat not found.',
-        ], 404);
+        ], 200);
     }
 
     // Delete the chats
@@ -2823,7 +2823,7 @@ public function blocked_chat(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Chat record not found.',
-        ], 404);
+        ], 200);
     }
 
     // Update the chat_blocked field for the chat record
@@ -2887,7 +2887,7 @@ public function add_friends(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'user not found.',
-        ], 404);
+        ], 200);
     }
 
     // Check if friend_user exists
@@ -2896,7 +2896,7 @@ public function add_friends(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'friend_user not found.',
-        ], 404);
+        ], 200);
     }
 
     if ($friend == 2) {
@@ -2916,7 +2916,7 @@ public function add_friends(Request $request)
             return response()->json([
                 'success' => false,
                 'message' => 'You Already Removed as Friend.',
-            ], 404);
+            ], 200);
         }
     } else if ($friend == 1) {
         // Check if the friend relationship already exists
@@ -3028,7 +3028,7 @@ public function friends_list(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'No friends found.',
-        ], 404);
+        ], 200);
     }
 
     $friendDetails = $friends->map(function ($friend) use ($user_id) {
@@ -3143,7 +3143,7 @@ public function add_notifications(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'user not found.',
-        ], 404);
+        ], 200);
     }
 
     // Check if notify_user exists
@@ -3152,7 +3152,7 @@ public function add_notifications(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'notify_user not found.',
-        ], 404);
+        ], 200);
     }
 
     // Create a new notifications instance
@@ -3248,7 +3248,7 @@ public function notification_list(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'No notifications found.',
-        ], 404);
+        ], 200);
     }
 
     // Prepare notification details
@@ -3353,7 +3353,7 @@ public function verifications(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'User not found.',
-        ], 404);
+        ], 200);
     }
 
     // Store the images and get their paths
@@ -3415,7 +3415,7 @@ public function add_points(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'User not found.',
-        ], 404);
+        ], 200);
     }
 
     // Check if points entry exists
@@ -3424,7 +3424,7 @@ public function add_points(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Points entry not found.',
-        ], 404);
+        ], 200);
     }
 
     // Get points from the points entry
@@ -3494,7 +3494,7 @@ public function reward_points(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'User not found.',
-        ], 404);
+        ], 200);
     }
 
     // Update user points
@@ -3562,7 +3562,7 @@ public function spin_points(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'User not found.',
-        ], 404);
+        ], 200);
     }
 
     // Check if user can add points (once per day)
@@ -3637,7 +3637,7 @@ public function points_list(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'No Points found.',
-        ], 404);
+        ], 200);
     }
 
     $pointsDetails = [];
@@ -3678,7 +3678,7 @@ public function verify_front_image(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'User not found.',
-        ], 404);
+        ], 200);
     }
 
     if ($user->verified == 1) {
@@ -3747,7 +3747,7 @@ public function verify_back_image(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'User not found.',
-        ], 404);
+        ], 200);
     }
 
     if ($user->verified == 1) {
@@ -3816,7 +3816,7 @@ public function verify_selfie_image(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'User not found.',
-        ], 404);
+        ], 200);
     }
 
     if ($user->verified == 1) {
@@ -3885,7 +3885,7 @@ public function payment_image(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'User not found.',
-        ], 404);
+        ], 200);
     }
 
     if ($user->verified == 1) {
@@ -3989,7 +3989,7 @@ public function verification_list(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'No verifications found.',
-        ], 404);
+        ], 200);
     }
 
     // Format the verification details
@@ -4048,7 +4048,7 @@ public function add_feedback(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'user not found.',
-        ], 404);
+        ], 200);
     }
 
     // Create a new Feedback instance
@@ -4079,7 +4079,7 @@ public function profession_list(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'No profession found.',
-        ], 404);
+        ], 200);
     }
 
     $professionData = [];
@@ -4106,7 +4106,7 @@ public function settings_list(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'No settings found.',
-        ], 404);
+        ], 200);
     }
 
     $newsData = [];
@@ -4135,7 +4135,7 @@ public function appsettings_list(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'No Appsettings found.',
-        ], 404);
+        ], 200);
     }
 
     $appsettingsData = [];
@@ -4165,7 +4165,7 @@ public function privacy_policy(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'No privacy policy found.',
-        ], 404);
+        ], 200);
     }
 
     $newsData = [];
@@ -4192,7 +4192,7 @@ public function terms_conditions(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'No terms conditions found.',
-        ], 404);
+        ], 200);
     }
 
     $newsData = [];
@@ -4219,7 +4219,7 @@ public function refund_policy(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'No Refund policy found.',
-        ], 404);
+        ], 200);
     }
 
     $newsData = [];
@@ -4263,7 +4263,7 @@ public function profile_view(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'User not found.',
-        ], 404);
+        ], 200);
     }
 
     $profile_user = Users::find($profile_user_id);
@@ -4271,7 +4271,7 @@ public function profile_view(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Profile user not found.',
-        ], 404);
+        ], 200);
     }
 
        // Skip notification if user_id and profile_user_id are the same
@@ -4964,7 +4964,7 @@ public function verification_status(Request $request)
             return response()->json([
                 'success' => false,
                 'message' => 'Invalid User ID',
-            ], 404);
+            ], 200);
         }
 
         // Initialize HTTP client and send POST request
@@ -4992,7 +4992,7 @@ public function verification_status(Request $request)
             return response()->json([
                 'success' => false,
                 'message' => 'Verification transaction not found for txn_id: ' . $txn_id,
-            ], 404);
+            ], 200);
         }
 
         // Check if user_id matches
@@ -5075,7 +5075,7 @@ public function fakechat_list(Request $request)
             'success' => false,
             'message' => 'No fakechat found.',
             'total' => $totalCount, // Include total count even if no data found
-        ], 404);
+        ], 200);
     }
 
     $fakechatData = [];
@@ -5113,7 +5113,7 @@ public function plan_list(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'No plans found.',
-        ], 404);
+        ], 200);
     }
 
     $plansDetails = [];
@@ -5178,7 +5178,7 @@ public function recharge_user_list(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'No recharge transactions found.',
-        ], 404);
+        ], 200);
     }
 
     $professionData = [];
@@ -5239,7 +5239,7 @@ public function send_msg_all(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'User not found.',
-        ], 404);
+        ], 200);
     }
 
     // Fetch all users excluding the sender
@@ -5249,7 +5249,7 @@ public function send_msg_all(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'No other users found to send the message to.',
-        ], 404);
+        ], 200);
     }
 
     $currentTime = now();
@@ -5423,7 +5423,7 @@ public function delete_profile(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'User not found.',
-        ], 404);
+        ], 200);
     }
 
     // Check if a profile image exists and delete it from storage
@@ -5483,7 +5483,7 @@ public function send_msg_to_user(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'User not found.',
-        ], 404);
+        ], 200);
     }
 
     $chat_user = Users::find($chat_user_id);
@@ -5491,7 +5491,7 @@ public function send_msg_to_user(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'Chat user not found.',
-        ], 404);
+        ], 200);
     }
 
     $currentTime = now();
@@ -5680,7 +5680,7 @@ public function active_users_list(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'User not found.',
-        ], 404);
+        ], 200);
     }
 
     // Get the total count of active users with online_status = 1, excluding the specific user if necessary
@@ -5698,7 +5698,7 @@ public function active_users_list(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'No active users found.',
-        ], 404);
+        ], 200);
     }
 
     // Map through the active users and prepare the data
@@ -5750,7 +5750,7 @@ public function users_list(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'User not found.',
-        ], 404);
+        ], 200);
     }
 
     // Get the total count of users, excluding the specific user if necessary
@@ -5776,7 +5776,7 @@ public function users_list(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'No users found.',
-        ], 404);
+        ], 200);
     }
 
     // Map through the users and prepare the data
@@ -5839,7 +5839,7 @@ public function users_list(Request $request)
             return response()->json([
                 'success' => false,
                 'message' => 'No chats found.',
-            ], 404);
+            ], 200);
         }
 
         return response()->json([
@@ -5867,7 +5867,7 @@ public function users_list(Request $request)
             return response()->json([
                 'success' => false,
                 'message' => 'No chats found.',
-            ], 404);
+            ], 200);
         }
         $unreadMessagesSum = Chats::where('user_id', $user_id)
         ->where('unread', '>', 0)  // Assuming 'unread' is a numeric field
@@ -5964,7 +5964,7 @@ public function users_list(Request $request)
             return response()->json([
                 'success' => false,
                 'message' => 'User not found.',
-            ], 404);
+            ], 200);
         }
 
         // Delete the user from the database
@@ -5995,7 +5995,7 @@ public function users_list(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'User not found in Users table.',
-        ], 404);
+        ], 200);
     }
 
     // Manually check each field and return custom messages if they are missing
@@ -6093,7 +6093,7 @@ public function withdrawals(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'User not found in Users table.',
-        ], 404);
+        ], 200);
     }
 
     // Get the user's balance from the Users table
@@ -6187,7 +6187,7 @@ public function withdrawals_list(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'No withdrawals found for this user.',
-        ], 404);
+        ], 200);
     }
 
     // Prepare the withdrawal data
