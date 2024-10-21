@@ -22,6 +22,7 @@ class WithdrawalsExport implements FromCollection, WithHeadings
             ->select(
                 'withdrawals.id',
                 'users.name as user_name',
+                'users.unique_name as unique_name',
                 'withdrawals.amount',
                 'withdrawals.status', // Include status field
                 'withdrawals.datetime',
@@ -32,7 +33,8 @@ class WithdrawalsExport implements FromCollection, WithHeadings
                 'bank_details.ifsc_code'
             )
             ->join('users', 'withdrawals.user_id', '=', 'users.id')
-            ->leftJoin('bank_details', 'users.id', '=', 'bank_details.user_id'); // Assuming bank_details is the correct table name
+            ->leftJoin('bank_details', 'users.id', '=', 'bank_details.user_id') // Assuming bank_details is the correct table name
+            ->where('withdrawals.status', 0); // Only fetch status = 0
 
         // Apply filters if needed
         if (isset($this->filters['status'])) {
@@ -57,16 +59,11 @@ class WithdrawalsExport implements FromCollection, WithHeadings
             };
 
             return [
-                'id' => $withdrawal->id,
-                'user_name' => $withdrawal->user_name,
-                'amount' => $withdrawal->amount,
-                'status' => $statusDescription, // Add descriptive status
-                'datetime' => $withdrawal->datetime,
-                'bank_name' => $withdrawal->bank_name,
-                'branch_name' => $withdrawal->branch_name,
-                'account_number' => $withdrawal->account_number,
-                'account_holder_name' => $withdrawal->account_holder_name,
-                'ifsc_code' => $withdrawal->ifsc_code,
+                'Beneficiary Name' => $withdrawal->unique_name, // Unique user name again
+                'Beneficiary Account number' => $withdrawal->account_number,
+                'IFSC code' => $withdrawal->ifsc_code,
+                'Amount' => $withdrawal->amount,
+                'Description / Purpose' => 'salary', // Unique user name
             ];
         });
     }
@@ -74,16 +71,11 @@ class WithdrawalsExport implements FromCollection, WithHeadings
     public function headings(): array
     {
         return [
-            'ID',
-            'User Name',
-            'Amount',
-            'Status', // Column for descriptive status
-            'Datetime',
-            'Bank Name',
-            'Branch Name',
-            'Account Number',
-            'Account Holder Name',
-            'IFSC Code',
+            'Beneficiary Name (Mandatory)',
+            'Beneficiary Account number (Mandatory)',
+            'IFSC code (Mandatory)',
+            'Amount (Mandatory)', // Column for descriptive status
+            'Description / Purpose (Optional)',
         ];
     }
 }

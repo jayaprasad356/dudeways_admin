@@ -207,6 +207,8 @@ Route::prefix('admin')->middleware('auth')->group(function () {
                     Route::put('/withdrawals/{withdrawal}', [WithdrawalsController::class, 'update'])->name('withdrawals.update');
                     Route::post('/withdrawals/verify', [WithdrawalsController::class, 'verify'])->name('withdrawals.verify');
                     Route::get('withdrawals/export', [WithdrawalsController::class, 'export'])->name('withdrawals.export');
+                    Route::get('withdrawals/exportUsers', [WithdrawalsController::class, 'exportUsers'])->name('withdrawals.exportUsers');
+                    
 
                     Route::get('/bankdetails', [BankDetailsController::class, 'index'])->name('bankdetails.index');
                  

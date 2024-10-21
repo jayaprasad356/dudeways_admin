@@ -8,6 +8,7 @@ use App\Models\BankDetails;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\WithdrawalsExport; 
+use App\Exports\UsersExports; 
 
 class WithdrawalsController extends Controller
 {
@@ -107,4 +108,9 @@ class WithdrawalsController extends Controller
     {
         return Excel::download(new WithdrawalsExport($request->all()), 'withdrawals.xlsx');
     }
+    public function exportUsers(Request $request)
+    {
+        return Excel::download(new UsersExports($request->all()), 'users.xlsx');
+    }
+    
 }

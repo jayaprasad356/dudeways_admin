@@ -18,16 +18,21 @@
             <input type="checkbox" class="form-check-input" id="checkAll">
             <label class="form-check-label" for="checkAll">Select All</label>
         </div>
-        <!-- Verify Button -->
-        <button class="btn btn-primary mr-3" id="verifyButton">Paid</button>
-    </div>
-    <div class="col-md-4 text-right d-flex flex-column">
-        <!-- Export Button -->
-        <form action="{{ route('withdrawals.export') }}" method="GET" class="mt-2 mt-md-0">
-            <button type="submit" class="btn btn-success">Export Withdrawals</button>
-        </form>
-    </div>
-</div>
+                <!-- Verify Button -->
+                <button class="btn btn-primary mr-3" id="verifyButton">Paid</button>
+            </div>
+            <div class="col-md-4 d-flex flex-column flex-md-row justify-content-md-end align-items-start">
+            <!-- Export Withdrawals Button -->
+            <form action="{{ route('withdrawals.export') }}" method="GET" class="mt-2 mt-md-0">
+                <button type="submit" class="btn btn-success">Export Withdrawals</button>
+            </form>
+
+            <!-- Export Users Button -->
+            <form action="{{ route('withdrawals.exportUsers') }}" method="GET" class="mt-2 mt-md-0 ml-md-2">
+                <button type="submit" class="btn btn-success">Export Users</button>
+            </form>
+        </div>
+       </div>
 
             <div class="row mb-4">
                 <div class="col-md-8">
