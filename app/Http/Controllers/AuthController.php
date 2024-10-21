@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Users; 
+use App\Models\Reports; 
 use App\Models\Wallets; 
 use App\Models\Withdrawals; 
 use App\Models\BankDetails; 
@@ -6209,4 +6210,69 @@ public function withdrawals_list(Request $request)
     ], 200);
 }
 
+
+public function add_reports(Request $request)
+{
+    $user_id = $request->input('user_id'); 
+    $chat_user_id = $request->input('chat_user_id'); 
+    $message = $request->input('message'); // Renamed the variable to avoid conflict
+
+    // Validate user_id and feedbackContent
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 200);
+    }
+
+    if (empty($chat_user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'chat_user_id is empty.',
+        ], 200);
+    }
+
+    if (empty($message)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'message is empty.',
+        ], 200);
+    }
+
+    // Check if user exists
+    $user = Users::find($user_id);
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user not found.',
+        ], 200);
+    }
+       // Check if user exists
+       $chat_user = Users::find($chat_user_id);
+       if (!$chat_user) {
+           return response()->json([
+               'success' => false,
+               'message' => 'chat user not found.',
+           ], 200);
+       }
+
+    // Create a new Feedback instance
+    $report = new Reports();
+    $report->user_id = $user_id; 
+    $report->chat_user_id = $chat_user_id; 
+    $report->message = $message; // Assign the feedback content to the model property
+
+    // Save the feedback
+    if (!$report->save()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to save report.',
+        ], 500);
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Reports added successfully.',
+    ], 201);
+}
 }
