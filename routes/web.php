@@ -13,6 +13,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\HomeController;    
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\AppsettingsController;
 use App\Http\Controllers\NewsController;
@@ -208,6 +209,9 @@ Route::prefix('admin')->middleware('auth')->group(function () {
                     Route::post('/withdrawals/verify', [WithdrawalsController::class, 'verify'])->name('withdrawals.verify');
                     Route::get('withdrawals/export', [WithdrawalsController::class, 'export'])->name('withdrawals.export');
                     Route::get('withdrawals/exportUsers', [WithdrawalsController::class, 'exportUsers'])->name('withdrawals.exportUsers');
+                    
+                    Route::get('/reports', [ReportsController::class, 'index'])->name('reports.index');
+                    Route::delete('/reports/{reports}', [ReportsController::class, 'destroy'])->name('reports.destroy');
                     
 
                     Route::get('/bankdetails', [BankDetailsController::class, 'index'])->name('bankdetails.index');

@@ -158,6 +158,13 @@
                 </li>
 
                 <li class="nav-item has-treeview">
+                <a href="{{ route('reports.index') }}" class="nav-link {{ activeSegment('reports') }}">
+                    <i class="fas fa-exclamation-circle"></i>
+                        <p>Complaints</p>
+                    </a>
+                </li>
+
+                <li class="nav-item has-treeview">
                     <a href="{{ route('appsettings.edit', 1) }}" class="nav-link {{ activeSegment('appsettings') }}">
                         <i class="nav-icon fas fa-gear"></i>
                         <p>App Settings</p>

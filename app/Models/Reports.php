@@ -11,4 +11,13 @@ class Reports extends Model
         'chat_user_id',
         'message',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(Users::class, 'user_id');
+    }
+    public function chatUser()
+    {
+        return $this->belongsTo(Users::class, 'chat_user_id');
+    }
 }
