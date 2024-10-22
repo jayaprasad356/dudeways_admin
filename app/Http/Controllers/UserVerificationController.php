@@ -24,7 +24,7 @@ class UserVerificationController extends Controller
              $user = Users::find($verificationId);
              if ($user) {
                  // Update the withdrawal status to Paid (1)
-                 $user->verification_status = 1;
+                 $user->verified = 1;
                  $user->save();
              }
          }
@@ -40,7 +40,7 @@ class UserVerificationController extends Controller
         $user = Users::find($verificationId);
         if ($user) {
             // Change verification_status to Rejected (2)
-            $user->verification_status = 2;
+            $user->verified = 2;
             if (Storage::disk('public')->exists('users/' . $user->selfi_image)) {
                 Storage::disk('public')->delete('users/' . $user->selfi_image);
             }

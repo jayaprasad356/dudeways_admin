@@ -556,7 +556,6 @@ public function userdetails(Request $request)
             'balance' => $user->balance ?? '',
             'selfi_image' => $selfiimageUrl,
             'proof_image' => $proofimageUrl,
-            'verification_status' => $user->verification_status,
             'unread_count' => strval($unreadMessagesSum), // Cast unread count to string
             'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
@@ -2263,8 +2262,17 @@ public function add_chat(Request $request)
 
            // Check if the chat user is female
            if ($chat_user->gender === 'female') {
-            $pointsToCredit = floor($pointsRequired * 0.60); // Calculate 60% of the points
+            if ($chat_user->verified === 1) {
+                // Credit 60% of the points for verified users
+                $pointsToCredit = floor($pointsRequired * 0.60);
+            } else {
+                // Credit 20% of the points for unverified users
+                $pointsToCredit = floor($pointsRequired * 0.20);
+            }
+    
+            // Update the user's balance
             $chat_user->balance += $pointsToCredit;
+    
 
             // Save the female user's updated balance
             if (!$chat_user->save()) {
