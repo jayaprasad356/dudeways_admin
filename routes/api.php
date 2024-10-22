@@ -76,6 +76,8 @@ Route::post('update_bank', [AuthController::class, 'update_bank']);
 Route::post('withdrawals', [AuthController::class, 'withdrawals']);
 Route::post('withdrawals_list', [AuthController::class, 'withdrawals_list']);
 Route::post('add_reports', [AuthController::class, 'add_reports']);
+Route::post('user_earnings', [AuthController::class, 'user_earnings']);
+Route::post('update_mobile', [AuthController::class, 'update_mobile']);
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();

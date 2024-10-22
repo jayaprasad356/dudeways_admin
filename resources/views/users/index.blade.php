@@ -71,6 +71,7 @@
                     <th>View Notify <i class="fas fa-sort"></i></th>
                     <th>Profile Verified <i class="fas fa-sort"></i></th>
                     <th>Cover Image Verified <i class="fas fa-sort"></i></th>
+                    <th>Verified Status<i class="fas fa-sort"></i></th>
                     <th>DateTime <i class="fas fa-sort"></i></th>
                     </tr>
                 </thead>
@@ -158,12 +159,17 @@
                                 {{ $user->profile_verified == 1 ? 'Enable' : 'Disable' }}
                             </span>
                         </td>
-
                         <td>
-                        <span class="{{ $user->cover_img_verified == 1 ? 'text-enable' : 'text-disable' }}">
-                                {{ $user->cover_img_verified == 1 ? 'Enable' : 'Disable' }}
+                        <span class="{{ $user->cover_image_verified == 1 ? 'text-enable' : 'text-disable' }}">
+                                {{ $user->cover_image_verified == 1 ? 'Enable' : 'Disable' }}
                             </span>
                         </td>
+                        <td>
+                            <span style="color: {{ $user->verification_status == 1 ? 'green' : ($user->verification_status == 2 ? '#FF0000' : '#1E90FF') }};">
+                                {{ $user->verification_status == 1 ? 'Verified' : ($user->verification_status == 2 ? 'Rejected' : 'Not-Verified') }}
+                            </span>
+                        </td>
+
                         <td>{{$user->datetime}}</td>
                     </tr>
                     @endforeach

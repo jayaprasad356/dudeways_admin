@@ -521,7 +521,8 @@ public function userdetails(Request $request)
     // Image URLs
     $imageUrl = $user->profile ? asset('storage/app/public/users/' . $user->profile) : '';
     $coverimageUrl = $user->cover_img ? asset('storage/app/public/users/' . $user->cover_img) : '';
-
+    $selfiimageUrl = $user->selfi_image ? asset('storage/app/public/users/' . $user->selfi_image) : '';
+    $proofimageUrl = $user->proof_image ? asset('storage/app/public/users/' . $user->proof_image) : '';
 
     return response()->json([
         'success' => true,
@@ -553,6 +554,9 @@ public function userdetails(Request $request)
             'latitude' => $user->latitude,
             'longtitude' => $user->longtitude,
             'balance' => $user->balance ?? '',
+            'selfi_image' => $selfiimageUrl,
+            'proof_image' => $proofimageUrl,
+            'verification_status' => $user->verification_status,
             'unread_count' => strval($unreadMessagesSum), // Cast unread count to string
             'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
@@ -6275,4 +6279,140 @@ public function add_reports(Request $request)
         'message' => 'Reports added successfully.',
     ], 201);
 }
+
+public function user_earnings(Request $request)
+{
+    $user_id = $request->input('user_id');
+    $type = $request->input('type');
+
+    // Check if user_id is provided
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 200);
+    }
+
+    if (empty($type)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'type is empty.',
+        ], 200);
+    }
+
+    // Find the user by user_id
+    $user = Users::find($user_id);
+
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user not found.',
+        ], 200);
+    }
+
+    // Check if type is passed and if it's 'with_verification'
+    if ($type === 'with_verification') {
+        $selfi_image = $request->file('selfi_image');
+        $proof_image = $request->file('proof_image');
+
+        // Check if both images are provided
+        if ($selfi_image !== null && $proof_image !== null) {
+            // Save the selfie image
+            $selfieImagePath = $selfi_image->store('users', 'public');
+            $user->selfi_image = basename($selfieImagePath);
+
+            // Save the proof image
+            $proofImagePath = $proof_image->store('users', 'public');
+            $user->proof_image = basename($proofImagePath);
+
+            // Update the user record with image paths
+            $user->save();
+
+            // Image URLs
+            $selfieImageUrl = asset('storage/app/public/users/' . $user->selfi_image);
+            $proofImageUrl = asset('storage/app/public/users/' . $user->proof_image);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Verified successfully.',
+                'selfi_image_url' => $selfieImageUrl,
+                'proof_image_url' => $proofImageUrl
+            ], 200);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Both selfi_image and proof_image are required for verification.',
+            ], 200);
+        }
+    } 
+    // If the type is 'without_verification'
+    else if ($type === 'without_verification') {
+        return response()->json([
+            'success' => true,
+            'message' => 'User profile without verification.',
+        ], 200);
+    }
+
+    // If type is not valid
+    return response()->json([
+        'success' => false,
+        'message' => 'Invalid type provided.',
+    ], 400);
+}
+
+public function update_mobile(Request $request)
+{
+    $user_id = $request->input('user_id');
+
+    // Check if user_id is provided
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 200);
+    }
+
+    // Find the user by ID
+    $user = Users::find($user_id);
+
+    // Check if user exists
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user not found.',
+        ], 200);
+    }
+
+    // Get the mobile number from the request
+    $mobile = $request->input('mobile');
+
+    // Check if mobile number is provided
+    if (is_null($mobile)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'mobile is empty.',
+        ], 200);
+    }
+
+    // Validate the mobile number
+    if (!preg_match('/^\d{10}$/', $mobile)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Mobile number must be exactly 10 digits.',
+        ], 200);
+    }
+
+    // Update user's mobile number
+    $user->mobile = $mobile;
+
+    // Save the updated user details
+    $user->save();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Mobile updated successfully.',
+    ], 200);
+}
+
+
 }

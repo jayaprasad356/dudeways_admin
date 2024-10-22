@@ -21,6 +21,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\FriendsController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\UserNotificationsController;
+use App\Http\Controllers\UserVerificationController;
 use App\Http\Controllers\VerificationsController;
 use App\Http\Controllers\FakechatsController;
 use App\Http\Controllers\Chat_pointsController;
@@ -213,6 +214,11 @@ Route::prefix('admin')->middleware('auth')->group(function () {
                     Route::get('/reports', [ReportsController::class, 'index'])->name('reports.index');
                     Route::delete('/reports/{reports}', [ReportsController::class, 'destroy'])->name('reports.destroy');
                     
+                     //Verifications  
+        Route::get('/user_verifications', [UserVerificationController::class, 'index'])->name('user_verifications.index');
+        Route::post('/user_verifications/verify', [UserVerificationController::class, 'verify'])->name('user_verifications.verify');
+        Route::post('/user-verifications/reject', [UserVerificationController::class, 'reject'])->name('user_verifications.reject');
+
 
                     Route::get('/bankdetails', [BankDetailsController::class, 'index'])->name('bankdetails.index');
                  
