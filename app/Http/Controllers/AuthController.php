@@ -188,7 +188,7 @@ public function register(Request $request)
     $profession_id = $request->input('profession_id');
     $referred_by = $request->input('referred_by');
     $introduction = $request->input('introduction');
-    $mobile = $request->input('mobile', '0000000000');
+    $mobile = $request->input('mobile', '');
 
     $points = $request->input('points'); 
     $total_points = $request->input('total_points'); 
