@@ -357,6 +357,11 @@ public function register(Request $request)
 
     $user->load('profession');
 
+         // Add notification entries for female users
+         if ($gender === 'male') {
+            $this->addNotificationsForFemaleUsers($user_id, "{$user->name} registered In App.");
+        }
+
 
     // Image URL
     $imageUrl = asset('storage/app/public/users/' . $user->profile);
@@ -439,9 +444,44 @@ private function generateReferCode()
 
     return $refer_code;
 }
+private function addNotificationsForFemaleUsers($newUserId, $message)
+{
+    // Fetch female users
+    $femaleUserIds = Users::where('gender', 'female')->pluck('id');
 
+    foreach ($femaleUserIds as $femaleUserId) {
+        // Store notification entry for each female user
+        $notification = new Notifications();
+        $notification->user_id = $femaleUserId;
+        $notification->notify_user_id = $newUserId;  // ID of the new user
+        $notification->message = $message;
+        $notification->datetime = now();
+        $notification->save();
+    }
 
+    // Send notifications to all female users
+  //  foreach ($femaleUserIds as $femaleUserId) {
+  //      $this->sendNotificationsToFemaleUser(strval($femaleUserId), $message);
+  //  }
+}
 
+protected function sendNotificationsToFemaleUser($femaleUserId, $message)
+{
+    // Fetch the user
+    $user = Users::find($femaleUserId);
+
+    if ($user) {  // Send notification only if the user is offline
+        // Send notification via OneSignal
+        $this->oneSignalClient->sendNotificationToExternalUser(
+            $message,
+            $femaleUserId, // Corrected to use $femaleUserId
+            $url = null,
+            $data = null,
+            $buttons = null,
+            $schedule = null
+        );
+    }
+}
 
 public function userdetails(Request $request)
 {
@@ -464,7 +504,12 @@ public function userdetails(Request $request)
         ], 200);
     }
 
-    $user->load('profession');
+        $online_status = $request->input('online_status');
+
+        $user->online_status = '1';
+        $user->save();
+
+      $user->load('profession');
 
       // Get the sum of unread values
       $unreadMessagesSum = Chats::where('user_id', $user_id)
