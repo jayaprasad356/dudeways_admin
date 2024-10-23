@@ -459,10 +459,10 @@ private function addNotificationsForFemaleUsers($newUserId, $message)
         $notification->save();
     }
 
-    // Send notifications to all female users
-  //  foreach ($femaleUserIds as $femaleUserId) {
-  //      $this->sendNotificationsToFemaleUser(strval($femaleUserId), $message);
-  //  }
+    //Send notifications to all female users
+   foreach ($femaleUserIds as $femaleUserId) {
+       $this->sendNotificationsToFemaleUser(strval($femaleUserId), $message);
+   }
 }
 
 protected function sendNotificationsToFemaleUser($femaleUserId, $message)
@@ -506,8 +506,10 @@ public function userdetails(Request $request)
 
         $online_status = $request->input('online_status');
 
-        $user->online_status = '1';
-        $user->save();
+        if ($online_status === '0' || $online_status === '1') {
+            $user->online_status = $online_status;
+            $user->save();
+        }
 
       $user->load('profession');
 
