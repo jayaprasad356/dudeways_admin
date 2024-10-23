@@ -464,13 +464,6 @@ public function userdetails(Request $request)
         ], 200);
     }
 
-        $online_status = $request->input('online_status');
-
-        // Update online_status based on the provided value
-        if ($online_status === '0' || $online_status === '1') {
-            $user->online_status = $online_status;
-            $user->save();
-        }
     $user->load('profession');
 
       // Get the sum of unread values
@@ -6285,7 +6278,6 @@ public function user_earnings(Request $request)
             $proofImagePath = $proof_image->store('users', 'public');
             $user->proof_image = basename($proofImagePath);
 
-            // Update the user record with image paths
             $user->save();
 
             // Image URLs
