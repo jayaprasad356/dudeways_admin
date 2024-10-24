@@ -6356,7 +6356,7 @@ public function user_earnings(Request $request)
 
             return response()->json([
                 'success' => true,
-                'message' => 'Verified successfully.',
+                'message' => 'Under Verification.',
                 'selfi_image_url' => $selfieImageUrl,
                 'proof_image_url' => $proofImageUrl
             ], 200);
