@@ -6321,13 +6321,25 @@ public function user_earnings(Request $request)
         ], 200);
     }
 
-    // Check if type is passed and if it's 'with_verification'
-    if ($type === 'with_verification') {
-        $selfi_image = $request->file('selfi_image');
-        $proof_image = $request->file('proof_image');
+        // Check if type is passed and if it's 'with_verification'
+        if ($type === 'with_verification') {
+            $selfi_image = $request->file('selfi_image');
+            $proof_image = $request->file('proof_image');
+        
+            if (empty($selfi_image)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'selfi_image is empty.',
+                ], 200);
+            }
+        
+            if (empty($proof_image)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'proof_image is empty.',
+                ], 200);
+            }
 
-        // Check if both images are provided
-        if ($selfi_image !== null && $proof_image !== null) {
             // Save the selfie image
             $selfieImagePath = $selfi_image->store('users', 'public');
             $user->selfi_image = basename($selfieImagePath);
@@ -6348,13 +6360,8 @@ public function user_earnings(Request $request)
                 'selfi_image_url' => $selfieImageUrl,
                 'proof_image_url' => $proofImageUrl
             ], 200);
-        } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'Both selfi_image and proof_image are required for verification.',
-            ], 200);
         }
-    } 
+
     // If the type is 'without_verification'
     else if ($type === 'without_verification') {
         return response()->json([
@@ -6424,5 +6431,134 @@ public function update_mobile(Request $request)
     ], 200);
 }
 
+public function selfi_image(Request $request)
+{
+    $user_id = $request->input('user_id');
+    $type = $request->input('type');
 
+    // Check if user_id is provided
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 200);
+    }
+
+    if (empty($type)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'type is empty.',
+        ], 200);
+    }
+
+    // Find the user by user_id
+    $user = Users::find($user_id);
+
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user not found.',
+        ], 200);
+    }
+
+        // Check if type is passed and if it's 'with_verification'
+        if ($type === 'with_verification') {
+            $selfi_image = $request->file('selfi_image');
+            $proof_image = $request->file('proof_image');
+        
+            if (empty($selfi_image)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'selfi_image is empty.',
+                ], 200);
+            }
+        
+
+            // Save the selfie image
+            $selfieImagePath = $selfi_image->store('users', 'public');
+            $user->selfi_image = basename($selfieImagePath);
+
+            $user->save();
+
+            // Image URLs
+            $selfieImageUrl = asset('storage/app/public/users/' . $user->selfi_image);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Selfie Image Verified successfully.',
+                'selfi_image_url' => $selfieImageUrl
+            ], 200);
+        }
+
+    // If type is not valid
+    return response()->json([
+        'success' => false,
+        'message' => 'Invalid type provided.',
+    ], 400);
+}
+
+
+public function proof_image(Request $request)
+{
+    $user_id = $request->input('user_id');
+    $type = $request->input('type');
+
+    // Check if user_id is provided
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 200);
+    }
+
+    if (empty($type)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'type is empty.',
+        ], 200);
+    }
+
+    // Find the user by user_id
+    $user = Users::find($user_id);
+
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user not found.',
+        ], 200);
+    }
+
+        // Check if type is passed and if it's 'with_verification'
+        if ($type === 'with_verification') {
+            $proof_image = $request->file('proof_image');
+        
+            if (empty($proof_image)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'proof_image is empty.',
+                ], 200);
+            }
+
+
+            // Save the proof image
+            $proofImagePath = $proof_image->store('users', 'public');
+            $user->proof_image = basename($proofImagePath);
+
+            $user->save();
+
+            $proofImageUrl = asset('storage/app/public/users/' . $user->proof_image);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Proof Image Verified successfully.',
+                'proof_image_url' => $proofImageUrl
+            ], 200);
+        }
+
+    // If type is not valid
+    return response()->json([
+        'success' => false,
+        'message' => 'Invalid type provided.',
+    ], 400);
+}
 }

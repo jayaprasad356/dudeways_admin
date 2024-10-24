@@ -78,6 +78,8 @@ Route::post('withdrawals_list', [AuthController::class, 'withdrawals_list']);
 Route::post('add_reports', [AuthController::class, 'add_reports']);
 Route::post('user_earnings', [AuthController::class, 'user_earnings']);
 Route::post('update_mobile', [AuthController::class, 'update_mobile']);
+Route::post('selfi_image', [AuthController::class, 'selfi_image']);
+Route::post('proof_image', [AuthController::class, 'proof_image']);
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
