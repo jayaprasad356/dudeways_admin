@@ -6434,7 +6434,7 @@ public function update_mobile(Request $request)
 public function selfi_image(Request $request)
 {
     $user_id = $request->input('user_id');
-    $type = $request->input('type');
+    $type = $request->input('type', 'with_verification'); // Set default to 'with_verification'
 
     // Check if user_id is provided
     if (empty($user_id)) {
@@ -6444,13 +6444,8 @@ public function selfi_image(Request $request)
         ], 200);
     }
 
-    if (empty($type)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'type is empty.',
-        ], 200);
-    }
-
+    // No need to check if $type is empty since it defaults to 'with_verification'
+    
     // Find the user by user_id
     $user = Users::find($user_id);
 
@@ -6461,47 +6456,39 @@ public function selfi_image(Request $request)
         ], 200);
     }
 
-        // Check if type is passed and if it's 'with_verification'
-        if ($type === 'with_verification') {
-            $selfi_image = $request->file('selfi_image');
-            $proof_image = $request->file('proof_image');
-        
-            if (empty($selfi_image)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'selfi_image is empty.',
-                ], 200);
-            }
-        
+    // Now, you can assume $type will be 'with_verification' or whatever value is passed
+    if ($type === 'with_verification') {
+        $selfi_image = $request->file('selfi_image');
 
-            // Save the selfie image
-            $selfieImagePath = $selfi_image->store('users', 'public');
-            $user->selfi_image = basename($selfieImagePath);
-
-            $user->save();
-
-            // Image URLs
-            $selfieImageUrl = asset('storage/app/public/users/' . $user->selfi_image);
-
+        if (empty($selfi_image)) {
             return response()->json([
-                'success' => true,
-                'message' => 'Selfie Image Verified successfully.',
-                'selfi_image_url' => $selfieImageUrl
+                'success' => false,
+                'message' => 'selfi_image is empty.',
             ], 200);
         }
 
-    // If type is not valid
-    return response()->json([
-        'success' => false,
-        'message' => 'Invalid type provided.',
-    ], 400);
+        // Save the selfie image
+        $selfieImagePath = $selfi_image->store('users', 'public');
+        $user->selfi_image = basename($selfieImagePath);
+
+        $user->save();
+
+        // Image URLs
+        $selfieImageUrl = asset('storage/app/public/users/' . $user->selfi_image);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Selfie Image Verified successfully.',
+            'selfi_image_url' => $selfieImageUrl
+        ], 200);
+    }
 }
 
 
 public function proof_image(Request $request)
 {
     $user_id = $request->input('user_id');
-    $type = $request->input('type');
+    $type = $request->input('type', 'with_verification'); // Set default to 'with_verification'
 
     // Check if user_id is provided
     if (empty($user_id)) {
@@ -6511,13 +6498,8 @@ public function proof_image(Request $request)
         ], 200);
     }
 
-    if (empty($type)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'type is empty.',
-        ], 200);
-    }
-
+    // No need to check if $type is empty since it defaults to 'with_verification'
+    
     // Find the user by user_id
     $user = Users::find($user_id);
 
@@ -6528,37 +6510,31 @@ public function proof_image(Request $request)
         ], 200);
     }
 
-        // Check if type is passed and if it's 'with_verification'
-        if ($type === 'with_verification') {
-            $proof_image = $request->file('proof_image');
-        
-            if (empty($proof_image)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'proof_image is empty.',
-                ], 200);
-            }
+    // Now, you can assume $type will be 'with_verification' or whatever value is passed
+    if ($type === 'with_verification') {
+        $proof_image = $request->file('proof_image');
 
-
-            // Save the proof image
-            $proofImagePath = $proof_image->store('users', 'public');
-            $user->proof_image = basename($proofImagePath);
-
-            $user->save();
-
-            $proofImageUrl = asset('storage/app/public/users/' . $user->proof_image);
-
+        if (empty($proof_image)) {
             return response()->json([
-                'success' => true,
-                'message' => 'Proof Image Verified successfully.',
-                'proof_image_url' => $proofImageUrl
+                'success' => false,
+                'message' => 'proof_image is empty.',
             ], 200);
         }
 
-    // If type is not valid
-    return response()->json([
-        'success' => false,
-        'message' => 'Invalid type provided.',
-    ], 400);
+        // Save the proof image
+        $proofImagePath = $proof_image->store('users', 'public');
+        $user->proof_image = basename($proofImagePath);
+
+        $user->save();
+
+        $proofImageUrl = asset('storage/app/public/users/' . $user->proof_image);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Proof Image Verified successfully.',
+            'proof_image_url' => $proofImageUrl
+        ], 200);
+    }
 }
+
 }
