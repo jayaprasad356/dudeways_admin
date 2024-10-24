@@ -5702,10 +5702,10 @@ public function active_users_list(Request $request)
     $totalActiveUsers = $totalActiveUsersQuery->count();
 
     // Fetch active users whose active_datetime is within the last one hour,
-    // excluding the specific user if necessary, applying offset and limit
-    $activeUsers = $totalActiveUsersQuery->offset($offset)
-                                         ->limit($limit)
-                                         ->get();
+    $activeUsers = $totalActiveUsersQuery->orderBy('active_datetime', 'desc') // Sort by active_datetime descending
+                                        ->offset($offset)
+                                        ->limit($limit)
+                                        ->get();
 
     // Check if any active users are found
     if ($activeUsers->isEmpty()) {
