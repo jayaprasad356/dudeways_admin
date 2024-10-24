@@ -504,19 +504,21 @@ public function userdetails(Request $request)
         ], 200);
     }
 
-        $online_status = $request->input('online_status');
+    $online_status = $request->input('online_status');
 
-        if ($online_status === '0' || $online_status === '1') {
-            $user->online_status = $online_status;
-            $user->save();
-        }
+    // Check if the online_status is being updated (either '0' or '1')
+    if ($online_status === '0' || $online_status === '1') {
+        $user->online_status = $online_status;
+        $user->active_datetime = Carbon::now(); 
+        $user->save();
+    }
 
-      $user->load('profession');
+    $user->load('profession');
 
-      // Get the sum of unread values
-      $unreadMessagesSum = Chats::where('user_id', $user_id)
-      ->where('unread', '>', 0)  // Assuming 'unread' is a numeric field
-      ->sum('unread');
+    // Get the sum of unread values
+    $unreadMessagesSum = Chats::where('user_id', $user_id)
+        ->where('unread', '>', 0)  // Assuming 'unread' is a numeric field
+        ->sum('unread');
 
     // Image URLs
     $imageUrl = $user->profile ? asset('storage/app/public/users/' . $user->profile) : '';
@@ -564,6 +566,7 @@ public function userdetails(Request $request)
         ],
     ], 200);
 }
+
 
 
 public function other_userdetails(Request $request)
@@ -5669,7 +5672,7 @@ public function active_users_list(Request $request)
     // Retrieve offset, limit, and user_id from the request, with default values
     $offset = $request->input('offset', 0); // Default offset is 0
     $limit = $request->input('limit', 10);  // Default limit is 10
-    $excludeUserId = $request->input('user_id'); // The user_id to exclude if online_status is 1
+    $excludeUserId = $request->input('user_id'); // The user_id to exclude if needed
 
     // Validate the user_id input
     if (empty($excludeUserId)) {
@@ -5688,12 +5691,18 @@ public function active_users_list(Request $request)
         ], 200);
     }
 
-    // Get the total count of active users with online_status = 1, excluding the specific user if necessary
-    $totalActiveUsersQuery = Users::where('online_status', 1)
+    // Get the current time and calculate the time one hour ago
+    $currentDateTime = Carbon::now();
+    $oneHourAgo = Carbon::now()->subHour();
+
+    // Get the total count of users whose active_datetime is within the last one hour,
+    // excluding the specific user if necessary
+    $totalActiveUsersQuery = Users::whereBetween('active_datetime', [$oneHourAgo, $currentDateTime])
                                   ->where('id', '!=', $excludeUserId);
     $totalActiveUsers = $totalActiveUsersQuery->count();
 
-    // Fetch active users with online_status = 1, excluding the specific user if necessary, applying offset and limit
+    // Fetch active users whose active_datetime is within the last one hour,
+    // excluding the specific user if necessary, applying offset and limit
     $activeUsers = $totalActiveUsersQuery->offset($offset)
                                          ->limit($limit)
                                          ->get();
@@ -5717,11 +5726,12 @@ public function active_users_list(Request $request)
             'name' => $user->name,
             'unique_name' => $user->unique_name,
             'email' => $user->email,
-            'mobile' => $user->mobile,
+            'mobile' => $user->mobile ?? '',
             'gender' => $user->gender,
             'profile' => $imageUrl,
             'cover_img' => $coverimageUrl,
-            'online_status' => $user->online_status, // This will be 1 for all returned users
+            'online_status' => $user->online_status, // Include the online status as needed
+            'active_datetime' => Carbon::parse($user->active_datetime)->format('Y-m-d H:i:s'),
         ];
     });
 
@@ -5732,6 +5742,7 @@ public function active_users_list(Request $request)
         'data' => $activeUsersData,
     ], 200);
 }
+
 
 public function users_list(Request $request)
 {
@@ -5798,7 +5809,7 @@ public function users_list(Request $request)
             'introduction' => $user->introduction,
             'age' => $user->age,
             'email' => $user->email,
-            'mobile' => $user->mobile,
+            'mobile' => $user->mobile ?? '',
             'gender' => $user->gender,
             'profile' => $imageUrl,
             'cover_img' => $coverimageUrl,
