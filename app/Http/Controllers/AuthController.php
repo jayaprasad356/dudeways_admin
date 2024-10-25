@@ -1134,13 +1134,23 @@ public function add_trip(Request $request)
         ], 200);
     }
 
+        $approvedTrip = Trips::where('user_id', $user_id)
+        ->where('trip_status', 1) 
+        ->exists();
+
+        if ($approvedTrip) {
+        return response()->json([
+            'success' => false,
+            'message' => 'You have already uploaded a trip. You cannot upload another until it is removed or rejected.',
+        ], 200);
+        }
         // Check if the user is verified and gender is male
-        if ($user->gender == 'male' && $user->verified != 1) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Please Verify your profile then post trip.',
-            ], 200);
-           }
+       // if ($user->gender == 'male' && $user->verified != 1) {
+       //     return response()->json([
+        //        'success' => false,
+        //        'message' => 'Please Verify your profile then post trip.',
+         //   ], 200);
+       // }
 
 
     // Handle profile image URL and save it to the trips folder if needed
