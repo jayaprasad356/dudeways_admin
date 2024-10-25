@@ -2634,6 +2634,7 @@ public function add_chat(Request $request)
                 'name' => $chat_user->name,
                 'unique_name' => $chat_user->unique_name,
                 'points' => $chat_user->points,
+                'gender' => $chat_user->gender,
                 'profile' => $imageUrl,
                 'cover_img' => $coverImageUrl,
                 'online_status' => $chat_user->online_status,
@@ -3302,6 +3303,7 @@ public function notification_list(Request $request)
             'notify_user_id' => $notification->notify_user_id,
             'name' => $notify_user->name,
             'unique_name' => $notify_user->unique_name,
+            'gender' => $notify_user->gender,
             'verified' => strval($notify_user->verified), // Cast verified string
             'profile' => $imageUrl,
             'cover_img' => $coverImageUrl,
