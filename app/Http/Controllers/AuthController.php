@@ -2181,7 +2181,16 @@ public function add_chat(Request $request)
     // Gender and points check
     $pointsRequired = 10;
     $userGender = $user->gender;
+    $chatUserGender = $chat_user->gender;
     $currentTime = Carbon::now();
+    
+    // Check if both users are female
+    if ($userGender === 'female' && $chatUserGender === 'female') {
+        return response()->json([
+            'success' => false,
+            'message' => 'You cannot message female persons.',
+        ], 200);
+    }
     
 
     if ($userGender !== 'female') {
