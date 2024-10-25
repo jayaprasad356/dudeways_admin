@@ -358,9 +358,9 @@ public function register(Request $request)
     $user->load('profession');
 
          // Add notification entries for female users
-        //  if ($gender === 'male') {
-        //     $this->addNotificationsForFemaleUsers($user_id, "{$user->name} registered In App.");
-        // }
+         if ($gender === 'male') {
+            $this->addNotificationsForFemaleUsers($user_id, "{$user->name} registered In App.");
+        }
 
 
     // Image URL
