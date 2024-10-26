@@ -1531,14 +1531,15 @@ public function trip_list(Request $request)
                             ->skip($offset)
                             ->take($limit)
                             ->get();
-    } elseif ($type == 'female') {
-        // Filter trips by gender 'female'
+    } elseif($type == 'female') {
         $tripsQuery->whereHas('users', function ($query) {
             $query->where('gender', 'female');
         });
-
+    
         $totalTrips = $tripsQuery->count();
-        $trips = $tripsQuery->skip($offset)
+    
+        $trips = $tripsQuery->orderBy('trip_datetime', 'desc')
+                            ->skip($offset)
                             ->take($limit)
                             ->get();
     } else {
