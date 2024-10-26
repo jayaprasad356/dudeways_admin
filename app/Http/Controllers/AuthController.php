@@ -2296,7 +2296,6 @@ public function add_chat(Request $request)
                     'chat_status' => '0',
                 ], 500);
             }
-
         // Check if the female user was referred by someone
         if (!empty($chat_user->referred_by)) {
             // Find all users that were referred by the same refer_code
