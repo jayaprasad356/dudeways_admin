@@ -2286,7 +2286,13 @@ public function add_chat(Request $request)
 
            // Check if the chat user is female
            if ($chat_user->gender === 'female') {
-                $pointsToCredit = floor($pointsRequired * 0.60);
+                if ($chat_user->verified === 1) {
+                    // Credit 60% of the points for verified users
+                    $pointsToCredit = floor($pointsRequired * 0.60);
+                } else {
+                    // Credit 20% of the points for unverified users
+                    $pointsToCredit = floor($pointsRequired * 0.20);
+                }
               $chat_user->balance += $pointsToCredit;
     
 
