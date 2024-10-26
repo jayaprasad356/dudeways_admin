@@ -2293,6 +2293,7 @@ public function add_chat(Request $request)
                 return response()->json([
                     'success' => false,
                     'message' => 'Failed to update female user balance.',
+                    'chat_status' => '0',
                 ], 500);
             }
 
