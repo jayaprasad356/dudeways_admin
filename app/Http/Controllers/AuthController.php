@@ -2189,6 +2189,7 @@ public function add_chat(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'You cannot message female persons.',
+            'chat_status' => '0',
         ], 200);
     }
     
