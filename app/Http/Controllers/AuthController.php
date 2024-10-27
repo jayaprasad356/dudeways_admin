@@ -2525,7 +2525,7 @@ public function add_chat(Request $request)
                     $this->oneSignalClient->sendNotificationToExternalUser(
                         $message,
                         $chat_user_id,
-                        $url = 'https://www.dudeways.com/path/to/userid=' . strval($chat_user_id) . '&chatid=' . strval($user->user_id) . '&senderName=' . urlencode($user->name) . '&receiverName=' . urlencode($user->name) . '&senderUniqueName=' . urlencode($user->unique_name) . '&receiverName=' . urlencode($user->name),
+                        $url = null,
                         $data = null,
                         $buttons = null,
                         $schedule = null
