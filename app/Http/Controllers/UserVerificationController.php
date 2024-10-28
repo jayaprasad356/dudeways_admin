@@ -59,11 +59,12 @@ class UserVerificationController extends Controller
      public function index(Request $request)
      {
         $query = Users::whereNotNull('selfi_image')
-              ->where('selfi_image', '!=', '')
-              ->whereNotNull('proof_image')
-              ->where('proof_image', '!=', '');
+            ->where('selfi_image', '!=', '')
+        ->whereNotNull('proof_image')
+           ->where('proof_image', '!=', '')
+        ->where('verified', 0); // Filter by verified status
 
-         
+           
          // Apply search filter if provided
          if ($request->has('search') && $request->input('search') !== '') {
              $search = $request->input('search');
