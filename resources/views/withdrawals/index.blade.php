@@ -72,7 +72,7 @@
                     <th>Checkbox</th>
                         <th>Actions</th>
                         <th>ID <i class="fas fa-sort"></i></th>
-                        <th>User Name <i class="fas fa-sort"></i></th>
+                        <th>Unique Name<i class="fas fa-sort"></i></th>
                         <th>Amount <i class="fas fa-sort"></i></th>
                         <th>Status <i class="fas fa-sort"></i></th>
                         <th>Datetime <i class="fas fa-sort"></i></th>
@@ -92,7 +92,7 @@
                             <button class="btn btn-danger btn-delete" data-url="{{route('withdrawals.destroy', $withdrawal)}}"><i class="fas fa-trash"></i></button>
                         </td>
                         <td>{{$withdrawal->id}}</td>
-                        <td>{{ optional($withdrawal->user)->name }}</td> <!-- Display user name safely -->
+                        <td>{{ optional($withdrawal->user)->unique_name }}</td> <!-- Display user name safely -->
                         <td>{{$withdrawal->amount}}</td>
                         <td>
                                 <span class="
