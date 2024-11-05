@@ -6566,4 +6566,59 @@ public function proof_image(Request $request)
     }
 }
 
+public function random_user(Request $request)
+{
+    $user = Users::where('gender', 'female')
+                ->where('online_status', 1)
+                ->inRandomOrder()
+                ->limit(1)
+                ->first();
+
+    // Check if a user was found
+    if ($user) {
+        $imageUrl = $user->profile ? asset('storage/app/public/users/' . $user->profile) : '';
+        $coverimageUrl = $user->cover_img ? asset('storage/app/public/users/' . $user->cover_img) : '';
+        $selfiimageUrl = $user->selfi_image ? asset('storage/app/public/users/' . $user->selfi_image) : '';
+        $proofimageUrl = $user->proof_image ? asset('storage/app/public/users/' . $user->proof_image) : '';
+    
+        return response()->json([
+            'success' => true,
+            'message' => 'Random User retrieved successfully.',
+            'data' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'unique_name' => $user->unique_name,
+                'email' => $user->email,
+                'mobile' => $user->mobile ?? '',
+                'age' => $user->age,
+                'gender' => $user->gender,
+                'state' => $user->state,
+                'city' => $user->city,
+                'profession' => $user->profession ? $user->profession->profession : '',
+                'refer_code' => $user->refer_code,
+                'referred_by' => $user->referred_by ?? '',
+                'profile' => $imageUrl,
+                'cover_img' => $coverimageUrl,
+                'points' => $user->points,
+                'verified' => $user->verified,
+                'online_status' => $user->online_status,
+                'introduction' => $user->introduction,
+                'message_notify' => $user->message_notify,
+                'add_friend_notify' => $user->add_friend_notify,
+                'view_notify' => $user->view_notify,
+                'profile_verified' => $user->profile_verified,
+                'cover_img_verified' => $user->cover_img_verified,
+                'latitude' => $user->latitude ?? '',
+                'longtitude' => $user->longtitude ?? '',
+                'balance' => $user->balance ?? '',
+                'selfi_image' => $selfiimageUrl,
+                'proof_image' => $proofimageUrl,
+                'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
+                'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
+                'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
+            ],
+        ], 200);
+    }
+}
+
 }

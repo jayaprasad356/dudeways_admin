@@ -80,6 +80,7 @@ Route::post('user_earnings', [AuthController::class, 'user_earnings']);
 Route::post('update_mobile', [AuthController::class, 'update_mobile']);
 Route::post('selfi_image', [AuthController::class, 'selfi_image']);
 Route::post('proof_image', [AuthController::class, 'proof_image']);
+Route::post('random_user', [AuthController::class, 'random_user']);
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
