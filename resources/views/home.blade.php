@@ -60,6 +60,20 @@
                 </div>
             </div>
 
+            <div class="col-lg-4 col-6">
+                <!-- small box -->
+                <div class="small-box bg-orange">
+                    <div class="inner">
+                        <h3>{{ $today_active_users }}</h3>
+                        <p>Today Active Users Count</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-user-clock"></i> <!-- Example of a different icon -->
+                    </div>
+                    <a href="{{ route('users.index') }}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+
 
             <!-- ./col -->
         </div>

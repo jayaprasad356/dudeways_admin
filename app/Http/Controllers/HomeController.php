@@ -50,6 +50,7 @@ class HomeController extends Controller
         ->whereNotNull('payment_image')
         ->where('payment_image', '<>', '')
         ->count();
+        $today_active_users = Users::whereDate('active_datetime', $today)->count();
         
         // Optional: Count of pending profiles and cover images
         // $pending_profile_count = Users::where('profile_verified', 0)->whereNotNull('profile')->count();
@@ -63,6 +64,7 @@ class HomeController extends Controller
             'pending_trips_count' => $pending_trips_count,
             'pending_verification_count' => $pending_verification_count,
             'today_recharge_amount' => $today_recharge_amount,
+            'today_active_users' => $today_active_users,
         ]);
     }
 }

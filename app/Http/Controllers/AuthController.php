@@ -3047,8 +3047,10 @@ public function friends_list(Request $request)
   $limit = (int)$limit;
   
  
-     // Fetch friends for the specific user_id from the database with pagination
-     $friendsQuery = Friends::where('user_id', $user_id);
+      // Fetch friends for the specific user_id from the database with pagination
+      $friendsQuery = Friends::where('user_id', $user_id)
+      ->orderBy('datetime', 'desc'); // Sort by latest friends first
+
      $totalFriends = $friendsQuery->count(); // Get total count of friends
      
      if ($offset >= $totalFriends) {
@@ -6079,6 +6081,19 @@ public function users_list(Request $request)
         ], 200);
     }
 
+       // Check if the account number is already in use by another user
+       $account_number = $request->input('account_number');
+       $existingAccount = BankDetails::where('account_number', $account_number)
+                           ->where('user_id', '!=', $user_id) // Exclude the current user's record
+                           ->first();
+   
+       if ($existingAccount) {
+           return response()->json([
+               'success' => false,
+               'message' => 'Account number already exists.',
+           ], 200);
+       }
+       
     // Prepare the data for updating or inserting
     $data = [
         'account_holder_name' => $request->input('account_holder_name'),
