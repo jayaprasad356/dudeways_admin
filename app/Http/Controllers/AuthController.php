@@ -268,14 +268,6 @@ public function register(Request $request)
             'message' => 'Invalid email format.',
         ], 200);
     }
-
-    $existingUser = Users::where('unique_name', $unique_name)->first();
-    if ($existingUser) {
-        return response()->json([
-            'success' => false,
-            'message' => 'User already exists with this Unique Name.',
-        ], 200);
-    }
     $profession = Professions::find($profession_id);
 
     if (!$profession) {
