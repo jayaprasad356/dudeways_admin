@@ -40,7 +40,6 @@ class HomeController extends Controller
         ->whereDate('datetime', $today)
         ->count();
         $pending_withdrawals_count = Withdrawals::where('status', 0)
-        ->whereDate('datetime', $today)
         ->sum('amount');
         $today_recharge_amount = Transactions::where('type', 'add_points')
         ->whereDate('datetime', $today)
