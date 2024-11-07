@@ -2286,6 +2286,8 @@ public function add_chat(Request $request)
                     $pointsToCredit = floor($pointsRequired * 0.20);
                 }
               $chat_user->balance += $pointsToCredit;
+
+           $this->sendNotificationsToFemaleUsers(strval($chat_user_id), "Amount Credited To Your Wallet");
     
 
             // Save the female user's updated balance
@@ -2525,6 +2527,24 @@ public function add_chat(Request $request)
                 }
             }
 
+            protected function sendNotificationsToFemaleUsers($chat_user_id, $message)
+            {
+                $user = Users::find($chat_user_id);
+
+                
+                if ($user && $user->online_status == 0) {
+                    
+                    // Send notification via OneSignal
+                    $this->oneSignalClient->sendNotificationToExternalUser(
+                        $message,
+                        $chat_user_id,
+                        $url = null,
+                        $data = null,
+                        $buttons = null,
+                        $schedule = null
+                    );
+                }
+            }
 
     
     public function chat_list(Request $request)
@@ -6575,12 +6595,8 @@ public function proof_image(Request $request)
 
 public function random_user(Request $request)
 {
-    $user = Users::where('gender', 'female')
-                ->where('online_status', 1)
-                ->inRandomOrder()
-                ->limit(1)
-                ->first();
-
+    $user = Users::find(2398);
+    
     // Check if a user was found
     if ($user) {
         $imageUrl = $user->profile ? asset('storage/app/public/users/' . $user->profile) : '';
