@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Users; 
+use App\Models\user_calls;
 use App\Models\Reports; 
 use App\Models\Wallets; 
 use App\Models\Withdrawals; 
@@ -6643,5 +6644,99 @@ public function random_user(Request $request)
         ], 200);
     }
 }
+public function user_call(Request $request)
+{
+    $user_id = $request->input('user_id');
+    $call_user_id = $request->input('call_user_id');
+    $start_datetime = $request->input('start_datetime');
+    $end_datetime = $request->input('end_datetime');
+
+    // Validate that the required inputs are not empty
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 200);
+    }
+    if (empty($call_user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'call_user_id is empty.',
+        ], 200);
+    }
+    if (empty($start_datetime)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'start_datetime is empty.',
+        ], 200);
+    }
+    if (empty($end_datetime)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'end_datetime is empty.',
+        ], 200);
+    }
+
+    // Manual check for datetime format
+    if (!strtotime($start_datetime)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid start_datetime format. It should be in Y-m-d H:i:s format.',
+        ], 200);
+    }
+
+    if (!strtotime($end_datetime)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid end_datetime format. It should be in Y-m-d H:i:s format.',
+        ], 200);
+    }
+
+    // Check if end_datetime is after start_datetime
+    if (strtotime($end_datetime) <= strtotime($start_datetime)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'end_datetime should be after start_datetime.',
+        ], 200);
+    }
+
+    // Check if users exist
+    $user = Users::find($user_id);
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User not found.',
+        ], 200);
+    }
+
+    $callUser = Users::find($call_user_id);
+    if (!$callUser) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Call user not found.',
+        ], 200);
+    }
+
+    // Create a new Usercall instance
+    $usercalls = new user_calls();
+    $usercalls->user_id = $user_id;
+    $usercalls->call_user_id = $call_user_id;
+    $usercalls->start_datetime = $start_datetime;
+    $usercalls->end_datetime = $end_datetime;
+
+    // Save the user call
+    if (!$usercalls->save()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to save user call.',
+        ], 500);
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'User call added successfully.',
+    ], 200);
+}
+
 
 }
