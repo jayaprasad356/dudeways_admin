@@ -6253,7 +6253,9 @@ public function withdrawals_list(Request $request)
 
 
     // Retrieve all withdrawals for the given user_id
-    $withdrawals = Withdrawals::where('user_id', $user_id)->get();
+    $withdrawals = Withdrawals::where('user_id', $user_id)
+                 ->orderBy('datetime', 'desc')
+                 ->get();
 
     // Check if any withdrawals exist for this user
     if ($withdrawals->isEmpty()) {
