@@ -73,7 +73,18 @@
                     <a href="{{ route('users.index') }}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
             </div>
-
+            <div class="col-lg-4 col-6">
+              <div class="small-box bg-teal">
+                    <div class="inner">
+                        <h3>{{ $yesterday_recharge_amount }}</h3>
+                        <p>Yesterday Recharge Amount</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-user-clock"></i> <!-- Example of a different icon -->
+                    </div>
+                    <a href="{{ route('transactions.index') }}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
 
             <!-- ./col -->
         </div>
