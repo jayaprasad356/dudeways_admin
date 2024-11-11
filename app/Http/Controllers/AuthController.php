@@ -6741,4 +6741,43 @@ public function user_call(Request $request)
 }
 
 
+public function user_transaction_list(Request $request)
+{
+    // Retrieve user_id from request
+    $user_id = $request->input('user_id');
+
+
+    // Retrieve all withdrawals for the given user_id
+    $transactions = Transaction::where('user_id', $user_id)
+                 ->orderBy('datetime', 'desc')
+                 ->get();
+
+    // Check if any withdrawals exist for this user
+    if ($transactions->isEmpty()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No transactions found for this user.',
+        ], 200);
+    }
+
+    // Prepare the withdrawal data
+    $transactionsData = [];
+    foreach ($transactions as $transaction) {
+        $transactionsData[] = [
+            'id' => $transaction->id,
+            'user_id' => $transaction->user_id,
+            'points' => $transaction->points,
+            'amount' => $transaction->amount,
+            'type' => $transaction->type,
+            'datetime' => $transaction->datetime, // Assuming this field exists
+        ];
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'User Transaction listed successfully.',
+        'data' => $transactionsData,
+    ], 200);
+}
+
 }
