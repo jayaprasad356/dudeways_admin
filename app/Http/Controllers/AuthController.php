@@ -1115,6 +1115,15 @@ public function add_trip(Request $request)
         ], 200);
     }
 
+    if ($user->gender == 'male') {
+        if ($user->points < 50) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You need at least 50 points to add a trip.',
+            ], 200);
+        }
+    }
+
     // Check if the user already has a pending trip
     $pendingTrip = Trips::where('user_id', $user_id)
         ->where('trip_status', 0) // Assuming 0 means pending
@@ -1168,6 +1177,11 @@ public function add_trip(Request $request)
         }
     } else {
         $trip_image = null; // Set to null or handle differently if needed
+    }
+
+    if ($user->gender == 'male') {
+        $user->points -= 50;
+        $user->save();
     }
 
     // Create a new trip instance
