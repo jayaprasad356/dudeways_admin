@@ -2223,7 +2223,7 @@ public function add_chat(Request $request)
         if ($lastChatPoints) {
             $lastUpdateTime = Carbon::parse($lastChatPoints->datetime);
             // If less than an hour has passed, skip points deduction
-            if ($lastUpdateTime->diffInHours($currentTime) < 1) {
+            if ($lastUpdateTime->diffInMinutes($currentTime) < 30) {
                 // Skip points deduction and return updated chat
                 if ($existingChat) {
                     $existingChat->msg_seen = 1;
