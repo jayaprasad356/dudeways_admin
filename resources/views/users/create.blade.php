@@ -114,10 +114,16 @@
     @enderror
 </div>
 
-                <div class="form-group">
+               <div class="form-group">
                     <label for="language">Language</label>
-                    <input type="text" name="language" class="form-control @error('language') is-invalid @enderror" id="language"
-                           placeholder="language" value="{{ old('language') }}">
+                    <select name="language" class="form-control @error('language') is-invalid @enderror" id="language">
+                        <option value=''>--select--</option>
+                        <option value='Tamil' {{ old('language') == 'Tamil' ? 'selected' : '' }}>Tamil</option>
+                        <option value='Telugu' {{ old('language') == 'Telugu' ? 'selected' : '' }}>Telugu</option>
+                        <option value='Kanada' {{ old('language') == 'Kanada' ? 'selected' : '' }}>Kanada</option>
+                        <option value='Malayalam' {{ old('language') == 'Malayalam' ? 'selected' : '' }}>Malayalam</option>
+                         <option value='Hindi' {{ old('language') == 'Hindi' ? 'selected' : '' }}>Hindi</option>
+                    </select>
                     @error('language')
                     <span class="invalid-feedback" role="alert">
                         <strong>{{ $message }}</strong>
