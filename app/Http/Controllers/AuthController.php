@@ -195,6 +195,8 @@ public function register(Request $request)
     $points = $request->input('points'); 
     $total_points = $request->input('total_points'); 
 
+    $language = $request->input('language', 'Tamil');
+
     $recharge_points = DB::table('news')
     ->orderBy('updated_at', 'desc') 
     ->value('recharge_points');
@@ -256,13 +258,6 @@ public function register(Request $request)
         return response()->json([
             'success' => false,
             'message' => 'profession_id is empty.',
-        ], 200);
-    }
-
-    if (empty($language)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'language is empty.',
         ], 200);
     }
 
