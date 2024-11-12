@@ -24,6 +24,8 @@ class NewsController extends Controller
             'terms_conditions' => 'required|string',
             'refund_policy' => 'required|string',
             'recharge_points' => 'required|string',
+            'verification_cost' => 'required|string',
+            'without_verification_cost' => 'required|string',
         ]);
 
         $news = News::findOrFail(1); // Again, assuming ID 1 for simplicity
@@ -34,6 +36,8 @@ class NewsController extends Controller
         $news->terms_conditions = $request->input('terms_conditions');
         $news->refund_policy = $request->input('refund_policy');
         $news->recharge_points = $request->input('recharge_points');
+        $news->verification_cost = $request->input('verification_cost');
+        $news->without_verification_cost = $request->input('without_verification_cost');
     
 
         if ($news->save()) {

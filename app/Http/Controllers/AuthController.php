@@ -4182,6 +4182,8 @@ public function settings_list(Request $request)
             'instagram_link' => $item->instagram,
             'telegram_link' => $item->telegram,
             'upi_id' => $item->upi_id,
+            'verification_cost' => $item->verification_cost,
+            'without_verification_cost' => $item->without_verification_cost,
         ];
     }
 

@@ -48,6 +48,16 @@
                 <input type="number" class="form-control" id="recharge_points" name="recharge_points" value="{{ $news->recharge_points }}" required>
             </div>
 
+            <div class="form-group">
+                <label for="verification_cost">Verification Cost</label>
+                <input type="text" class="form-control" id="verification_cost" name="verification_cost" value="{{ $news->verification_cost }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="without_verification_cost">Without Verification Cost</label>
+                <input type="text" class="form-control" id="without_verification_cost" name="without_verification_cost" value="{{ $news->without_verification_cost }}" required>
+            </div>
+
             <div class="box-footer">
                 <button type="submit" class="btn btn-primary">Update</button>
             </div>
