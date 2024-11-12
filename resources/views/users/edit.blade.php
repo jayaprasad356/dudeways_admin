@@ -119,7 +119,17 @@
     @enderror
 </div>
 
-
+<div class="form-group">
+                    <label for="language">Language</label>
+                    <input type="text" name="language" class="form-control @error('language') is-invalid @enderror"
+                           id="language"
+                           placeholder="language" value="{{ old('language', $users->language) }}">
+                    @error('language')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                    @enderror
+                </div>
 
                 <div class="form-group">
                     <label for="referred_by">Referred By</label>

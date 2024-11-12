@@ -145,6 +145,7 @@ if ($request->hasFile('cover_img')) {
             'add_friend_notify' => $request->add_friend_notify,
             'view_notify' => $request->view_notify,
             'introduction' => $request->introduction,
+            'language' => $request->language,
             'profile' => $imageName, // Save only the image name in the database
             'datetime' => now(),
             'last_seen' => now(),
@@ -260,6 +261,7 @@ private function generateUniqueName($name, $user_id)
         $users->profile_verified = $request->profile_verified;
         $users->cover_img_verified = $request->cover_img_verified;
         $users->points = $request->points;
+        $users->language = $request->language;
         $users->total_points = $request->total_points;
         $users->verification_end_date = $request->verification_end_date;
         $users->datetime = now();

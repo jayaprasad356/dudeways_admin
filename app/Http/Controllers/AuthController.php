@@ -189,6 +189,7 @@ public function register(Request $request)
     $profession_id = $request->input('profession_id');
     $referred_by = $request->input('referred_by');
     $introduction = $request->input('introduction');
+    $language = $request->input('language');
     $mobile = $request->input('mobile', '');
 
     $points = $request->input('points'); 
@@ -258,6 +259,13 @@ public function register(Request $request)
         ], 200);
     }
 
+    if (empty($language)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'language is empty.',
+        ], 200);
+    }
+
     if (empty($email)) {
         return response()->json([
             'success' => false,
@@ -311,6 +319,7 @@ public function register(Request $request)
     $user->mobile = $mobile;
     $user->state = $state;
     $user->city = $city;
+    $user->language = $language;
     $user->referred_by = $referred_by;
     $user->introduction = $introduction;
     $user->datetime = now(); 
@@ -373,6 +382,7 @@ public function register(Request $request)
             'gender' => $user->gender,
             'state' => $user->state,
             'city' => $user->city,
+            'language' => $user->language ?? '',
             'profession' => $user->profession ? $user->profession->profession : null,
             'refer_code' => $refer_code, // Return the generated refer_code
             'referred_by' => $user->referred_by,
@@ -532,6 +542,7 @@ public function userdetails(Request $request)
             'gender' => $user->gender,
             'state' => $user->state,
             'city' => $user->city,
+            'language' => $user->language ?? '',
             'profession' => $user->profession ? $user->profession->profession : '',
             'refer_code' => $user->refer_code,
             'referred_by' => $user->referred_by,

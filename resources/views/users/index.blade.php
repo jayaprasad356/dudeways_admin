@@ -57,6 +57,7 @@
                     <th>State <i class="fas fa-sort"></i></th>
                     <th>City <i class="fas fa-sort"></i></th>
                     <th>Profession <i class="fas fa-sort"></i></th>
+                    <th>Language <i class="fas fa-sort"></i></th>
                     <th>Refer Code <i class="fas fa-sort"></i></th>
                     <th>Referred By <i class="fas fa-sort"></i></th>
                     <th>Points <i class="fas fa-sort"></i></th>
@@ -113,7 +114,7 @@
                         <td>{{$user->state}}</td>
                         <td>{{$user->city}}</td>
                         <td>{{ optional($user->professions)->profession }}</td>
-
+                        <td>{{$user->language}}</td>
                         <td>{{$user->refer_code}}</td>
                         <td>{{$user->referred_by}}</td>
                         <td>{{$user->points}}</td>

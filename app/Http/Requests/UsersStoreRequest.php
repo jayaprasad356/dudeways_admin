@@ -47,6 +47,7 @@ class UsersStoreRequest extends FormRequest
             'cover_img_verified' => 'nullable|boolean',
             'last_Seen' => 'nullable|datetime',
             'introduction' => 'nullable|string',
+            'language' => 'nullable|string',
         ];
     }
 }
