@@ -261,6 +261,7 @@ public function register(Request $request)
         ], 200);
     }
 
+
     if (empty($email)) {
         return response()->json([
             'success' => false,
@@ -445,7 +446,9 @@ private function generateReferCode()
 private function addNotificationsForFemaleUsers($newUserId, $message)
 {
     // Fetch female users
-    $femaleUserIds = Users::where('gender', 'female')->pluck('id');
+    $femaleUserIds = Users::where('gender', 'female')
+              ->whereDate('active_datetime', '=', now()->toDateString()) // Ignore the time part
+               ->pluck('id'); 
 
     foreach ($femaleUserIds as $femaleUserId) {
         // Store notification entry for each female user
