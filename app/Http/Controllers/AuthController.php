@@ -5819,7 +5819,6 @@ public function users_list(Request $request)
     $offset = $request->input('offset', 0); // Default offset is 0
     $limit = $request->input('limit', 10);  // Default limit is 10
     $excludeUserId = $request->input('user_id'); // The user_id to exclude if online_status is 1
-    $gender = $request->input('gender'); // The gender to filter the users
 
     // Validate the user_id input
     if (empty($excludeUserId)) {
@@ -5838,19 +5837,21 @@ public function users_list(Request $request)
         ], 200);
     }
 
-    // Get the total count of users, excluding the specific user if necessary
-    $totalUsersQuery = Users::where('id', '!=', $excludeUserId);
+    // Get the gender of the provided user_id
+    $userGender = $user->gender; // Assuming gender is stored as 'male' or 'female'
 
-    // Apply gender filter if provided
-    if (!empty($gender) && $gender !== 'all') {
-        $totalUsersQuery->where('gender', $gender);
-    }
+    // Determine the gender to query for the opposite gender
+    $oppositeGender = ($userGender == 'male') ? 'female' : 'male';
+
+    // Get the total count of users, excluding the specific user and filtering by gender
+    $totalUsersQuery = Users::where('id', '!=', $excludeUserId)
+                            ->where('gender', $oppositeGender);
 
     $totalUsers = $totalUsersQuery->count();
 
-    // Fetch users, excluding the specific user if necessary,
-    // applying offset, limit, and ordering by datetime
-    $usersQuery = $totalUsersQuery->orderBy('datetime', 'desc')
+    // Fetch users, excluding the specific user, filtering by gender,
+    // applying offset, limit, and ordering by active_datetime (assuming 'active_datetime' is the column)
+    $usersQuery = $totalUsersQuery->orderBy('active_datetime', 'desc')  // Assuming 'active_datetime' is the column to sort by
                                  ->offset($offset)
                                  ->limit($limit);
 
