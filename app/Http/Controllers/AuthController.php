@@ -3716,13 +3716,15 @@ public function points_list(Request $request)
         ], 404);
     }
 
-    $totalPoints = $user->total_points;
+      $AddPoints = Transaction::where('user_id', $userId)
+      ->where('type', 'add_points')
+      ->exists();
 
-    if ($totalPoints < 50) {
+     if ($AddPoints) {
+      $points = Points::where('price', '>=', 99)->orderBy('points', 'desc')->get();
+      } else {
         $points = Points::orderBy('points', 'desc')->get();
-    } else {
-        $points = Points::where('price', '>=', 99)->orderBy('points', 'desc')->get();
-    }
+      }
 
     if ($points->isEmpty()) {
         return response()->json([
