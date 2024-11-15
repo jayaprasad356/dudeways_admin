@@ -3706,7 +3706,23 @@ public function spin_points(Request $request)
 
 public function points_list(Request $request)
 {
-    $points = Points::orderBy('points', 'desc')->get();
+    $userId = $request->input('user_id');
+    $user = Users::find($userId);
+
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User not found.',
+        ], 404);
+    }
+
+    $totalPoints = $user->total_points;
+
+    if ($totalPoints < 50) {
+        $points = Points::orderBy('points', 'desc')->get();
+    } else {
+        $points = Points::where('price', '>=', 99)->orderBy('points', 'desc')->get();
+    }
 
     if ($points->isEmpty()) {
         return response()->json([
@@ -3735,6 +3751,7 @@ public function points_list(Request $request)
         'data' => $pointsDetails,
     ], 200);
 }
+
 
 public function verify_front_image(Request $request)
 {
