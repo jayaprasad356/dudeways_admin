@@ -6643,7 +6643,10 @@ public function proof_image(Request $request)
 
 public function random_user(Request $request)
 {
-    $user = Users::find(2398);
+   $user = Users::where('gender', 'female')
+           ->where('online_status', 1)
+           ->inRandomOrder()
+           ->first(); 
     
     // Check if a user was found
     if ($user) {
