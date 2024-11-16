@@ -2307,7 +2307,7 @@ public function add_chat(Request $request)
                     $pointsToCredit = floor($pointsRequired * 0.30);
                 } else {
                     // Credit 20% of the points for unverified users
-                    $pointsToCredit = floor($pointsRequired * 0.20);
+                    $pointsToCredit = floor($pointsRequired * 0.10);
                 }
               $chat_user->balance += $pointsToCredit;
 
