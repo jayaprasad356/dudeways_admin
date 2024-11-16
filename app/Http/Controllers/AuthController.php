@@ -510,15 +510,21 @@ public function userdetails(Request $request)
     // Check if the online_status is being updated (either '0' or '1')
     if ($online_status === '0' || $online_status === '1') {
         $user->online_status = $online_status;
-        $user->active_datetime = Carbon::now(); 
+        $user->active_datetime = Carbon::now();
         $user->save();
     }
+    if ($user->gender == 'female') {
+        $friendUserIds = DB::table('friends')
+            ->where('user_id', $user_id)
+            ->pluck('friend_user_id');
 
+        foreach ($friendUserIds as $friend_user_id) {
+            $this->sendNotificationsToOnlineUsers(strval($friend_user_id), "{$user->name} is online");
+        }
+    }
     $user->load('profession');
-
-    // Get the sum of unread values
     $unreadMessagesSum = Chats::where('user_id', $user_id)
-        ->where('unread', '>', 0)  // Assuming 'unread' is a numeric field
+        ->where('unread', '>', 0)
         ->sum('unread');
 
     // Image URLs
@@ -548,7 +554,7 @@ public function userdetails(Request $request)
             'cover_img' => $coverimageUrl,
             'points' => $user->points,
             'verified' => $user->verified,
-            'online_status' => $user->online_status, // Updated value
+            'online_status' => $user->online_status,
             'introduction' => $user->introduction,
             'message_notify' => $user->message_notify,
             'add_friend_notify' => $user->add_friend_notify,
@@ -560,7 +566,7 @@ public function userdetails(Request $request)
             'balance' => $user->balance ?? '',
             'selfi_image' => $selfiimageUrl,
             'proof_image' => $proofimageUrl,
-            'unread_count' => strval($unreadMessagesSum), // Cast unread count to string
+            'unread_count' => strval($unreadMessagesSum),
             'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
@@ -569,7 +575,32 @@ public function userdetails(Request $request)
     ], 200);
 }
 
+protected function sendNotificationsToOnlineUsers($friend_user_id, $message)
+{
+    $user = Users::find($friend_user_id);
 
+    if ($user) {
+        // Get the current date
+        $currentDate = Carbon::now()->startOfDay();
+
+        // Get the active datetime of the friend user and check if it's within the last 3 days
+        $activeDate = Carbon::parse($user->active_datetime)->startOfDay();
+        $twoDaysAgo = Carbon::now()->subDays(2)->startOfDay();
+
+        // Check if the active_datetime is between today and 2 days ago
+        if ($activeDate->between($twoDaysAgo, $currentDate)) {
+            // Send notification if the friend user is active within the last 3 days
+            $this->oneSignalClient->sendNotificationToExternalUser(
+                $message,
+                $friend_user_id,
+                $url = null,
+                $data = null,
+                $buttons = null,
+                $schedule = null
+            );
+        }
+    }
+}
 
 public function other_userdetails(Request $request)
 {
