@@ -513,7 +513,7 @@ public function userdetails(Request $request)
         $user->active_datetime = Carbon::now();
         $user->save();
     }
-    if ($user->gender == 'female') {
+    /*if ($user->gender == 'female') {
         $friendUserIds = DB::table('friends')
             ->where('user_id', $user_id)
             ->pluck('friend_user_id');
@@ -521,7 +521,7 @@ public function userdetails(Request $request)
         foreach ($friendUserIds as $friend_user_id) {
             $this->sendNotificationsToOnlineUsers(strval($friend_user_id), "{$user->name} is online");
         }
-    }
+    }*/
     $user->load('profession');
     $unreadMessagesSum = Chats::where('user_id', $user_id)
         ->where('unread', '>', 0)
@@ -575,7 +575,7 @@ public function userdetails(Request $request)
     ], 200);
 }
 
-protected function sendNotificationsToOnlineUsers($friend_user_id, $message)
+/*protected function sendNotificationsToOnlineUsers($friend_user_id, $message)
 {
     $user = Users::find($friend_user_id);
 
@@ -600,7 +600,7 @@ protected function sendNotificationsToOnlineUsers($friend_user_id, $message)
             );
         }
     }
-}
+}*/
 
 public function other_userdetails(Request $request)
 {
