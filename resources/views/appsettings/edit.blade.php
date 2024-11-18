@@ -9,6 +9,7 @@
         <form action="{{ route('appsettings.update', $appsettings->id) }}" method="POST">
             @csrf
             @method('PUT')
+
             <div class="form-group">
                 <label for="link">Link</label>
                 <input type="text" class="form-control" id="link" name="link" value="{{ old('link', $appsettings->link) }}" required>
@@ -32,6 +33,24 @@
                     <label class="custom-control-label" for="login"></label>
                 </div>
                 @error('login')
+                <span class="invalid-feedback" role="alert">
+                    <strong>{{ $message }}</strong>
+                </span>
+                @enderror
+            </div>
+
+            <!-- Mode Field -->
+            <div class="form-group">
+                <label for="call_mode">Call Mode</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="call_mode" id="call_mode_testing" value="testing" {{ old('call_mode', $appsettings->call_mode) == 'testing' ? 'checked' : '' }}>
+                    <label class="form-check-label" for="call_mode_testing">testing</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="call_mode" id="call_mode_live" value="live" {{ old('call_mode', $appsettings->call_mode) == 'live' ? 'checked' : '' }}>
+                    <label class="form-check-label" for="call_mode_live">live</label>
+                </div>
+                @error('call_mode')
                 <span class="invalid-feedback" role="alert">
                     <strong>{{ $message }}</strong>
                 </span>

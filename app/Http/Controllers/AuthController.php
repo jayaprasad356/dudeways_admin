@@ -4273,6 +4273,7 @@ public function appsettings_list(Request $request)
             'app_version' => $item->app_version,
             'description' => $item->description,
             'login' => strval($item->login),
+            'call_mode' => $item->call_mode,
         ];
     }
 
