@@ -48,6 +48,7 @@
                         <th>User Name <i class="fas fa-sort"></i></th>
                         <th>Type <i class="fas fa-sort"></i></th>
                         <th>Points <i class="fas fa-sort"></i></th>
+                        <th>Amount <i class="fas fa-sort"></i></th>
                         <th>DateTime <i class="fas fa-sort"></i></th>
                     </tr>
                 </thead>
@@ -58,6 +59,7 @@
                         <td>{{ optional($transaction->user)->name }}</td>
                         <td>{{ $transaction->type }}</td>
                         <td>{{ $transaction->points }}</td>
+                        <td>{{ $transaction->amount }}</td>
                         <td>{{ $transaction->datetime }}</td>
                     </tr>
                     @endforeach

@@ -20,6 +20,7 @@
         </div>
                 <!-- Verify Button -->
                 <button class="btn btn-primary mr-3" id="verifyButton">Paid</button>
+                <button class="btn btn-danger mr-3" id="cancelButton">Cancel</button>
             </div>
             <div class="col-md-4 d-flex flex-column flex-md-row justify-content-md-end align-items-start">
             <!-- Export Withdrawals Button -->
@@ -116,7 +117,7 @@
                 </tbody>
             </table>
         </div>
-        {{ $withdrawals->render() }}
+        {{ $withdrawals->appends(request()->query())->links() }}
         </div>
     </div>
     @endsection
@@ -264,6 +265,37 @@
                     success: function(response) {
                         // Handle success response
                         alert('Paid successfully!');
+                        location.reload(); // Reload the page or update UI as needed
+                    },
+                    error: function(xhr, status, error) {
+                        // Handle error response
+                        console.error(error);
+                        alert('Error updating withdrawals. Please try again.');
+                    }
+                });
+            } else {
+                alert('Please select at least one withdrawals.');
+            }
+        });
+            // Handle Verify Button click
+            $('#cancelButton').click(function() {
+            var withdrawalIds = [];
+            $('.checkbox:checked').each(function() {
+                withdrawalIds.push($(this).data('id'));
+            });
+
+            if (withdrawalIds.length > 0) {
+                // AJAX call to backend
+                $.ajax({
+                    url: "{{ route('withdrawals.cancel') }}",
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        withdrawal_ids: withdrawalIds
+                    },
+                    success: function(response) {
+                        // Handle success response
+                        alert('cancel successfully!');
                         location.reload(); // Reload the page or update UI as needed
                     },
                     error: function(xhr, status, error) {

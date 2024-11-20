@@ -8,7 +8,8 @@ use App\Models\BankDetails;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\WithdrawalsExport; 
-use App\Exports\UsersExports; 
+use App\Exports\UsersExports;
+use Illuminate\Support\Facades\DB; 
 
 class WithdrawalsController extends Controller
 {
@@ -27,6 +28,37 @@ class WithdrawalsController extends Controller
 
         return response()->json(['success' => true]);
     }
+    public function cancel(Request $request)
+    {
+        $withdrawalIds = $request->input('withdrawal_ids', []);
+    
+        foreach ($withdrawalIds as $withdrawalId) {
+            $withdrawal = Withdrawals::find($withdrawalId);
+            if ($withdrawal) {
+                // Retrieve the user associated with the withdrawal
+                $user = Users::find($withdrawal->user_id);
+    
+                if ($user) {
+                    // Add the amount back to the user's balance
+                    $user->balance += $withdrawal->amount;
+                    $user->save();
+                }
+                \App\Models\Transaction::create([
+                    'user_id' => $user->id,  // User associated with the withdrawal
+                    'type' => 'cancelled',    // Transaction type (cancelled)
+                    'points' => '0',  
+                    'amount' => $withdrawal->amount,  // Points (amount of the withdrawal)
+                    'datetime' => now(),      // Current timestamp
+                ]);
+                // Update the withdrawal status to Canceled (0)
+                $withdrawal->status = 2;
+                $withdrawal->save();
+            }
+        }
+    
+        return response()->json(['success' => true]);
+    }
+    
     public function index(Request $request)
     {
         $query = Withdrawals::query()->with(['user', 'user.bankDetails']); // Eager load the user and their bank details
