@@ -3406,6 +3406,7 @@ public function notification_list(Request $request)
             'message' => $notification->message,
             'friend' => $friendStatus,
             'datetime' => $notificationTime->format('Y-m-d H:i:s'),
+            'date' => $notificationTime->format('Y-m-d'),
             'time' => $timeDifference,
             'updated_at' => Carbon::parse($notification->updated_at)->format('Y-m-d H:i:s'),
             'created_at' => Carbon::parse($notification->created_at)->format('Y-m-d H:i:s'),
