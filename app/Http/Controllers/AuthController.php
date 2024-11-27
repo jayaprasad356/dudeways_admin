@@ -5848,6 +5848,8 @@ public function active_users_list(Request $request)
             'email' => $user->email,
             'mobile' => $user->mobile ?? '',
             'gender' => $user->gender,
+            'age' => $user->age ?? '',
+            'introduction' => $user->introduction ?? '',
             'profile' => $imageUrl,
             'cover_img' => $coverimageUrl,
             'online_status' => $user->online_status, // Include the online status as needed
