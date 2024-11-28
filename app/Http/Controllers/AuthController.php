@@ -66,7 +66,7 @@ class AuthController extends Controller
     
     
         // Check if a customer with the given phone number exists in the database
-        $user = Users::where('mobile', $mobile)->first();
+        $user = Users::where('mobile', $mobile)->with('profession')->first();
     
         // If customer not found, return failure response
         if (!$user) {
@@ -94,7 +94,7 @@ class AuthController extends Controller
             'gender' => $user->gender,
             'state' => $user->state,
             'city' => $user->city,
-            'profession' => $user->profession,
+            'profession' => $user->profession ? $user->profession->profession : null,
             'refer_code' => $user->refer_code,
             'referred_by' => $user->referred_by,
             'profile' => $imageUrl,
@@ -102,6 +102,12 @@ class AuthController extends Controller
             'points' => $user->points,
             'verified' => $user->verified,
             'online_status' => $user->online_status,
+            'introduction' => $user->introduction,
+            'message_notify' => $user->message_notify,
+            'add_friend_notify' => $user->add_friend_notify,
+            'view_notify' => $user->view_notify,
+            'profile_verified' => $user->profile_verified,
+            'cover_img_verified' => $user->cover_img_verified,
             'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
