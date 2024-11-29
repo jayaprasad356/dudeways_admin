@@ -490,6 +490,222 @@ protected function sendNotificationsToFemaleUser($femaleUserId, $message)
     }
 }
 
+
+public function new_register(Request $request)
+{
+    $age = $request->input('age');
+    $dob = $request->input('dob');
+    $name = $request->input('name');
+    $unique_name = $request->input('unique_name');
+    $email = $request->input('email','');
+    $gender = $request->input('gender');
+    $state = $request->input('state','');
+    $city = $request->input('city','');
+    $profession_id = $request->input('profession_id','1');
+    $referred_by = $request->input('referred_by');
+    $introduction = $request->input('introduction','');
+    $language = $request->input('language');
+    $mobile = $request->input('mobile');
+
+    $points = $request->input('points'); 
+    $total_points = $request->input('total_points'); 
+
+    $language = $request->input('language', 'Tamil');
+
+    $recharge_points = DB::table('news')
+    ->orderBy('updated_at', 'desc') 
+    ->value('recharge_points');
+
+    $recharge_points = $recharge_points ?? 0;
+
+    $points += $recharge_points;
+    $total_points += $recharge_points;
+
+    if (empty($mobile)) {
+        $response['success'] = false;
+        $response['message'] = 'mobile is empty.';
+        return response()->json($response, 200);
+    }
+
+    // Validate mobile number format
+    if (empty($mobile) || strlen($mobile) !== 10) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Mobile number should be 10 digits.',
+        ], 200);
+    }
+
+    if (empty($dob)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'dob is empty.',
+        ], 200);
+    }
+
+    // Calculate the age from dob
+    try {
+        $birthdate = Carbon::parse($dob); // Parse the DOB
+        $age = $birthdate->age; // Calculate the age
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid date format for dob.',
+        ], 200);
+    }
+
+    if (empty($name)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Name is empty.',
+        ], 200);
+    } elseif (strlen($name) < 4 || strlen($name) > 18) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Name should be between 4 and 18 characters.',
+        ], 200);
+    }
+
+    if (empty($gender)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Gender is empty.',
+        ], 200);
+    } 
+
+    if (Users::where('mobile', $mobile)->exists()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Mobile number is already registered.',
+        ], 200); 
+    }
+
+    // Generate a refer_code automatically
+    $refer_code = $this->generateNewReferCode();
+
+    // If referred_by is provided, validate it
+    if (!empty($referred_by)) {
+        $validReferredBy = Users::where('refer_code', $referred_by)->exists();
+        if (!$validReferredBy) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid referred_by.',
+            ], 200);
+        }
+    }
+
+    $user = new Users();
+    $user->age = $age;
+    $user->name = $name;
+    $user->dob = $dob;
+    $user->gender = $gender;
+    $user->profession_id = $profession_id;
+    $user->refer_code = $this->generateNewReferCode();
+    $user->email = $email;
+    $user->points = $points;
+    $user->total_points = $total_points;
+    $user->mobile = $mobile;
+    $user->state = $state;
+    $user->city = $city;
+    $user->language = $language;
+    $user->referred_by = $referred_by;
+    $user->introduction = $introduction;
+    $user->datetime = now(); 
+    $user->last_seen = now(); 
+    // Save the user
+    $user->save();
+
+    // Retrieve the user's id
+    $user_id = $user->id;
+
+    // Generate unique_name based on name and user's id
+    $unique_name = $this->generateNewUniqueName($name, $user_id);
+    $user->unique_name = $unique_name;
+    $user->save();
+
+
+    // Image URL
+    $imageUrl = asset('storage/app/public/users/' . $user->profile);
+    $coverimageUrl = asset('storage/app/public/users/' . $user->cover_img);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'User registered successfully.',
+        'data' => [
+            'id' => $user->id,
+            'name' => $user->name,
+            'unique_name' => $user->unique_name,
+            'email' => $user->email,
+            'mobile' => $user->mobile ?? '',
+            'dob' => $user->dob ?? '',
+            'age' => $user->age,
+            'gender' => $user->gender,
+            'state' => $user->state,
+            'city' => $user->city,
+            'language' => $user->language ?? '',
+            'profession' => $user->profession ? $user->profession->profession : null,
+            'refer_code' => $refer_code, // Return the generated refer_code
+            'referred_by' => $user->referred_by ?? '',
+            'profile' => $imageUrl,
+            'cover_img' => $coverimageUrl,
+            'points' => $user->points,
+            'total_points' => $user->total_points,
+            'introduction' => $user->introduction,
+            'latitude' => $user->latitude ?? '',
+            'longtitude' => $user->longtitude ?? '',
+            'verified' => 0,
+            'online_status' => 0,
+            'message_notify' => 1,
+            'add_friend_notify' => 1,
+            'view_notify' => 1,
+            'profile_verified' => 0,
+            'cover_img_verified' => 0,
+            'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
+            'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
+                'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
+                'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
+        ],
+    ], 201);
+}
+
+
+private function generateNewUniqueName($name, $user_id)
+{
+    // Remove spaces and convert the name to lowercase
+    $name = strtolower(str_replace(' ', '', $name));
+
+    // Extract the first part of the user's name and limit to first 8 characters
+    $firstPart = substr($name, 0, 8);
+
+    // Generate the unique name by concatenating the first part with the user's id
+    $unique_name = $firstPart . $user_id;
+
+    // Check if the generated unique_name is already in use
+    $counter = 1;
+    while (Users::where('unique_name', $unique_name)->exists()) {
+        // If it is, append a counter to make it unique
+        $unique_name = $firstPart . $user_id . $counter;
+        $counter++;
+    }
+
+    return $unique_name;
+}
+
+private function generateNewReferCode()
+{
+    // Generate a random string
+    $characters = array_merge(range('A', 'Z'), range('a', 'z'), range(0, 9));
+    shuffle($characters);
+    $refer_code = implode('', array_slice($characters, 0, 6));
+
+    // Check if the generated refer_code already exists in the database
+    // If it does, regenerate the refer_code until it's unique
+    while (Users::where('refer_code', $refer_code)->exists()) {
+        shuffle($characters);
+        $refer_code = implode('', array_slice($characters, 0, 6));
+    }
+
+    return $refer_code;
+}
 public function userdetails(Request $request)
 {
     $user_id = $request->input('user_id');
