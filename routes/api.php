@@ -84,6 +84,7 @@ Route::post('proof_image', [AuthController::class, 'proof_image']);
 Route::post('random_user', [AuthController::class, 'random_user']);
 Route::post('user_call', [AuthController::class, 'user_call']);
 Route::post('user_transaction_list', [AuthController::class, 'user_transaction_list']);
+//Route::post('voice_verification', [AuthController::class, 'voice_verification']);
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();

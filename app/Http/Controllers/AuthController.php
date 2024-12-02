@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Users; 
+use App\Models\NewRegister; 
+use App\Models\VoiceVerifications; 
 use App\Models\user_calls;
 use App\Models\Reports; 
 use App\Models\Wallets; 
@@ -186,6 +188,7 @@ return response()->json([
 public function register(Request $request)
 {
     $age = $request->input('age');
+    $dob = $request->input('dob');  // Date of birth, if provided
     $name = $request->input('name');
     $unique_name = $request->input('unique_name');
     $email = $request->input('email');
@@ -204,43 +207,88 @@ public function register(Request $request)
     $language = $request->input('language', 'Tamil');
 
     $recharge_points = DB::table('news')
-    ->orderBy('updated_at', 'desc') 
-    ->value('recharge_points');
+        ->orderBy('updated_at', 'desc') 
+        ->value('recharge_points');
 
     $recharge_points = $recharge_points ?? 0;
 
     $points += $recharge_points;
     $total_points += $recharge_points;
 
-    if (empty($state)) {
+    // Validate email or mobile, one of them must be provided
+    if (empty($email) && empty($mobile)) {
         return response()->json([
             'success' => false,
-            'message' => 'state is empty.',
+            'message' => 'Either email or mobile number is required.',
         ], 200);
     }
-    if (empty($city)) {
+
+    if (!empty($mobile) && strlen($mobile) != 10) {
         return response()->json([
             'success' => false,
-            'message' => 'city is empty.',
+            'message' => 'Mobile number must be 10 digits.',
         ], 200);
     }
-    if (empty($introduction)) {
+
+    // If mobile is provided, check if it already exists
+    if (!empty($mobile) && Users::where('mobile', $mobile)->exists()) {
         return response()->json([
             'success' => false,
-            'message' => 'introduction is empty.',
+            'message' => 'User already exists with this mobile number.',
         ], 200);
     }
+
+    // If email is provided, validate the email format and check if it already exists
+    if (!empty($email)) {
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid email format.',
+            ], 200);
+        }
+
+        if (Users::where('email', $email)->exists()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User already exists with this email.',
+            ], 200);
+        }
+    }
+
+    if (empty($age) && empty($dob)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Either age or DOB is required.',
+        ], 200);
+    }
+    
+
+    // If age is not provided, calculate it from the provided date of birth (DOB)
+    if (empty($age) && !empty($dob)) {
+        try {
+            $birthdate = Carbon::parse($dob);
+            $age = $birthdate->age;
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid date format for DOB. Please provide a valid date in the format: YYYY-MM-DD.',
+            ], 200);
+        }
+    }
+
+    // Validate age
     if (empty($age)) {
         return response()->json([
             'success' => false,
-            'message' => 'Age is empty.',
-        ], 420);
+            'message' => 'Age is required.',
+        ], 200);
     } elseif ($age < 18 || $age > 60) {
         return response()->json([
             'success' => false,
             'message' => 'Age should be between 18 and 60.',
         ], 200);
     }
+
 
     if (empty($name)) {
         return response()->json([
@@ -260,41 +308,15 @@ public function register(Request $request)
             'message' => 'Gender is empty.',
         ], 200);
     } 
-    if (empty($profession_id)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'profession_id is empty.',
-        ], 200);
-    }
 
-
-    if (empty($email)) {
+  
+    if ($profession_id && !Professions::find($profession_id)) {
         return response()->json([
             'success' => false,
-            'message' => 'Email is empty.',
-        ], 200);
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Invalid email format.',
+            'message' => 'Profession not found.',
         ], 200);
     }
-    $profession = Professions::find($profession_id);
-
-    if (!$profession) {
-        return response()->json([
-            'success' => false,
-            'message' => 'profession not found.',
-        ], 200);
-    }
-    // Check if the user with the given email already exists
-    $existingEmail = Users::where('email', $email)->first();
-    if ($existingEmail) {
-        return response()->json([
-            'success' => false,
-            'message' => 'User already exists with this email.',
-        ], 200);
-    }
+    
     // Generate a refer_code automatically
     $refer_code = $this->generateReferCode();
 
@@ -378,23 +400,23 @@ public function register(Request $request)
             'id' => $user->id,
             'name' => $user->name,
             'unique_name' => $user->unique_name,
-            'email' => $user->email,
+            'email' => $user->email ?? '',
             'mobile' => $user->mobile ?? '',
             'age' => $user->age,
             'gender' => $user->gender,
-            'state' => $user->state,
-            'city' => $user->city,
+            'state' => $user->state ?? '',
+            'city' => $user->city ?? '',
             'language' => $user->language ?? '',
-            'profession' => $user->profession ? $user->profession->profession : null,
+            'profession' => $user->profession ? $user->profession->profession : '',
             'refer_code' => $refer_code, // Return the generated refer_code
-            'referred_by' => $user->referred_by,
+            'referred_by' => $user->referred_by ?? '',
             'profile' => $imageUrl,
             'cover_img' => $coverimageUrl,
             'points' => $user->points,
             'total_points' => $user->total_points,
-            'introduction' => $user->introduction,
-            'latitude' => $user->latitude,
-            'longtitude' => $user->longtitude,
+            'introduction' => $user->introduction ?? '',
+            'latitude' => $user->latitude ?? '',
+            'longtitude' => $user->longtitude ?? '',
             'verified' => 0,
             'online_status' => 0,
             'message_notify' => 1,
@@ -496,39 +518,20 @@ public function new_register(Request $request)
     $age = $request->input('age');
     $dob = $request->input('dob');
     $name = $request->input('name');
-    $unique_name = $request->input('unique_name');
-    $email = $request->input('email','');
     $gender = $request->input('gender');
-    $state = $request->input('state','');
-    $city = $request->input('city','');
-    $profession_id = $request->input('profession_id','1');
-    $referred_by = $request->input('referred_by');
-    $introduction = $request->input('introduction','');
     $language = $request->input('language');
     $mobile = $request->input('mobile');
 
-    $points = $request->input('points'); 
-    $total_points = $request->input('total_points'); 
-
-    $language = $request->input('language', 'Tamil');
-
-    $recharge_points = DB::table('news')
-    ->orderBy('updated_at', 'desc') 
-    ->value('recharge_points');
-
-    $recharge_points = $recharge_points ?? 0;
-
-    $points += $recharge_points;
-    $total_points += $recharge_points;
-
-    if (empty($mobile)) {
-        $response['success'] = false;
-        $response['message'] = 'mobile is empty.';
-        return response()->json($response, 200);
+      // Check for required fields
+      if (empty($mobile)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Mobile is empty.',
+        ], 200);
     }
 
-    // Validate mobile number format
-    if (empty($mobile) || strlen($mobile) !== 10) {
+    // Validate mobile number format (10 digits)
+    if (strlen($mobile) !== 10) {
         return response()->json([
             'success' => false,
             'message' => 'Mobile number should be 10 digits.',
@@ -538,21 +541,29 @@ public function new_register(Request $request)
     if (empty($dob)) {
         return response()->json([
             'success' => false,
-            'message' => 'dob is empty.',
+            'message' => 'DOB is empty.',
         ], 200);
     }
-
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $dob)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid dob format. Expected format: YYYY-MM-DD.',
+        ], 200);
+    }
+    
     // Calculate the age from dob
     try {
-        $birthdate = Carbon::parse($dob); // Parse the DOB
-        $age = $birthdate->age; // Calculate the age
+        $birthdate = Carbon::parse($dob);
+        $age = $birthdate->age;
     } catch (\Exception $e) {
         return response()->json([
             'success' => false,
-            'message' => 'Invalid date format for dob.',
+            'message' => 'Invalid DOB format.',
         ], 200);
     }
+    
 
+    // Validate name
     if (empty($name)) {
         return response()->json([
             'success' => false,
@@ -570,142 +581,53 @@ public function new_register(Request $request)
             'success' => false,
             'message' => 'Gender is empty.',
         ], 200);
-    } 
+    }
 
-    if (Users::where('mobile', $mobile)->exists()) {
+    if (empty($language)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Language is empty.',
+        ], 200);
+    }
+
+    // Check for duplicate mobile number only
+    if (NewRegister::where('mobile', $mobile)->exists()) {
         return response()->json([
             'success' => false,
             'message' => 'Mobile number is already registered.',
         ], 200); 
     }
 
-    // Generate a refer_code automatically
-    $refer_code = $this->generateNewReferCode();
-
-    // If referred_by is provided, validate it
-    if (!empty($referred_by)) {
-        $validReferredBy = Users::where('refer_code', $referred_by)->exists();
-        if (!$validReferredBy) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid referred_by.',
-            ], 200);
-        }
-    }
-
-    $user = new Users();
-    $user->age = $age;
-    $user->name = $name;
-    $user->dob = $dob;
-    $user->gender = $gender;
-    $user->profession_id = $profession_id;
-    $user->refer_code = $this->generateNewReferCode();
-    $user->email = $email;
-    $user->points = $points;
-    $user->total_points = $total_points;
-    $user->mobile = $mobile;
-    $user->state = $state;
-    $user->city = $city;
-    $user->language = $language;
-    $user->referred_by = $referred_by;
-    $user->introduction = $introduction;
-    $user->datetime = now(); 
-    $user->last_seen = now(); 
+    // Create a new user instance and assign values
+    $newregister= new NewRegister();
+    $newregister->age = $age;
+    $newregister->name = $name;
+    $newregister->dob = $dob;
+    $newregister->gender = $gender;
+    $newregister->language = $language;
+    $newregister->mobile = $mobile;  // Can be empty
+    $newregister->datetime = now(); 
+    
     // Save the user
-    $user->save();
+    $newregister->save();
 
-    // Retrieve the user's id
-    $user_id = $user->id;
-
-    // Generate unique_name based on name and user's id
-    $unique_name = $this->generateNewUniqueName($name, $user_id);
-    $user->unique_name = $unique_name;
-    $user->save();
-
-
-    // Image URL
-    $imageUrl = asset('storage/app/public/users/' . $user->profile);
-    $coverimageUrl = asset('storage/app/public/users/' . $user->cover_img);
 
     return response()->json([
         'success' => true,
-        'message' => 'User registered successfully.',
+        'message' => 'New User registered successfully.',
         'data' => [
-            'id' => $user->id,
-            'name' => $user->name,
-            'unique_name' => $user->unique_name,
-            'email' => $user->email,
-            'mobile' => $user->mobile ?? '',
-            'dob' => $user->dob ?? '',
-            'age' => $user->age,
-            'gender' => $user->gender,
-            'state' => $user->state,
-            'city' => $user->city,
-            'language' => $user->language ?? '',
-            'profession' => $user->profession ? $user->profession->profession : null,
-            'refer_code' => $refer_code, // Return the generated refer_code
-            'referred_by' => $user->referred_by ?? '',
-            'profile' => $imageUrl,
-            'cover_img' => $coverimageUrl,
-            'points' => $user->points,
-            'total_points' => $user->total_points,
-            'introduction' => $user->introduction,
-            'latitude' => $user->latitude ?? '',
-            'longtitude' => $user->longtitude ?? '',
-            'verified' => 0,
-            'online_status' => 0,
-            'message_notify' => 1,
-            'add_friend_notify' => 1,
-            'view_notify' => 1,
-            'profile_verified' => 0,
-            'cover_img_verified' => 0,
-            'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
-            'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
-                'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
-                'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
+            'id' => $newregister->id,
+            'name' => $newregister->name,
+            'mobile' => $newregister->mobile,
+            'dob' => $newregister->dob,
+            'age' => $newregister->age,
+            'gender' => $newregister->gender,
+            'language' => $newregister->language,
+            'datetime' => Carbon::parse($newregister->datetime)->format('Y-m-d H:i:s'),
         ],
     ], 201);
 }
 
-
-private function generateNewUniqueName($name, $user_id)
-{
-    // Remove spaces and convert the name to lowercase
-    $name = strtolower(str_replace(' ', '', $name));
-
-    // Extract the first part of the user's name and limit to first 8 characters
-    $firstPart = substr($name, 0, 8);
-
-    // Generate the unique name by concatenating the first part with the user's id
-    $unique_name = $firstPart . $user_id;
-
-    // Check if the generated unique_name is already in use
-    $counter = 1;
-    while (Users::where('unique_name', $unique_name)->exists()) {
-        // If it is, append a counter to make it unique
-        $unique_name = $firstPart . $user_id . $counter;
-        $counter++;
-    }
-
-    return $unique_name;
-}
-
-private function generateNewReferCode()
-{
-    // Generate a random string
-    $characters = array_merge(range('A', 'Z'), range('a', 'z'), range(0, 9));
-    shuffle($characters);
-    $refer_code = implode('', array_slice($characters, 0, 6));
-
-    // Check if the generated refer_code already exists in the database
-    // If it does, regenerate the refer_code until it's unique
-    while (Users::where('refer_code', $refer_code)->exists()) {
-        shuffle($characters);
-        $refer_code = implode('', array_slice($characters, 0, 6));
-    }
-
-    return $refer_code;
-}
 public function userdetails(Request $request)
 {
     $user_id = $request->input('user_id');
@@ -7082,6 +7004,90 @@ public function user_transaction_list(Request $request)
         'success' => true,
         'message' => 'User Transaction listed successfully.',
         'data' => $transactionsData,
+    ], 200);
+}
+
+public function voice_verification(Request $request)
+{
+    $user_id = $request->input('user_id');
+    $voice = $request->file('voice'); 
+
+    // Validate user_id and voice
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User ID is empty.',
+        ], 200);
+    }
+
+    if (empty($voice)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Voice file is empty.',
+        ], 200);
+    }
+
+    // Validate file type
+    if ($voice->getClientOriginalExtension() !== 'mp3') {
+        return response()->json([
+            'success' => false,
+            'message' => 'The voice file must be an MP3.',
+        ], 200);
+    }
+
+    // Check if the user exists
+    $user = Users::find($user_id);
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User not found.',
+        ], 200);
+    }
+
+    // Check if voice verification already exists for this user
+    $existingRecord = VoiceVerifications::where('user_id', $user_id)->first();
+    if ($existingRecord) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Voice verification already exists for this user.',
+            'data' => [
+                'id' => $existingRecord->id,
+                'user_id' => $existingRecord->user_id,
+                'name' => $user->name,
+                'mobile' => $user->mobile,
+                'voice' => asset('storage/app/public/voices/' . $existingRecord->voice),
+                'status' => $existingRecord->status,
+                'datetime' => $existingRecord->datetime->format('Y-m-d H:i:s'),
+            ],
+        ], 200);
+    }
+
+    // Store the voice file in the 'voices' directory within 'public' storage
+    $voicePath = $voice->store('voices', 'public');
+
+    // Create a new record in the voice_verifications table
+    $voiceVerification = new VoiceVerifications(); 
+    $voiceVerification->user_id = $user_id;
+    $voiceVerification->voice = basename($voicePath);
+    $voiceVerification->datetime = now(); 
+    $voiceVerification->status = 0; 
+    $voiceVerification->save();
+
+    // Generate the URL for the saved voice file
+    $voiceUrl = asset('storage/app/public/voices/' . $voicePath);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Voice verified successfully.',
+        'data' => [
+            'id' => $voiceVerification->id,
+            'user_id' => $voiceVerification->user_id,
+            'name' => $user->name,
+            'mobile' => $user->mobile,
+            'voice' => $voiceUrl,
+            'status' => $voiceVerification->status,
+            'datetime' => $voiceVerification->datetime->format('Y-m-d H:i:s'),
+        ],
     ], 200);
 }
 

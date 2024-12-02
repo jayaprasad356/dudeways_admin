@@ -32,6 +32,7 @@ use App\Http\Controllers\Verification_transController;
 use App\Http\Controllers\ProfessionsController;
 use App\Http\Controllers\TransactionsController;
 use App\Http\Controllers\BulkUserController;
+use App\Http\Controllers\VoiceVerificationsController;
 use App\Http\Controllers\WalletsController;
 use App\Http\Controllers\WithdrawalsController;
 use App\Models\BankDetails;
@@ -219,6 +220,10 @@ Route::prefix('admin')->middleware('auth')->group(function () {
         Route::get('/user_verifications', [UserVerificationController::class, 'index'])->name('user_verifications.index');
         Route::post('/user_verifications/verify', [UserVerificationController::class, 'verify'])->name('user_verifications.verify');
         Route::post('/user-verifications/reject', [UserVerificationController::class, 'reject'])->name('user_verifications.reject');
+
+          Route::get('/voice_verifications', [VoiceVerificationsController::class, 'index'])->name('voice_verifications.index');
+          Route::post('/voice_verifications/verify', [VoiceVerificationsController::class, 'verify'])->name('voice_verifications.verify');
+          Route::post('/user-voice_verifications/reject', [VoiceVerificationsController::class, 'reject'])->name('voice_verifications.reject');
 
 
                     Route::get('/bankdetails', [BankDetailsController::class, 'index'])->name('bankdetails.index');
