@@ -171,12 +171,12 @@
                     </a>
                 </li>
 
-               <!-- <li class="nav-item has-treeview">
+                <li class="nav-item has-treeview">
                 <a href="{{ route('voice_verifications.index') }}" class="nav-link {{ activeSegment('voice_verifications') }}">
                 <i class="nav-icon fas fa-check-circle"></i>
                         <p>Voice Verifications</p>
                     </a>
-                </li>-->
+                </li>
 
                 <li class="nav-item has-treeview">
                     <a href="{{ route('appsettings.edit', 1) }}" class="nav-link {{ activeSegment('appsettings') }}">
