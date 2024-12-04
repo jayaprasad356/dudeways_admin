@@ -48,7 +48,6 @@
                                 <option value="">All</option>
                                 <option value="1" {{ request()->input('status') === '1' ? 'selected' : '' }}>Verified</option>
                                 <option value="0" {{ request()->input('status') === '0' ? 'selected' : '' }}>Pending</option>
-                                <option value="2" {{ request()->input('status') === '2' ? 'selected' : '' }}>Reject</option>
                             </select>
                         </div>
                     </form>
@@ -73,8 +72,8 @@
                         <tr>
                             <td><input type="checkbox" class="checkbox" data-id="{{ $voice_verification->id }}"></td>
                             <td>{{ $voice_verification->id }}</td>
-                            <td>{{ $voice_verification->user->name }}</td>
-                            <td>{{ $voice_verification->user->mobile }}</td>
+                            <td>{{ $voice_verification->user ? $voice_verification->user->name : '' }}</td>
+                            <td>{{ $voice_verification->user ? $voice_verification->user->mobile : '' }}</td>
                             <td><a href="{{ asset('storage/app/public/voices/' . $voice_verification->voice) }}" target="_blank">Play Voice</a></td>
                             <td>
                                 <span class="{{ $voice_verification->status == 0 ? 'text-pending' : ($voice_verification->status == 1 ? 'text-success' : 'text-danger') }}">

@@ -38,13 +38,12 @@ class VoiceVerificationsController extends Controller
          $verificationIds = $request->input('verification_ids', []);
  
          foreach ($verificationIds as $verificationId) {
-             $voice_verifications = VoiceVerifications::find($verificationId);
-             if ($voice_verifications) {
-                 // Update the withdrawal status to Paid (1)
-                 $voice_verifications->status = 2;
-                 $voice_verifications->save();
-             }
-         }
+            $voice_verification = VoiceVerifications::find($verificationId);
+            if ($voice_verification) {
+                // Delete the record
+                $voice_verification->delete();
+            }
+        }
  
          return response()->json(['success' => true]);
      }

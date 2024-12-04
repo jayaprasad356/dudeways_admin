@@ -188,7 +188,7 @@ return response()->json([
 public function register(Request $request)
 {
     $age = $request->input('age');
-    $dob = $request->input('dob');  // Date of birth, if provided
+    $dob = $request->input('dob');  
     $name = $request->input('name');
     $unique_name = $request->input('unique_name');
     $email = $request->input('email');
@@ -333,6 +333,7 @@ public function register(Request $request)
 
     $user = new Users();
     $user->age = $age;
+    $user->dob = $dob;
     $user->name = $name;
     $user->gender = $gender;
     $user->profession_id = $profession_id;
@@ -403,6 +404,7 @@ public function register(Request $request)
             'email' => $user->email ?? '',
             'mobile' => $user->mobile ?? '',
             'age' => $user->age,
+            'dob' => $user->dob ?? '',
             'gender' => $user->gender,
             'state' => $user->state ?? '',
             'city' => $user->city ?? '',
@@ -513,121 +515,6 @@ protected function sendNotificationsToFemaleUser($femaleUserId, $message)
 }
 
 
-public function new_register(Request $request)
-{
-    $age = $request->input('age');
-    $dob = $request->input('dob');
-    $name = $request->input('name');
-    $gender = $request->input('gender');
-    $language = $request->input('language');
-    $mobile = $request->input('mobile');
-
-      // Check for required fields
-      if (empty($mobile)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Mobile is empty.',
-        ], 200);
-    }
-
-    // Validate mobile number format (10 digits)
-    if (strlen($mobile) !== 10) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Mobile number should be 10 digits.',
-        ], 200);
-    }
-
-    if (empty($dob)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'DOB is empty.',
-        ], 200);
-    }
-    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $dob)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Invalid dob format. Expected format: YYYY-MM-DD.',
-        ], 200);
-    }
-    
-    // Calculate the age from dob
-    try {
-        $birthdate = Carbon::parse($dob);
-        $age = $birthdate->age;
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Invalid DOB format.',
-        ], 200);
-    }
-    
-
-    // Validate name
-    if (empty($name)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Name is empty.',
-        ], 200);
-    } elseif (strlen($name) < 4 || strlen($name) > 18) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Name should be between 4 and 18 characters.',
-        ], 200);
-    }
-
-    if (empty($gender)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Gender is empty.',
-        ], 200);
-    }
-
-    if (empty($language)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Language is empty.',
-        ], 200);
-    }
-
-    // Check for duplicate mobile number only
-    if (NewRegister::where('mobile', $mobile)->exists()) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Mobile number is already registered.',
-        ], 200); 
-    }
-
-    // Create a new user instance and assign values
-    $newregister= new NewRegister();
-    $newregister->age = $age;
-    $newregister->name = $name;
-    $newregister->dob = $dob;
-    $newregister->gender = $gender;
-    $newregister->language = $language;
-    $newregister->mobile = $mobile;  // Can be empty
-    $newregister->datetime = now(); 
-    
-    // Save the user
-    $newregister->save();
-
-
-    return response()->json([
-        'success' => true,
-        'message' => 'New User registered successfully.',
-        'data' => [
-            'id' => $newregister->id,
-            'name' => $newregister->name,
-            'mobile' => $newregister->mobile,
-            'dob' => $newregister->dob,
-            'age' => $newregister->age,
-            'gender' => $newregister->gender,
-            'language' => $newregister->language,
-            'datetime' => Carbon::parse($newregister->datetime)->format('Y-m-d H:i:s'),
-        ],
-    ], 201);
-}
-
 public function userdetails(Request $request)
 {
     $user_id = $request->input('user_id');
@@ -687,6 +574,7 @@ public function userdetails(Request $request)
             'email' => $user->email,
             'mobile' => $user->mobile ?? '',
             'age' => $user->age,
+            'dob' => $user->dob ?? '',
             'gender' => $user->gender,
             'state' => $user->state,
             'city' => $user->city,
@@ -797,9 +685,11 @@ public function other_userdetails(Request $request)
             'email' => $otherUser->email,
             'mobile' => $otherUser->mobile,
             'age' => $otherUser->age,
+            'dob' => $otherUser->dob ?? '',
             'gender' => $otherUser->gender,
             'state' => $otherUser->state,
             'city' => $otherUser->city,
+            'language' => $otherUser->language ?? '',
             'profession' => $otherUser->profession ? $otherUser->profession->profession : '',
             'refer_code' => $otherUser->refer_code,
             'referred_by' => $otherUser->referred_by ? $otherUser->referred_by->referred_by : '',
