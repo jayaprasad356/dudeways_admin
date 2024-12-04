@@ -1136,13 +1136,7 @@ public function add_trip(Request $request)
     $location = $request->input('location');
     $profile_image = $request->input('profile_image'); // New field for profile image
 
-    // Validate each input and return specific error messages
-    if (empty($trip_type)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Trip Type is empty.',
-        ], 200);
-    }
+ 
     if (empty($from_date)) {
         return response()->json([
             'success' => false,
@@ -1297,7 +1291,7 @@ public function add_trip(Request $request)
             'name' => $user->name,
             'unique_name' => $user->unique_name,
             'verified' => $user->verified,
-            'trip_type' => $trip->trip_type,
+            'trip_type' => $trip->trip_type ?? '',
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
             'to_date' => date('F j, Y', strtotime($trip->to_date)),
             'time' => $timeDifference, 
@@ -1379,7 +1373,7 @@ public function update_trip(Request $request)
     }
 
     $user_id = $request->input('user_id'); 
-    $trip_type = $request->input('trip_type');
+   // $trip_type = $request->input('trip_type');
     $from_date = $request->input('from_date');
     $to_date = $request->input('to_date');
     $trip_title = $request->input('trip_title');
@@ -1399,7 +1393,7 @@ public function update_trip(Request $request)
         }
         $trip->user_id = $user_id;
     }
-    if ($trip_type !== null) {
+   /* if ($trip_type !== null) {
         if (empty($trip_type)) {
             return response()->json([
                 'success' => false,
@@ -1407,7 +1401,7 @@ public function update_trip(Request $request)
             ], 200);
         }
         $trip->trip_type = $trip_type;
-    }
+    }*/
     if ($from_date !== null) {
         if (empty($from_date)) {
             return response()->json([
@@ -1494,7 +1488,7 @@ public function update_trip(Request $request)
             'name' => $user->name,
             'unique_name' => $user->unique_name,
             'verified' => $user->verified,
-            'trip_type' => $trip->trip_type,
+           // 'trip_type' => $trip->trip_type,
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
             'to_date' => date('F j, Y', strtotime($trip->to_date)),
             'time' => $timeDifference, 
@@ -1714,7 +1708,7 @@ public function trip_list(Request $request)
             'verified' => $user->verified,
             'profile' => $imageUrl,
             'cover_image' => $coverImageUrl,
-            'trip_type' => $trip->trip_type,
+            //'trip_type' => $trip->trip_type,
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
             'to_date' => date('F j, Y', strtotime($trip->to_date)),
             'time' => $timeDifference,
@@ -1843,7 +1837,7 @@ public function my_trip_list(Request $request)
             'unique_name' => $user->unique_name,
             'profile' => $imageUrl,
             'cover_image' => $coverimageUrl,
-            'trip_type' => $trip->trip_type,
+            //'trip_type' => $trip->trip_type,
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
             'to_date' => date('F j, Y', strtotime($trip->to_date)),
             'time' => $timeDifference,
@@ -1936,7 +1930,7 @@ public function trip_date(Request $request)
             'unique_name' => $user->unique_name,
             'profile' => $imageUrl,
             'cover_image' => $coverimageUrl,
-            'trip_type' => $trip->trip_type,
+            //'trip_type' => $trip->trip_type,
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
             'to_date' => date('F j, Y', strtotime($trip->to_date)),
             'time' => $timeDifference, 
@@ -2016,7 +2010,7 @@ public function latest_trip(Request $request)
         'verified' => $user->verified,
         'unique_name' => $user ? $user->unique_name : 'Unknown',
         'profile' => $userProfileUrl,
-        'trip_type' => $trip->trip_type,
+        //'trip_type' => $trip->trip_type,
         'from_date' => date('F j, Y', strtotime($trip->from_date)),
         'to_date' => date('F j, Y', strtotime($trip->to_date)),
         'time' => $timeDifference, 
@@ -2127,7 +2121,7 @@ public function recent_trip(Request $request)
             'verified' => $user ? $user->verified : false,
             'unique_name' => $user ? $user->unique_name : 'Unknown',
             'profile' => $userProfileUrl,
-            'trip_type' => $trip->trip_type,
+            //'trip_type' => $trip->trip_type,
             'from_date' => Carbon::parse($trip->from_date)->format('F j, Y'),
             'to_date' => Carbon::parse($trip->to_date)->format('F j, Y'),
             'time' => $timeDifference,
