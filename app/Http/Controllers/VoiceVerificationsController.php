@@ -20,33 +20,48 @@ class VoiceVerificationsController extends Controller
      public function verify(Request $request)
      {
          $verificationIds = $request->input('verification_ids', []);
- 
+     
          foreach ($verificationIds as $verificationId) {
-             $voice_verifications = VoiceVerifications::find($verificationId);
-             if ($voice_verifications) {
-                 // Update the withdrawal status to Paid (1)
-                 $voice_verifications->status = 1;
-                 $voice_verifications->save();
+             $voice_verification = VoiceVerifications::find($verificationId);
+             if ($voice_verification) {
+                 // Update the verification status to Paid (1)
+                 $voice_verification->status = 1;
+                 $voice_verification->save();
+     
+                 // Update the user's voice_verification_status to 1
+                 $user = Users::find($voice_verification->user_id);
+                 if ($user) {
+                     $user->voice_verification_status = 1;
+                     $user->save();
+                 }
              }
          }
- 
+     
          return response()->json(['success' => true]);
      }
-
+     
      public function reject(Request $request)
      {
          $verificationIds = $request->input('verification_ids', []);
- 
+     
          foreach ($verificationIds as $verificationId) {
-            $voice_verification = VoiceVerifications::find($verificationId);
-            if ($voice_verification) {
-                // Delete the record
-                $voice_verification->delete();
-            }
-        }
- 
+             $voice_verification = VoiceVerifications::find($verificationId);
+             if ($voice_verification) {
+                 // Delete the verification record
+                 $voice_verification->delete();
+     
+                 // Update the user's voice_verification_status to 2 (Rejected)
+                 $user = Users::find($voice_verification->user_id);
+                 if ($user) {
+                     $user->voice_verification_status = 2;
+                     $user->save();
+                 }
+             }
+         }
+     
          return response()->json(['success' => true]);
      }
+     
 
 
      public function index(Request $request)

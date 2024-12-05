@@ -110,6 +110,7 @@ class AuthController extends Controller
             'view_notify' => $user->view_notify,
             'profile_verified' => $user->profile_verified,
             'cover_img_verified' => $user->cover_img_verified,
+            'voice_verification_status' => $user->voice_verification_status ?? '',
             'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
@@ -599,6 +600,7 @@ public function userdetails(Request $request)
             'selfi_image' => $selfiimageUrl,
             'proof_image' => $proofimageUrl,
             'unread_count' => strval($unreadMessagesSum),
+            'voice_verification_status' => $user->voice_verification_status ?? '',
             'last_seen' => Carbon::parse($user->last_seen)->format('Y-m-d H:i:s'),
             'datetime' => Carbon::parse($user->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s'),
@@ -705,6 +707,7 @@ public function other_userdetails(Request $request)
             'profile_verified' => $otherUser->profile_verified,
             'cover_img_verified' => $otherUser->cover_img_verified,
             'balance' => $otherUser->balance ?? '',
+            'voice_verification_status' => $user->voice_verification_status ?? '',
             'last_seen' => Carbon::parse($otherUser->last_seen)->format('Y-m-d H:i:s'),
             'datetime' => Carbon::parse($otherUser->datetime)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::parse($otherUser->updated_at)->format('Y-m-d H:i:s'),
@@ -6956,6 +6959,9 @@ public function voice_verification(Request $request)
     $voiceVerification->datetime = now(); 
     $voiceVerification->status = 0; 
     $voiceVerification->save();
+
+    $user->voice_verification_status = 0;
+    $user->save();
 
     // Generate the URL for the saved voice file
     $voiceUrl = asset('storage/app/public/voices/' . $voicePath);
