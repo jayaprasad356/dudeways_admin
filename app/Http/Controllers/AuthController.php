@@ -6982,7 +6982,7 @@ public function voice_verification(Request $request)
 }
 
 
-/*public function update_language(Request $request)
+public function update_language(Request $request)
 {
     $user_id = $request->input('user_id');
 
@@ -7076,7 +7076,7 @@ public function update_profile_details(Request $request)
         'message' => 'User Profile Details updated successfully.',
     ], 200);
 }
-*/
+
 
 
 }
