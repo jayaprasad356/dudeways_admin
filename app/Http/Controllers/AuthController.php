@@ -6981,4 +6981,102 @@ public function voice_verification(Request $request)
     ], 200);
 }
 
+
+/*public function update_language(Request $request)
+{
+    $user_id = $request->input('user_id');
+
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 200);
+    }
+
+    $user = Users::find($user_id);
+
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user not found.',
+        ], 200);
+    }
+
+    $language = $request->input('language');
+
+    if (empty($language)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'language is empty.',
+        ], 200);
+    }
+
+    // Update user location details
+    $user->language = $language;
+
+    $user->save();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'User Language updated successfully.',
+    ], 200);
+}
+
+public function update_profile_details(Request $request)
+{
+    $user_id = $request->input('user_id');
+
+    if (empty($user_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user_id is empty.',
+        ], 200);
+    }
+
+    $user = Users::find($user_id);
+
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'user not found.',
+        ], 200);
+    }
+
+    // Only update fields if new data is passed
+    $age = $request->input('age');
+    $dob = $request->input('dob');
+    $name = $request->input('name');
+
+    if (isset($age)) {
+        $user->age = $age;  // Update age only if provided
+    }
+
+    if (isset($dob)) {
+        try {
+            $birthdate = Carbon::parse($dob);
+            $user->dob = $dob;  // Update DOB only if valid date is provided
+            $user->age = $birthdate->age;  // Calculate and update age
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid date format for DOB. Please provide a valid date in the format: YYYY-MM-DD.',
+            ], 200);
+        }
+    }
+
+    if (isset($name)) {
+        $user->name = $name;  // Update name only if provided
+    }
+
+    // Save the updated fields, but don't overwrite any null data
+    $user->save();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'User Profile Details updated successfully.',
+    ], 200);
+}
+*/
+
+
 }

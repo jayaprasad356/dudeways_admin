@@ -36,4 +36,32 @@ public function index(Request $request)
 
     return view('bankdetails.index', compact('bankdetails', 'users')); // Pass friends and users to the view
 }
+    public function edit(BankDetails $bankdetails)
+    {
+        return view('bankdetails.edit', compact('bankdetails'));
+    }
+
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Points  $customer
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, BankDetails $bankdetails)
+
+    {
+        $bankdetails->account_holder_name = $request->account_holder_name;
+        $bankdetails->account_number = $request->account_number;
+        $bankdetails->ifsc_code = $request->ifsc_code;
+        $bankdetails->bank_name = $request->bank_name;
+        $bankdetails->branch_name = $request->branch_name;
+        
+
+        if (!$bankdetails->save()) {
+            return redirect()->back()->with('error', 'Sorry, Something went wrong while updating the customer.');
+        }
+        return redirect()->route('bankdetails.edit', $bankdetails->id)->with('success', 'Success, Bank Details has been updated.');
+    }
 }

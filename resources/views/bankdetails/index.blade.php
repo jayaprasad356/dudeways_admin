@@ -29,6 +29,7 @@
         <table class="table table-bordered table-hover">
             <thead class="thead-dark">
                 <tr>
+                <th>Actions</th>
                     <th>ID <i class="fas fa-sort"></i></th>
                     <th>User Name <i class="fas fa-sort"></i></th>
                     <th>Bank Name<i class="fas fa-sort"></i></th>
@@ -41,6 +42,10 @@
             <tbody>
                 @foreach ($bankdetails as $bankdetail)
                 <tr>
+                <td>
+                    <a href="{{ route('bankdetails.edit', $bankdetail) }}" class="btn btn-primary"><i class="fas fa-edit"></i></a>
+                    
+                        </td>
                     <td>{{$bankdetail->id}}</td>
                     <td>{{ optional($bankdetail->user)->name }}</td> <!-- Display user name safely -->
                     <td>{{$bankdetail->bank_name}}</td>

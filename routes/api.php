@@ -85,6 +85,8 @@ Route::post('random_user', [AuthController::class, 'random_user']);
 Route::post('user_call', [AuthController::class, 'user_call']);
 Route::post('user_transaction_list', [AuthController::class, 'user_transaction_list']);
 Route::post('voice_verification', [AuthController::class, 'voice_verification']);
+Route::post('update_language', [AuthController::class, 'update_language']);
+Route::post('update_profile_details', [AuthController::class, 'update_profile_details']);
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();

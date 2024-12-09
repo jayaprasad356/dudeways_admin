@@ -227,6 +227,8 @@ Route::prefix('admin')->middleware('auth')->group(function () {
 
 
                     Route::get('/bankdetails', [BankDetailsController::class, 'index'])->name('bankdetails.index');
+                    Route::get('/bankdetails/{bankdetails}/edit', [BankDetailsController::class, 'edit'])->name('bankdetails.edit');
+                    Route::put('/bankdetails/{bankdetails}', [BankDetailsController::class, 'update'])->name('bankdetails.update');
                  
                     
                
