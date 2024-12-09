@@ -1492,6 +1492,7 @@ public function update_trip(Request $request)
             'id' => $trip->id,
             'name' => $user->name,
             'unique_name' => $user->unique_name,
+            'gender' => $user->gender,
             'verified' => $user->verified,
             'trip_type' => $trip->trip_type ?? '',
             'from_date' => date('F j, Y', strtotime($trip->from_date)),
